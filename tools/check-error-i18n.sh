@@ -33,8 +33,14 @@ CURRENT=$(grep -rnP '(?<![a-zA-Z0-9._])Error\(w,' "$HANDLER_DIR" "$MIDDLEWARE_DI
 echo "i18n ratchet: deprecated Error(w, call sites = $CURRENT (baseline = $BASELINE)"
 
 if [ "$CURRENT" -gt "$BASELINE" ]; then
-  echo "FAIL: Error(w, call sites grew from $BASELINE to $CURRENT."
-  echo "Use ErrorKey(w, r, …) with a message catalog key instead."
+  echo "FAIL: Deprecated Error(w, call sites grew from $BASELINE to $CURRENT."
+  echo ""
+  echo "Do NOT use Error(w, status, \"message\") — it bypasses localization."
+  echo "Use ErrorKey(w, r, status, \"error.key\") instead. See CONTRIBUTING.md § Internationalization."
+  echo ""
+  echo "For non-JSON endpoints (WebSocket, streaming):"
+  echo "  http.Error(w, i18n.T(r.Context(), \"error.key\"), status)"
+  echo ""
   echo "If this growth is intentional (e.g. after a merge), update tools/i18n-baseline.txt."
   exit 1
 fi

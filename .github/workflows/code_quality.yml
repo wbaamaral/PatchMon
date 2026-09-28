@@ -41,8 +41,8 @@ jobs:
       - name: i18n catalog parity check
         run: node tools/i18n-check.mjs
 
-  i18n-ratchet:
-    name: i18n ratchet (backend)
+  i18n-guard:
+    name: "i18n guard: no hardcoded Error(w, (backend)"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -52,7 +52,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check Error(w, ratchet
+      - name: Check deprecated Error(w, ratchet (baseline = 0)
         run: bash tools/check-error-i18n.sh
 
   go-test:

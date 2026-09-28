@@ -434,6 +434,72 @@ If you're adding or changing:
 
 ---
 
+## Internationalization (i18n)
+
+PatchMon supports English (source) and Brazilian Portuguese (`pt-BR`). All user-facing strings must go through the translation catalog — never hardcode English text in components or API responses.
+
+### Frontend (React)
+
+Use `react-i18next` with per-page namespaces:
+
+```jsx
+import { useTranslation } from "react-i18next";
+
+function MyPage() {
+  const { t } = useTranslation("my_namespace");
+  return <h1>{t("title")}</h1>;
+}
+```
+
+**Catalog files:** `frontend/src/i18n/locales/{en,pt-BR}/<namespace>.json`
+
+- Keep `en` and `pt-BR` catalogs in exact key parity (enforced by `tools/i18n-check.mjs` in CI).
+- Use `{{var}}` for interpolation: `t("toasts.saved", { name })` → `"Saved {{name}}"`.
+- Use `_one`/`_other` suffixes for plurals: `t("items", { count })`.
+- For module-level arrays (tabs, columns), use the `labelKey` pattern and resolve at render time.
+
+### Backend (Go)
+
+Use `handler.ErrorKey` for all error responses:
+
+```go
+// ✅ Correct — localized, includes error_key
+ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
+
+// ❌ Forbidden — hardcoded English, no localization
+Error(w, http.StatusBadRequest, "Invalid request body")
+```
+
+**Catalog files:** `server-source-code/internal/i18n/locales/{en,pt-BR}/errors.json`
+
+The response shape is `{"error": "<localized>", "error_key": "<key>"}` — clients can use `error_key` for programmatic handling regardless of locale.
+
+For non-JSON endpoints (WebSocket, streaming), use `http.Error` with `i18n.T()`:
+
+```go
+http.Error(w, i18n.T(r.Context(), "error.unauthorized"), http.StatusUnauthorized)
+```
+
+### CI enforcement
+
+The `i18n-ratchet` job in CI blocks any new deprecated `Error(w,` calls (baseline is zero). If your PR adds one, the check will fail. Use `ErrorKey` instead.
+
+To verify locally:
+
+```bash
+bash tools/check-error-i18n.sh   # backend ratchet (must be 0)
+node tools/i18n-check.mjs        # frontend catalog parity
+```
+
+### Adding a new string
+
+1. Add the key to the `en` catalog with the English source text.
+2. Add the same key to the `pt-BR` catalog with the translation.
+3. Reference the key via `t("key")` (frontend) or `ErrorKey(w, r, status, "key")` (backend).
+4. Run `node tools/i18n-check.mjs` to verify parity.
+
+---
+
 ## Security Issues
 
 **Do not open a public GitHub issue for security vulnerabilities.**
