@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, Copy, Download, RefreshCw, Wifi, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import ModalPortal from "../../components/ui/ModalPortal";
 import { dashboardAPI } from "../../utils/api";
@@ -38,6 +39,7 @@ const WaitingForConnection = ({
 	shellCommand,
 	installCommand = null,
 }) => {
+	const { t } = useTranslation("hosts");
 	const [_wsStatus, setWsStatus] = useState(null);
 	const [connectionStage, setConnectionStage] = useState("waiting"); // waiting, connected, receiving, done
 	const [hasNavigated, setHasNavigated] = useState(false);
@@ -186,7 +188,7 @@ const WaitingForConnection = ({
 			<div className="bg-white dark:bg-secondary-800 rounded-lg p-6 w-full max-w-md">
 				<div className="flex justify-between items-center mb-6">
 					<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-						Waiting for Connection
+						{t("connection.waiting.title")}
 					</h3>
 					<button
 						type="button"
@@ -206,15 +208,14 @@ const WaitingForConnection = ({
 									<Wifi className="h-8 w-8 text-primary-600 dark:text-primary-400 animate-pulse" />
 								</div>
 								<h4 className="text-lg font-semibold text-secondary-900 dark:text-white mb-2">
-									Waiting for connection
+									{t("connection.waiting.stage_waiting_title")}
 								</h4>
 								<p className="text-sm text-secondary-600 dark:text-white text-center">
-									Please run the installation command on your host. This page
-									will automatically update when the connection is established.
+									{t("connection.waiting.stage_waiting_desc")}
 								</p>
 								<div className="mt-4 flex items-center gap-2 text-xs text-secondary-500 dark:text-white">
 									<RefreshCw className="h-4 w-4 animate-spin" />
-									<span>Checking connection status...</span>
+									<span>{t("connection.waiting.checking_status")}</span>
 								</div>
 							</>
 						)}
@@ -225,14 +226,14 @@ const WaitingForConnection = ({
 									<CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
 								</div>
 								<h4 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-2">
-									Connected
+									{t("connection.waiting.stage_connected_title")}
 								</h4>
 								<p className="text-sm text-secondary-600 dark:text-white text-center">
-									Agent is connected. Waiting for initial system report...
+									{t("connection.waiting.stage_connected_desc")}
 								</p>
 								<div className="mt-4 flex items-center gap-2 text-xs text-secondary-500 dark:text-white">
 									<RefreshCw className="h-4 w-4 animate-spin" />
-									<span>Waiting for initial report...</span>
+									<span>{t("connection.waiting.waiting_report")}</span>
 								</div>
 							</>
 						)}
@@ -243,14 +244,14 @@ const WaitingForConnection = ({
 									<Download className="h-8 w-8 text-blue-600 dark:text-blue-400 animate-pulse" />
 								</div>
 								<h4 className="text-lg font-semibold text-blue-600 dark:text-blue-400 mb-2">
-									Receiving initial report
+									{t("connection.waiting.stage_receiving_title")}
 								</h4>
 								<p className="text-sm text-secondary-600 dark:text-white text-center">
-									Collecting system information from the agent...
+									{t("connection.waiting.stage_receiving_desc")}
 								</p>
 								<div className="mt-4 flex items-center gap-2 text-xs text-secondary-500 dark:text-white">
 									<RefreshCw className="h-4 w-4 animate-spin" />
-									<span>Processing data...</span>
+									<span>{t("connection.waiting.processing_data")}</span>
 								</div>
 							</>
 						)}
@@ -261,10 +262,10 @@ const WaitingForConnection = ({
 									<CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
 								</div>
 								<h4 className="text-lg font-semibold text-green-600 dark:text-green-400 mb-2">
-									Done
+									{t("connection.waiting.stage_done_title")}
 								</h4>
 								<p className="text-sm text-secondary-600 dark:text-white text-center">
-									Initial report received. Redirecting to host page...
+									{t("connection.waiting.stage_done_desc")}
 								</p>
 							</>
 						)}
@@ -275,7 +276,7 @@ const WaitingForConnection = ({
 						<div className="space-y-2">
 							<div className="flex justify-between">
 								<span className="text-sm font-medium text-secondary-700 dark:text-white">
-									Host:
+									{t("connection.waiting.host_label")}
 								</span>
 								<span className="text-sm text-secondary-900 dark:text-white">
 									{host.friendly_name}
@@ -283,7 +284,7 @@ const WaitingForConnection = ({
 							</div>
 							<div className="flex justify-between">
 								<span className="text-sm font-medium text-secondary-700 dark:text-white">
-									Status:
+									{t("connection.waiting.status_label")}
 								</span>
 								<span
 									className={`text-sm font-medium ${
@@ -295,12 +296,12 @@ const WaitingForConnection = ({
 									}`}
 								>
 									{connectionStage === "waiting"
-										? "Pending"
+										? t("connection.waiting.status_pending")
 										: connectionStage === "connected"
-											? "Connected"
+											? t("connection.waiting.status_connected")
 											: connectionStage === "receiving"
-												? "Receiving"
-												: "Complete"}
+												? t("connection.waiting.status_receiving")
+												: t("connection.waiting.status_complete")}
 								</span>
 							</div>
 						</div>
@@ -315,7 +316,7 @@ const WaitingForConnection = ({
 								className="btn-outline flex-1 flex items-center justify-center gap-2"
 							>
 								<Copy className="h-4 w-4" />
-								View Command
+								{t("connection.waiting.view_command")}
 							</button>
 							<button
 								type="button"
@@ -324,7 +325,7 @@ const WaitingForConnection = ({
 								className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								<Copy className="h-4 w-4" />
-								Copy Command Again
+								{t("connection.waiting.copy_command_again")}
 							</button>
 						</div>
 					)}

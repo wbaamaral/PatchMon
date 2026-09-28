@@ -1,0 +1,483 @@
+{
+	"oidc": {
+		"toast": {
+			"saved": "Configurações OIDC salvas",
+			"save_failed": "Falha ao salvar configurações OIDC",
+			"imported": "Configurações OIDC importadas do .env",
+			"import_failed": "Falha ao importar do .env"
+		},
+		"env_banner": {
+			"title": "OIDC está configurado via .env"
+		},
+		"config": {
+			"title": "Configuração"
+		},
+		"warnings": {
+			"trust_email": "A opção confiar em e-mail não verificado está ativa. Qualquer pessoa que possa definir o próprio endereço de e-mail no seu provedor de identidade pode entrar como um usuário existente do PatchMon. Deixe ativo apenas se você controlar quem pode alterar endereços no seu diretório.",
+			"https_disabled": "Somente para desenvolvimento - Exigir HTTPS está desativado. Use apenas para testes locais."
+		},
+		"oauth2": {
+			"title": "Configuração OAuth2"
+		},
+		"field": {
+			"secret_set": "Definido",
+			"secret_not_set": "Não definido",
+			"client_id_placeholder": "Digite o ID do seu cliente OIDC",
+			"redirect_uri_placeholder": "Deixe vazio para usar a URL de callback acima",
+			"button_text_placeholder": "Entrar com SSO",
+			"callback_help": "Adicione esta URL aos URIs de redirecionamento permitidos do seu IdP"
+		},
+		"role_mapping": {
+			"title": "Mapeamento de papéis",
+			"description": "Mapeie nomes de grupos do IdP para papéis do PatchMon. Os usuários recebem o papel correspondente mais alto. O papel padrão é usado quando nenhum grupo corresponde.",
+			"superadmin_warning": {
+				"title": "Grupo de superadmin não configurado",
+				"body": "A sincronização de papéis está ativa, mas nenhum grupo de Superadmin do IdP está definido. O OIDC não concederá superadmin a nenhum usuário, e superadmins existentes não serão rebaixados no login. Defina o grupo de Superadmin abaixo para gerenciar o papel de superadmin via OIDC."
+			},
+			"table": {
+				"role": "Papel do PatchMon",
+				"mapped": "Papel OIDC mapeado (nome do grupo do IdP)",
+				"default_fallback": "Padrão (fallback)",
+				"default_help": "Papel quando nenhum grupo do IdP corresponde",
+				"not_configurable": "Não configurável via OIDC"
+			}
+		},
+		"setup": {
+			"title": "Instruções de configuração",
+			"step1": "Configure seu IdP (Keycloak, Okta, Auth0 etc.) com um novo cliente OAuth2",
+			"step2": "Adicione a URL de callback aos URIs de redirecionamento permitidos:",
+			"step3": "Solicite os escopos:",
+			"step3_hint": "(ou equivalente para seu IdP)",
+			"step4_label": "Usuários do Authentik:",
+			"step4_assign": "Associe este mapeamento ao seu provedor OAuth2.",
+			"step5": "Copie a URL do emissor, o ID do cliente e o segredo do cliente nos campos acima"
+		}
+	},
+	"common": {
+		"save": "Salvar",
+		"cancel": "Cancelar",
+		"edit": "Editar",
+		"delete": "Excluir",
+		"create": "Criar",
+		"close": "Fechar",
+		"copy": "Copiar",
+		"copied": "Copiado",
+		"active": "Ativo",
+		"inactive": "Inativo",
+		"documentation": "Documentação",
+		"view_guide": "Ver guia",
+		"export_csv": "Exportar CSV",
+		"exporting": "Exportando..."
+	},
+	"host_groups": {
+		"actions": {
+			"create_group": "Criar Grupo",
+			"create_group_title": "Criar grupo de hosts",
+			"edit_group_title": "Editar grupo",
+			"delete_group": "Excluir Grupo",
+			"update_group": "Atualizar Grupo",
+			"view_hosts_in": "Ver hosts em {{name}}",
+			"creating": "Criando...",
+			"updating": "Atualizando...",
+			"deleting": "Excluindo..."
+		},
+		"table": {
+			"group": "Grupo",
+			"description": "Descrição",
+			"color": "Cor",
+			"hosts": "Hosts",
+			"actions": "Ações",
+			"no_description": "Sem descrição"
+		},
+		"hosts_count_one": "{{count}} host",
+		"hosts_count_other": "{{count}} hosts",
+		"empty": {
+			"title": "Nenhum grupo de hosts encontrado",
+			"subtitle": "Clique em \"Criar Grupo\" para criar o primeiro grupo de hosts"
+		},
+		"error": {
+			"title": "Erro ao carregar grupos de hosts",
+			"fallback": "Falha ao carregar grupos de hosts"
+		},
+		"form": {
+			"name": "Nome *",
+			"description": "Descrição",
+			"color": "Cor",
+			"name_placeholder": "ex.: Servidores de Produção",
+			"description_placeholder": "Descrição opcional para este grupo",
+			"color_placeholder": "#3B82F6"
+		},
+		"create_modal": {
+			"title": "Criar Grupo de Hosts"
+		},
+		"edit_modal": {
+			"title": "Editar Grupo de Hosts"
+		},
+		"delete_modal": {
+			"title": "Excluir Grupo de Hosts",
+			"cannot_undo": "Esta ação não pode ser desfeita",
+			"confirm": "Tem certeza de que deseja excluir o grupo de hosts \"{{name}}\"?",
+			"note_label": "Nota:",
+			"note_body_one": "Este grupo contém {{count}} host. Estes hosts serão movidos para \"Sem grupo\" após a exclusão.",
+			"note_body_other": "Este grupo contém {{count}} hosts. Estes hosts serão movidos para \"Sem grupo\" após a exclusão.",
+			"hosts_in_group": "Hosts neste grupo:"
+		}
+	},
+	"environment": {
+		"title": "Variáveis de Ambiente",
+		"priority_1": "Prioridade 1",
+		"priority_1_desc": "arquivo .env",
+		"priority_2": "Prioridade 2",
+		"priority_2_desc": "Configurações do banco de dados (configurável abaixo)",
+		"priority_3": "Prioridade 3",
+		"priority_3_desc": "Padrões no código",
+		"env_only_note": "Variáveis marcadas como \"Configurar via .env\" são relacionadas a inicialização/deploy e só podem ser alteradas no arquivo .env (não no banco de dados).",
+		"restart_note": "Se alguma alteração for feita, reinicie o servidor PatchMon.",
+		"conflict": {
+			"title": "Configuração incorreta detectada",
+			"body": "Algumas variáveis têm valores tanto no env quanto no banco de dados. O env tem precedência. Remova do .env para que o valor do banco de dados tenha efeito."
+		},
+		"table": {
+			"variable": "Variável",
+			"help": "Ajuda",
+			"value": "Valor",
+			"default": "Padrão",
+			"source": "Origem",
+			"action": "Ação"
+		},
+		"source": {
+			"env": ".env",
+			"db": "Banco de dados",
+			"default": "Padrão"
+		},
+		"actions": {
+			"save": "Salvar",
+			"cancel": "Cancelar",
+			"edit": "Editar",
+			"override": "Sobrescrever",
+			"configure_via_env": "Configurar via .env",
+			"remove_from_env": "Remover do .env"
+		},
+		"tooltips": {
+			"show_help": "Mostrar ajuda",
+			"remove_from_env": "Remova do .env para que o valor do banco de dados tenha efeito",
+			"configure_via_env": "Somente inicialização/deploy - configurar via .env"
+		},
+		"errors": {
+			"title": "Erro ao carregar configuração de ambiente",
+			"load_failed": "Falha ao carregar configurações"
+		},
+		"toasts": {
+			"saved": "Salvo. Reinicie a aplicação para que as alterações tenham efeito.",
+			"update_failed": "Falha ao atualizar"
+		}
+	},
+	"discord": {
+		"title": "Autenticação Discord",
+		"subtitle": "Permitir que usuários entrem com sua conta do Discord",
+		"enable_title": "Habilitar Discord OAuth",
+		"enable_desc": "Permitir que usuários entrem e vinculem suas contas do Discord",
+		"oauth_config": "Configuração OAuth2",
+		"field": {
+			"client_id": "ID do Cliente",
+			"client_id_placeholder": "Digite o ID do cliente da sua aplicação Discord",
+			"client_secret": "Segredo do Cliente",
+			"secret_set": "Definido",
+			"secret_not_set": "Não definido",
+			"secret_placeholder": "Digite o segredo do cliente Discord",
+			"secret_placeholder_replace": "Digite o novo segredo para substituir",
+			"redirect_uri": "URI de Redirecionamento",
+			"redirect_uri_placeholder": "https://seu-dominio.com/api/v1/auth/discord/callback",
+			"redirect_uri_help": "Seu URI de redirecionamento deve ser:",
+			"button_text": "Texto do Botão",
+			"button_text_placeholder": "Entrar com Discord"
+		},
+		"actions": {
+			"save": "Salvar",
+			"apply": "Aplicar",
+			"applying": "Aplicando..."
+		},
+		"setup": {
+			"title": "Instruções de Configuração",
+			"step1_prefix": "Vá para o",
+			"step1_link": "Portal de Desenvolvedores do Discord",
+			"step2": "Clique em \"Nova Aplicação\" e dê um nome",
+			"step3": "Navegue para a seção \"OAuth2\" na barra lateral",
+			"step4": "Adicione seu URI de redirecionamento:",
+			"step5": "Copie o ID do Cliente e o Segredo do Cliente nos campos acima",
+			"step6": "Defina os escopos como:"
+		}
+	},
+	"ai": {
+		"title": "Assistente de Terminal IA",
+		"subtitle": "Configure assistência de terminal com IA e conclusão de comandos",
+		"api_key_warning": {
+			"title": "Chave de API precisa ser reinserida",
+			"body_before": "Sua chave de API de IA foi criptografada com um segredo diferente e não pode ser descriptografada. Isso pode acontecer se",
+			"body_after": "foi alterado ou não foi definido de forma consistente.",
+			"action": "Por favor, reinsira sua chave de API abaixo para restaurar a funcionalidade de IA."
+		},
+		"enable_title": "Habilitar Assistente de IA",
+		"enable_desc": "Habilitar assistência de terminal com IA no terminal SSH",
+		"provider_config": "Configuração do Provedor de IA",
+		"field": {
+			"provider": "Provedor",
+			"model": "Modelo",
+			"api_key": "Chave de API",
+			"api_key_placeholder": "Digite sua chave de API",
+			"api_key_configured": "Chave de API configurada",
+			"api_key_invalid": "Chave de API precisa ser reinserida (chave de criptografia alterada)",
+			"get_key": "Obtenha sua chave de API em:"
+		},
+		"provider_desc": {
+			"openrouter": "Acesse múltiplos modelos de IA através de uma única API",
+			"anthropic": "Acesso direto aos modelos Anthropic Claude",
+			"openai": "Acesso direto aos modelos OpenAI GPT",
+			"gemini": "Acesso direto aos modelos Google Gemini"
+		},
+		"test": {
+			"button": "Testar Conexão",
+			"failed": "Teste de conexão falhou"
+		},
+		"features": {
+			"title": "Recursos do Terminal IA",
+			"assistant": "Painel do Assistente de IA",
+			"assistant_desc": "Faça perguntas sobre a saída do terminal e obtenha ajuda",
+			"completion": "Conclusão de Comandos",
+			"completion_desc": "Obtenha sugestões de comandos com IA enquanto digita",
+			"diagnosis": "Diagnóstico de Erros",
+			"diagnosis_desc": "Deixe a IA explicar erros e sugerir soluções",
+			"context": "Consciente do Contexto",
+			"context_desc": "A IA usa o histórico do terminal para melhores sugestões"
+		}
+	},
+	"integrations": {
+		"title": "Integrações de API",
+		"subtitle": "Gerencie tokens de auto-inscrição para Proxmox e outras integrações",
+		"tabs": {
+			"proxmox": "Proxmox",
+			"auto_enrollment": "Auto-Inscrição (Direto)",
+			"scoped": "Credenciais com Escopo",
+			"gethomepage": "GetHomepage",
+			"docker": "Docker",
+			"checkmk": "Checkmk"
+		},
+		"token": {
+			"badge": {
+				"proxmox_lxc": "Proxmox LXC",
+				"api": "API",
+				"direct_host": "Host Direto",
+				"gethomepage": "GetHomepage"
+			},
+			"usage": "Uso: {{used}}/{{max}} hosts hoje",
+			"default_group": "Grupo Padrão:",
+			"scopes": "Escopos:",
+			"allowed_ips": "IPs Permitidos:",
+			"created": "Criado:",
+			"last_used": "Último Uso:",
+			"expires": "Expira:",
+			"expired": "(Expirado)",
+			"edit": "Editar",
+			"disable": "Desabilitar",
+			"enable": "Habilitar"
+		},
+		"proxmox": {
+			"title": "Auto-Inscrição Proxmox",
+			"subtitle": "Gerencie tokens para auto-inscrição de contêineres LXC Proxmox",
+			"new_token": "Novo Token",
+			"empty_title": "Nenhum token Proxmox criado ainda.",
+			"empty_desc": "Crie um token para habilitar a auto-inscrição de contêineres LXC Proxmox.",
+			"doc_heading": "Auto-Inscrição LXC Proxmox",
+			"doc_desc": "Descubra e inscreva automaticamente contêineres LXC dos seus hosts Proxmox."
+		},
+		"direct": {
+			"title": "Auto-Inscrição Direta de Host",
+			"subtitle": "Gerencie tokens para inscrição direta de hosts sem Proxmox",
+			"new_token": "Novo Token",
+			"empty_title": "Nenhum token de inscrição direta criado ainda.",
+			"empty_desc": "Crie um token para habilitar a inscrição direta de hosts.",
+			"doc_heading": "Inscrição Direta de Host",
+			"doc_desc": "Inscreva hosts individuais diretamente sem infraestrutura Proxmox."
+		},
+		"scoped": {
+			"title": "Credenciais de API com Escopo",
+			"subtitle": "Gerencie credenciais de API com permissões granulares baseadas em escopo",
+			"new_credential": "Nova Credencial",
+			"empty_title": "Nenhuma credencial com escopo criada ainda.",
+			"empty_desc": "Crie uma credencial para habilitar acesso programático à API com permissões granulares.",
+			"doc_heading": "Credenciais com Escopo",
+			"doc_desc": "Acesso programático aos dados do PatchMon com permissões granulares baseadas em escopo.",
+			"swagger_docs": "Documentação Swagger"
+		},
+		"gethomepage": {
+			"title": "Integração de Widget GetHomepage",
+			"subtitle": "Crie chaves de API para exibir estatísticas do PatchMon no seu painel GetHomepage",
+			"new_api_key": "Nova Chave de API",
+			"empty_title": "Nenhuma chave de API GetHomepage criada ainda.",
+			"empty_desc": "Crie uma chave de API para habilitar a integração de widget GetHomepage.",
+			"how_to": "Como Usar a Integração GetHomepage",
+			"step1": "Crie uma nova chave de API usando o botão acima",
+			"step2": "Copie a chave de API e o segredo da caixa de diálogo de sucesso",
+			"step3_prefix": "Adicione a seguinte configuração de widget ao seu",
+			"step3_suffix": "GetHomepage:",
+			"base64_title": "Como gerar BASE64_ENCODED_CREDENTIALS:",
+			"base64_desc": "Substitua YOUR_API_KEY e YOUR_API_SECRET pelas suas credenciais reais e execute este comando para obter a string base64.",
+			"widget_examples": "Exemplos Adicionais de Widget",
+			"widget_examples_desc": "Você pode criar múltiplos widgets para exibir diferentes estatísticas:",
+			"security_widget": "Widget de Atualizações de Segurança:",
+			"uptodate_widget": "Widget de Hosts Atualizados:",
+			"recent_widget": "Widget de Atividade Recente:"
+		},
+		"docker": {
+			"title": "Coleta de Inventário Docker",
+			"subtitle": "O monitoramento Docker agora está integrado ao agente Go do PatchMon",
+			"discovery_title": "Descoberta Automática de Docker",
+			"discovery_desc": "O agente Go do PatchMon descobre automaticamente o Docker quando está disponível no seu host e coleta informações abrangentes de inventário:",
+			"feature_containers": "Contêineres",
+			"feature_containers_desc": "Contêineres em execução e parados com status, imagens, portas e labels",
+			"feature_images": "Imagens",
+			"feature_images_desc": "Todas as imagens Docker com repositório, tags, tamanhos e origens",
+			"feature_volumes": "Volumes",
+			"feature_volumes_desc": "Volumes nomeados e anônimos com drivers, pontos de montagem e uso",
+			"feature_networks": "Redes",
+			"feature_networks_desc": "Redes Docker com drivers, configuração IPAM e contêineres conectados",
+			"feature_realtime": "Atualizações em Tempo Real",
+			"feature_realtime_desc": "Alterações de status de contêineres são enviadas instantaneamente via WebSocket",
+			"how_it_works": "Como Funciona",
+			"step1": "Instale o agente Go do PatchMon no seu host (veja a página Hosts para instruções de instalação)",
+			"step2": "O agente detecta automaticamente se o Docker está instalado e em execução no host",
+			"step3": "Durante cada ciclo de coleta, o agente coleta dados de inventário Docker e os envia ao servidor PatchMon",
+			"step4_prefix": "Veja seu inventário Docker completo (contêineres, imagens, volumes, redes) na",
+			"step4_link": "página Docker",
+			"step5": "Alterações de status de contêineres são enviadas ao servidor em tempo real via conexão WebSocket",
+			"no_config_title": "Nenhuma Configuração Adicional Necessária",
+			"no_config_desc": "Uma vez que o agente Go está instalado e o Docker está em execução no seu host, a coleta de inventário Docker acontece automaticamente. Nenhum agente Docker separado ou cron jobs são necessários.",
+			"requirements": "Requisitos:",
+			"req_agent": "O agente Go do PatchMon deve estar instalado e em execução",
+			"req_docker": "O daemon Docker deve estar instalado e em execução",
+			"req_socket_prefix": "O agente deve ter acesso ao socket do Docker (",
+			"req_socket_suffix": ")",
+			"req_root": "Normalmente requer executar o agente como root ou com permissões do grupo Docker"
+		},
+		"checkmk": {
+			"title": "Integração Checkmk",
+			"subtitle": "Exporte hosts como CSV para importação no Checkmk",
+			"desc_prefix": "Exporte sua lista de hosts do PatchMon no",
+			"desc_link": "formato de importação CSV do Checkmk",
+			"desc_suffix": ". Use o arquivo no Checkmk em Setup > Hosts > Importar hosts via arquivo CSV.",
+			"fields_desc_full": "Conjunto completo de atributos de importação do Checkmk (Host name, Alias, Monitored on site, IPv4, IPv6, SNMP community, Tag: Criticality, Tag: Networking Segment, Tag: Checkmk agent / API integrations, Tag: Piggyback, Tag: SNMP, Tag: IP address family). Colunas vazias podem ser preenchidas no Checkmk ou no CSV antes da importação.",
+			"fields_desc_basic": "Colunas: hostname, endereço IPv4, alias e tag do agente Checkmk (cmk-agent). Hostnames são limitados a 240 caracteres conforme o Checkmk.",
+			"additional_fields": "Adicionar campos adicionais",
+			"additional_fields_desc": "Quando habilitado, o CSV inclui todos os atributos dos documentos de importação do Checkmk (seção 6.1). O PatchMon preenche apenas hostname, alias, IPv4 e agente; outras colunas ficam vazias para você editar no Checkmk ou antes da reimportação.",
+			"no_hosts": "Nenhum host para exportar.",
+			"no_permission": "Você não tem permissão para visualizar hosts.",
+			"export_failed": "Exportação falhou."
+		},
+		"create_modal": {
+			"title_gethomepage": "Criar Chave de API GetHomepage",
+			"title_proxmox": "Criar Token Proxmox",
+			"title_direct": "Criar Token de Inscrição Direta",
+			"title_scoped": "Criar Credencial com Escopo",
+			"title_default": "Criar Token",
+			"token_name": "Nome do Token *",
+			"token_name_placeholder_gethomepage": "ex.: Widget GetHomepage",
+			"token_name_placeholder_proxmox": "ex.: Proxmox Produção",
+			"token_name_placeholder_direct": "ex.: Token de Inscrição Direta",
+			"token_name_placeholder_scoped": "ex.: Inventário Ansible",
+			"token_name_placeholder_default": "ex.: Nome do Token",
+			"max_hosts": "Máximo de Hosts Por Dia",
+			"max_hosts_help": "Número máximo de hosts que podem ser inscritos por dia usando este token",
+			"default_group": "Grupo de Hosts Padrão (Opcional)",
+			"no_default_group": "Sem grupo padrão",
+			"default_group_help": "Hosts auto-inscritos serão atribuídos a este grupo",
+			"scopes": "Escopos *",
+			"host_permissions": "Permissões de Host",
+			"scope_get": "- Ler dados do host",
+			"scope_put": "- Substituir dados do host",
+			"scope_patch": "- Atualizar dados do host",
+			"scope_update": "- Modificar dados do host",
+			"scope_delete": "- Excluir hosts",
+			"scopes_help": "Selecione as permissões que esta credencial de API deve ter",
+			"allowed_ips": "Endereços IP Permitidos (Opcional)",
+			"allowed_ips_placeholder": "ex.: 192.168.1.100, 10.0.0.50",
+			"allowed_ips_help": "Lista separada por vírgulas de endereços IP permitidos a usar este token",
+			"expires": "Data de Expiração (Opcional)",
+			"submit": "Criar Token",
+			"cancel": "Cancelar"
+		},
+		"success_modal": {
+			"title_gethomepage": "Chave de API Criada com Sucesso",
+			"title_scoped": "Credencial de API Criada com Sucesso",
+			"title_direct": "Token de Inscrição Direta Criado com Sucesso",
+			"title_default": "Token Criado com Sucesso",
+			"important_label": "Importante:",
+			"important": "Salve estas credenciais - o segredo não será mostrado novamente.",
+			"token_name": "Nome do Token",
+			"token_key": "Chave do Token",
+			"token_secret": "Segredo do Token",
+			"copy_key": "Copiar Chave",
+			"copy_secret": "Copiar Segredo",
+			"toggle_visibility": "Alternar visibilidade",
+			"granted_scopes": "Escopos Concedidos",
+			"usage_examples": "Exemplos de Uso",
+			"basic_curl": "Requisição cURL básica:",
+			"filter_by_group": "Filtrar por grupo de hosts:",
+			"copy_curl": "Copiar comando cURL",
+			"replace_tip": "💡 Substitua \"Production\" pelo nome ou UUID do seu grupo de hosts",
+			"proxmox_command": "Comando de Auto-Inscrição Proxmox",
+			"proxmox_command_desc": "Execute este comando no seu host Proxmox para descobrir e inscrever automaticamente todos os contêineres LXC em execução:",
+			"direct_command": "Comando de Inscrição Direta de Host",
+			"direct_command_desc": "Execute este comando em hosts individuais para inscrevê-los diretamente:",
+			"force_install": "Forçar instalação (ignorar pacotes quebrados)",
+			"force_install_help": "Habilite isso se os hosts tiverem pacotes quebrados (CloudPanel, WHM etc.) que bloqueiam operações do apt-get",
+			"copied": "Copiado",
+			"copy": "Copiar",
+			"direct_tip_label": "Dica:",
+			"direct_tip": "Especifique um nome personalizado:",
+			"base64_creds": "Credenciais Codificadas em Base64",
+			"copy_base64": "Copiar Base64",
+			"gethomepage_config": "Configuração GetHomepage",
+			"copy_config": "Copiar Configuração",
+			"paste_tip": "💡 Cole no seu",
+			"saved_credentials": "Salvei as Credenciais"
+		},
+		"edit_modal": {
+			"title": "Editar Token",
+			"token_name": "Nome do Token",
+			"token_name_placeholder": "ex.: meu-pve",
+			"token_name_help": "Atualize o nome do token para melhor organização",
+			"max_hosts": "Máximo de Hosts Por Dia",
+			"max_hosts_help": "Número máximo de hosts que podem ser inscritos por dia com este token",
+			"default_group": "Grupo de Hosts Padrão (Opcional)",
+			"no_default_group": "Sem grupo padrão",
+			"default_group_help": "Hosts auto-inscritos serão atribuídos a este grupo",
+			"scopes": "Escopos",
+			"host_permissions": "Permissões de Host",
+			"scope_get": "- Ler dados do host",
+			"scope_put": "- Substituir dados do host",
+			"scope_patch": "- Atualizar dados do host",
+			"scope_update": "- Modificar dados do host",
+			"scope_delete": "- Excluir hosts",
+			"scopes_help": "Atualize as permissões para esta credencial de API",
+			"allowed_ips": "Endereços IP Permitidos (Opcional)",
+			"allowed_ips_placeholder": "ex.: 192.168.1.100, 10.0.0.50",
+			"allowed_ips_help": "Lista separada por vírgulas de endereços IP permitidos a usar este token",
+			"expires": "Data de Expiração (Opcional)",
+			"submit": "Atualizar Credencial",
+			"cancel": "Cancelar"
+		},
+		"toasts": {
+			"create_failed": "Falha ao criar token",
+			"deleted": "Token \"{{name}}\" excluído",
+			"delete_failed": "Falha ao excluir token",
+			"update_failed": "Falha ao atualizar token",
+			"toggle_failed": "Falha ao alternar token",
+			"copy_failed": "Falha ao copiar para a área de transferência. Por favor, copie manualmente."
+		},
+		"confirm": {
+			"delete_title": "Excluir token",
+			"delete_message": "Tem certeza de que deseja excluir o token \"{{name}}\"?",
+			"delete_confirm": "Excluir token"
+		}
+	}
+}

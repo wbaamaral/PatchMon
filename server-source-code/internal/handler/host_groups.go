@@ -24,7 +24,7 @@ func NewHostGroupsHandler(hostGroups *store.HostGroupsStore, hosts *store.HostsS
 func (h *HostGroupsHandler) List(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.hostGroups.ListWithHostCount(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load host groups")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_host_groups")
 		return
 	}
 	// Build response with _count.hosts for frontend compatibility
@@ -59,7 +59,7 @@ func (h *HostGroupsHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	group, err := h.hostGroups.GetByID(r.Context(), id)
 	if err != nil || group == nil {
-		Error(w, http.StatusNotFound, "Host group not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_group_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, group)
@@ -73,11 +73,11 @@ func (h *HostGroupsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Color       *string `json:"color"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.Name == "" {
-		Error(w, http.StatusBadRequest, "Name is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.name_required")
 		return
 	}
 	color := "#3B82F6"
@@ -90,7 +90,7 @@ func (h *HostGroupsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Color:       &color,
 	}
 	if err := h.hostGroups.Create(r.Context(), g); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create host group")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_host_group")
 		return
 	}
 	JSON(w, http.StatusCreated, g)
@@ -101,7 +101,7 @@ func (h *HostGroupsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	group, err := h.hostGroups.GetByID(r.Context(), id)
 	if err != nil || group == nil {
-		Error(w, http.StatusNotFound, "Host group not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_group_not_found")
 		return
 	}
 	var req struct {
@@ -110,7 +110,7 @@ func (h *HostGroupsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Color       *string `json:"color"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.Name != nil {
@@ -123,7 +123,7 @@ func (h *HostGroupsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		group.Color = req.Color
 	}
 	if err := h.hostGroups.Update(r.Context(), group); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update host group")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_host_group")
 		return
 	}
 	JSON(w, http.StatusOK, group)
@@ -134,11 +134,11 @@ func (h *HostGroupsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	_, err := h.hostGroups.GetByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Host group not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_group_not_found")
 		return
 	}
 	if err := h.hostGroups.Delete(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete host group")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_host_group")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "Host group deleted successfully"})
@@ -149,12 +149,12 @@ func (h *HostGroupsHandler) GetHosts(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	_, err := h.hostGroups.GetByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Host group not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_group_not_found")
 		return
 	}
 	hostIDs, err := h.hostGroups.GetHostIDs(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_hosts_failed")
 		return
 	}
 	if len(hostIDs) == 0 {

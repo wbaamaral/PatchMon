@@ -1,4 +1,5 @@
 import { AlertTriangle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const DeleteConfirmationModal = ({
 	host,
@@ -7,6 +8,7 @@ const DeleteConfirmationModal = ({
 	onConfirm,
 	isLoading,
 }) => {
+	const { t } = useTranslation("hosts");
 	if (!isOpen || !host) return null;
 
 	return (
@@ -18,24 +20,24 @@ const DeleteConfirmationModal = ({
 					</div>
 					<div>
 						<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-							Delete Host
+							{t("detail.delete.title")}
 						</h3>
 						<p className="text-sm text-secondary-600 dark:text-white">
-							This action cannot be undone
+							{t("detail.delete.cannot_undo")}
 						</p>
 					</div>
 				</div>
 
 				<div className="mb-6">
 					<p className="text-secondary-700 dark:text-white">
-						Are you sure you want to delete the host{" "}
-						<span className="font-semibold">"{host.friendly_name}"</span>?
+						{t("detail.delete.confirm_prefix")}{" "}
+						<span className="font-semibold">"{host.friendly_name}"</span>
+						{t("detail.delete.confirm_suffix")}
 					</p>
 					<div className="mt-3 p-3 bg-danger-50 dark:bg-danger-900 border border-danger-200 dark:border-danger-700 rounded-md">
 						<p className="text-sm text-danger-800 dark:text-danger-200">
-							<strong>Warning:</strong> This will permanently remove the host
-							and all its associated data, including package information and
-							update history.
+							<strong>{t("detail.delete.warning_label")}</strong>{" "}
+							{t("detail.delete.warning_body")}
 						</p>
 					</div>
 				</div>
@@ -47,7 +49,7 @@ const DeleteConfirmationModal = ({
 						className="btn-outline"
 						disabled={isLoading}
 					>
-						Cancel
+						{t("detail.delete.cancel")}
 					</button>
 					<button
 						type="button"
@@ -55,7 +57,9 @@ const DeleteConfirmationModal = ({
 						className="btn-danger"
 						disabled={isLoading}
 					>
-						{isLoading ? "Deleting..." : "Delete Host"}
+						{isLoading
+							? t("detail.delete.deleting")
+							: t("detail.delete.confirm_button")}
 					</button>
 				</div>
 			</div>

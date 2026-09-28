@@ -37,6 +37,7 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AddHostWizard from "../components/AddHostWizard";
 import HostStatusPills from "../components/HostStatusPills";
@@ -129,6 +130,7 @@ const fetchWsStatusBatches = async (apiIds) => {
 };
 
 const Hosts = () => {
+	const { t } = useTranslation("hosts");
 	const hostGroupFilterId = useId();
 	const statusFilterId = useId();
 	const connectionFilterId = useId();
@@ -293,36 +295,71 @@ const Hosts = () => {
 	// Default column config (shared for initial state and reset)
 	const default_column_config = useMemo(
 		() => [
-			{ id: "select", label: "Select", visible: true, order: 0 },
-			{ id: "host", label: "Friendly Name", visible: true, order: 1 },
-			{ id: "hostname", label: "System Hostname", visible: true, order: 2 },
-			{ id: "ip", label: "IP Address", visible: false, order: 3 },
-			{ id: "group", label: "Group", visible: true, order: 4 },
-			{ id: "os", label: "OS", visible: true, order: 5 },
-			{ id: "os_version", label: "OS Version", visible: false, order: 6 },
-			{ id: "agent_version", label: "Agent Version", visible: true, order: 7 },
+			{ id: "select", labelKey: "columns.select", visible: true, order: 0 },
+			{ id: "host", labelKey: "columns.host", visible: true, order: 1 },
+			{ id: "hostname", labelKey: "columns.hostname", visible: true, order: 2 },
+			{ id: "ip", labelKey: "columns.ip", visible: false, order: 3 },
+			{ id: "group", labelKey: "columns.group", visible: true, order: 4 },
+			{ id: "os", labelKey: "columns.os", visible: true, order: 5 },
+			{
+				id: "os_version",
+				labelKey: "columns.os_version",
+				visible: false,
+				order: 6,
+			},
+			{
+				id: "agent_version",
+				labelKey: "columns.agent_version",
+				visible: true,
+				order: 7,
+			},
 			{
 				id: "auto_update",
-				label: "Agent Auto-Update",
+				labelKey: "columns.auto_update",
 				visible: true,
 				order: 8,
 			},
-			{ id: "ws_status", label: "Connection", visible: true, order: 9 },
-			{ id: "integrations", label: "Integrations", visible: true, order: 10 },
-			{ id: "status", label: "Reporting", visible: true, order: 11 },
-			{ id: "needs_reboot", label: "Reboot", visible: true, order: 12 },
-			{ id: "uptime", label: "Uptime", visible: true, order: 13 },
-			{ id: "updates", label: "Updates", visible: true, order: 14 },
+			{
+				id: "ws_status",
+				labelKey: "columns.ws_status",
+				visible: true,
+				order: 9,
+			},
+			{
+				id: "integrations",
+				labelKey: "columns.integrations",
+				visible: true,
+				order: 10,
+			},
+			{ id: "status", labelKey: "columns.status", visible: true, order: 11 },
+			{
+				id: "needs_reboot",
+				labelKey: "columns.needs_reboot",
+				visible: true,
+				order: 12,
+			},
+			{ id: "uptime", labelKey: "columns.uptime", visible: true, order: 13 },
+			{ id: "updates", labelKey: "columns.updates", visible: true, order: 14 },
 			{
 				id: "security_updates",
-				label: "Security Updates",
+				labelKey: "columns.security_updates",
 				visible: true,
 				order: 15,
 			},
-			{ id: "ssg_version", label: "SSG Version", visible: false, order: 16 },
-			{ id: "notes", label: "Notes", visible: false, order: 17 },
-			{ id: "last_update", label: "Last Update", visible: true, order: 18 },
-			{ id: "actions", label: "Actions", visible: true, order: 19 },
+			{
+				id: "ssg_version",
+				labelKey: "columns.ssg_version",
+				visible: false,
+				order: 16,
+			},
+			{ id: "notes", labelKey: "columns.notes", visible: false, order: 17 },
+			{
+				id: "last_update",
+				labelKey: "columns.last_update",
+				visible: true,
+				order: 18,
+			},
+			{ id: "actions", labelKey: "columns.actions", visible: true, order: 19 },
 		],
 		[],
 	);
@@ -804,7 +841,11 @@ const Hosts = () => {
 			queryClient.invalidateQueries({ queryKey: ["hosts"] });
 			// Show success message
 			if (data?.successCount !== undefined) {
-				const message = `Report fetch queued for ${data.successCount} of ${data.totalRequested} host${data.totalRequested !== 1 ? "s" : ""}`;
+				const message = t("bulk.report_fetch_queued", {
+					ok: data.successCount,
+					total: data.totalRequested,
+					count: data.totalRequested,
+				});
 				setBulkFetchReportMessage({ text: message, type: "success" });
 				// Clear message after 5 seconds
 				setTimeout(
@@ -823,7 +864,7 @@ const Hosts = () => {
 			const errorMsg =
 				error.response?.data?.error ||
 				error.response?.data?.details ||
-				"Failed to fetch reports";
+				t("bulk.failed_fetch_reports");
 			setBulkFetchReportMessage({ text: errorMsg, type: "error" });
 			setTimeout(
 				() => setBulkFetchReportMessage({ text: "", type: "error" }),
@@ -1237,14 +1278,16 @@ const Hosts = () => {
 				const memberships = host.host_group_memberships || [];
 				if (memberships.length === 0) {
 					// Host has no groups, add to "Ungrouped"
-					if (!groups.Ungrouped) {
-						groups.Ungrouped = [];
+					const ungroupedLabel = t("groups.ungrouped");
+					if (!groups[ungroupedLabel]) {
+						groups[ungroupedLabel] = [];
 					}
-					groups.Ungrouped.push(host);
+					groups[ungroupedLabel].push(host);
 				} else {
 					// Host has one or more groups, add to each group
 					memberships.forEach((membership) => {
-						const groupName = membership.host_groups?.name || "Unknown";
+						const groupName =
+							membership.host_groups?.name || t("groups.unknown");
 						if (!groups[groupName]) {
 							groups[groupName] = [];
 						}
@@ -1261,7 +1304,7 @@ const Hosts = () => {
 							(host.effectiveStatus || host.status).slice(1);
 						break;
 					case "os":
-						groupKey = host.os_type || "Unknown";
+						groupKey = host.os_type || t("groups.unknown");
 						break;
 					default:
 						groupKey = "All Hosts";
@@ -1275,7 +1318,7 @@ const Hosts = () => {
 		});
 
 		return groups;
-	}, [visibleHosts, groupBy]);
+	}, [visibleHosts, groupBy, t]);
 
 	const handleSort = (field) => {
 		if (sortField === field) {
@@ -1382,15 +1425,15 @@ const Hosts = () => {
 								friendlyName: newName,
 							})
 						}
-						placeholder="Enter friendly name..."
+						placeholder={t("table.friendly_name_placeholder")}
 						maxLength={100}
 						linkTo={`/hosts/${host.id}`}
 						validate={(value) => {
-							if (!value.trim()) return "Friendly name is required";
+							if (!value.trim()) return t("table.friendly_name_required");
 							if (value.trim().length < 1)
-								return "Friendly name must be at least 1 character";
+								return t("table.friendly_name_min");
 							if (value.trim().length > 100)
-								return "Friendly name must be less than 100 characters";
+								return t("table.friendly_name_max");
 							return null;
 						}}
 						className="w-full"
@@ -1399,13 +1442,13 @@ const Hosts = () => {
 			case "hostname":
 				return (
 					<div className="text-sm text-secondary-900 dark:text-white font-mono">
-						{host.hostname || "N/A"}
+						{host.hostname || t("table.na")}
 					</div>
 				);
 			case "ip":
 				return (
 					<div className="text-sm text-secondary-900 dark:text-white">
-						{host.ip || "N/A"}
+						{host.ip || t("table.na")}
 					</div>
 				);
 			case "group": {
@@ -1425,7 +1468,7 @@ const Hosts = () => {
 							})
 						}
 						options={hostGroups || []}
-						placeholder="Select groups..."
+						placeholder={t("table.select_groups_placeholder")}
 						className="w-full"
 					/>
 				);
@@ -1440,13 +1483,13 @@ const Hosts = () => {
 			case "os_version":
 				return (
 					<div className="text-sm text-secondary-900 dark:text-white">
-						{host.os_version || "N/A"}
+						{host.os_version || t("table.na")}
 					</div>
 				);
 			case "agent_version":
 				return (
 					<div className="text-sm text-secondary-900 dark:text-white">
-						{host.agent_version || "N/A"}
+						{host.agent_version || t("table.na")}
 					</div>
 				);
 			case "auto_update":
@@ -1455,14 +1498,14 @@ const Hosts = () => {
 						<InlineToggle
 							value={host.auto_update}
 							onSave={(autoUpdate) => handleAutoUpdateToggle(host, autoUpdate)}
-							trueLabel="Yes"
-							falseLabel="No"
+							trueLabel={t("table.yes")}
+							falseLabel={t("table.no")}
 						/>
 						{/* Warning badge when global auto-update is disabled */}
 						{!settings?.auto_update && host.auto_update && (
 							<span
 								className="text-amber-500 dark:text-amber-400"
-								title="Global auto-updates disabled in Settings > Agent Updates"
+								title={t("table.auto_update_disabled_warning")}
 							>
 								<AlertTriangle className="h-4 w-4" />
 							</span>
@@ -1475,7 +1518,7 @@ const Hosts = () => {
 					return (
 						<span className="badge badge-secondary">
 							<span className="w-2 h-2 bg-secondary-400 rounded-full mr-1.5" />
-							Unknown
+							{t("connection.unknown")}
 						</span>
 					);
 				}
@@ -1500,28 +1543,36 @@ const Hosts = () => {
 					badgeClass =
 						"badge bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200";
 					label = protocol;
-					ariaLabel = "WebSocket connected";
+					ariaLabel = t("connection.aria_connected");
 					StateIcon = Wifi;
-					tooltipText = `WebSocket connected${
-						wsStatus.secure ? " (secure)" : ""
-					}. Real-time control channel is active.`;
+					tooltipText = wsStatus.secure
+						? t("connection.tooltip_connected_secure")
+						: t("connection.tooltip_connected");
 				} else if (withinGrace) {
 					badgeClass =
 						"badge bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200";
-					label = `${protocol} reconnecting`;
-					ariaLabel = "WebSocket disconnected, within grace window";
+					label = t("connection.reconnecting", { protocol });
+					ariaLabel = t("connection.aria_disconnected_grace");
 					StateIcon = WifiOff;
-					tooltipText = `WebSocket disconnected (${Math.round(seconds)}s). Within the ${hostDownThresholdSeconds}s grace window, the agent may be reconnecting.`;
+					tooltipText = t("connection.tooltip_disconnected_grace", {
+						seconds: Math.round(seconds),
+						threshold: hostDownThresholdSeconds,
+					});
 				} else {
 					badgeClass =
 						"badge bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-200";
-					label = `${protocol} offline`;
-					ariaLabel = "WebSocket disconnected";
+					label = t("connection.offline_label", { protocol });
+					ariaLabel = t("connection.aria_disconnected");
 					StateIcon = WifiOff;
 					tooltipText =
 						typeof seconds === "number"
-							? `WebSocket has been disconnected for ${Math.round(seconds)}s (threshold: ${hostDownThresholdSeconds}s).`
-							: `WebSocket disconnected, duration unknown (likely past the ${hostDownThresholdSeconds}s threshold). The server may have restarted while the agent was already offline.`;
+							? t("connection.tooltip_disconnected", {
+									seconds: Math.round(seconds),
+									threshold: hostDownThresholdSeconds,
+								})
+							: t("connection.tooltip_disconnected_unknown", {
+									threshold: hostDownThresholdSeconds,
+								});
 				}
 				return (
 					<Tooltip content={tooltipText}>
@@ -1543,7 +1594,7 @@ const Hosts = () => {
 						{host.docker_enabled && (
 							<span
 								className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-								title="Docker monitoring enabled"
+								title={t("table.docker_enabled")}
 							>
 								<Container className="h-3 w-3" />
 							</span>
@@ -1551,7 +1602,7 @@ const Hosts = () => {
 						{host.compliance_enabled && (
 							<span
 								className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-								title="Compliance scanning enabled"
+								title={t("table.compliance_enabled")}
 							>
 								<Shield className="h-3 w-3" />
 							</span>
@@ -1582,24 +1633,29 @@ const Hosts = () => {
 				if (reportingState === "awaiting") {
 					badgeClass =
 						"badge bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-200";
-					label = "Awaiting report";
-					tooltipText =
-						"This host has been added but its agent has not sent a report yet. Install and start the agent on the host to begin monitoring.";
+					label = t("reporting.awaiting_label");
+					tooltipText = t("reporting.awaiting_tooltip");
 				} else if (reportingState === "reporting") {
 					badgeClass =
 						"badge bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200";
-					label = "Reporting";
-					tooltipText = `Agent reported recently. Last update: ${lastUpdateRel}.`;
+					label = t("reporting.reporting_label");
+					tooltipText = t("reporting.reporting_tooltip", {
+						lastUpdate: lastUpdateRel,
+					});
 				} else if (reportingState === "overdue") {
 					badgeClass =
 						"badge bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200";
-					label = "Overdue";
-					tooltipText = `Agent has not pushed a report yet but the WebSocket is still connected, so this is likely transient. Last update: ${lastUpdateRel}.`;
+					label = t("reporting.overdue_label");
+					tooltipText = t("reporting.overdue_tooltip", {
+						lastUpdate: lastUpdateRel,
+					});
 				} else {
 					badgeClass =
 						"badge bg-danger-100 text-danger-800 dark:bg-danger-900 dark:text-danger-200";
-					label = "Stale";
-					tooltipText = `Agent has not reported and the WebSocket is disconnected. Last update: ${lastUpdateRel}.`;
+					label = t("reporting.stale_label");
+					tooltipText = t("reporting.stale_tooltip", {
+						lastUpdate: lastUpdateRel,
+					});
 				}
 				return (
 					<Tooltip content={tooltipText}>
@@ -1617,20 +1673,22 @@ const Hosts = () => {
 				return (
 					<div className="flex justify-center">
 						{host.needs_reboot ? (
-							<Tooltip content={host.reboot_reason || "Reboot required"}>
+							<Tooltip
+								content={host.reboot_reason || t("status.reboot_tooltip")}
+							>
 								<button
 									type="button"
 									className="badge bg-warning-100 text-warning-800 dark:bg-warning-900 dark:text-warning-200 gap-1 cursor-help focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1"
 									onClick={(e) => e.preventDefault()}
 								>
 									<RotateCcw className="h-3 w-3" />
-									Required
+									{t("status.reboot_required")}
 								</button>
 							</Tooltip>
 						) : (
 							<span className="badge bg-success-100 text-success-800 dark:bg-success-900 dark:text-success-200 gap-1">
 								<CheckCircle className="h-3 w-3" />
-								No
+								{t("status.reboot_not_required")}
 							</span>
 						)}
 					</div>
@@ -1639,7 +1697,7 @@ const Hosts = () => {
 				const live = formatLiveUptime(host.boot_time, tickNow);
 				return (
 					<div className="text-sm text-secondary-900 dark:text-white">
-						{live || host.system_uptime || "N/A"}
+						{live || host.system_uptime || t("table.na")}
 					</div>
 				);
 			}
@@ -1651,7 +1709,7 @@ const Hosts = () => {
 							navigate(`/packages?host=${host.id}&filter=outdated`)
 						}
 						className="text-sm text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 font-medium hover:underline"
-						title="View outdated packages for this host"
+						title={t("table.view_outdated_packages")}
 					>
 						{host.updatesCount || 0}
 					</button>
@@ -1664,7 +1722,7 @@ const Hosts = () => {
 							navigate(`/packages?host=${host.id}&filter=security-updates`)
 						}
 						className="text-sm text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 font-medium hover:underline"
-						title="View security updates for this host"
+						title={t("table.view_security_updates")}
 					>
 						{host.securityUpdatesCount || 0}
 					</button>
@@ -1690,7 +1748,7 @@ const Hosts = () => {
 							</div>
 						) : (
 							<span className="text-secondary-400 dark:text-white italic">
-								No notes
+								{t("table.no_notes")}
 							</span>
 						)}
 					</div>
@@ -1701,7 +1759,7 @@ const Hosts = () => {
 						to={`/hosts/${host.id}`}
 						className="text-primary-600 hover:text-primary-900 flex items-center gap-1"
 					>
-						View
+						{t("table.view")}
 						<ExternalLink className="h-3 w-3" />
 					</Link>
 				);
@@ -1770,17 +1828,17 @@ const Hosts = () => {
 					<AlertTriangle className="h-5 w-5 text-danger-400" />
 					<div className="ml-3">
 						<h3 className="text-sm font-medium text-danger-800">
-							Error loading hosts
+							{t("error.load_hosts")}
 						</h3>
 						<p className="text-sm text-danger-700 mt-1">
-							{error.message || "Failed to load hosts"}
+							{error.message || t("error.load_hosts_message")}
 						</p>
 						<button
 							type="button"
 							onClick={() => refetch()}
 							className="mt-2 btn-danger text-xs"
 						>
-							Try again
+							{t("error.try_again")}
 						</button>
 					</div>
 				</div>
@@ -1794,10 +1852,10 @@ const Hosts = () => {
 			<div className="flex items-center justify-between mb-6">
 				<div>
 					<h1 className="text-2xl font-semibold text-secondary-900 dark:text-white">
-						Hosts
+						{t("title")}
 					</h1>
 					<p className="text-sm text-secondary-600 dark:text-white/80 mt-1">
-						Manage and monitor your connected hosts
+						{t("subtitle")}
 					</p>
 				</div>
 				<div className="flex items-center gap-3">
@@ -1806,7 +1864,7 @@ const Hosts = () => {
 						onClick={() => refreshHosts()}
 						disabled={isRefreshing}
 						className="btn-outline flex items-center justify-center p-2"
-						title="Refresh hosts data"
+						title={t("actions.refresh")}
 					>
 						<RefreshCw
 							className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
@@ -1818,7 +1876,7 @@ const Hosts = () => {
 						className="btn-primary flex items-center gap-2"
 					>
 						<Plus className="h-4 w-4" />
-						Add Host
+						{t("actions.add_host")}
 					</button>
 				</div>
 			</div>
@@ -1834,7 +1892,7 @@ const Hosts = () => {
 						<Server className="h-5 w-5 text-primary-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Total Hosts
+								{t("stats.total_hosts")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{hostCounts?.total ?? totalHosts}
@@ -1851,7 +1909,7 @@ const Hosts = () => {
 						<Clock className="h-5 w-5 text-warning-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Needs Updates
+								{t("stats.needs_updates")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{hostCounts?.needsUpdates ??
@@ -1874,7 +1932,7 @@ const Hosts = () => {
 						<RotateCcw className="h-5 w-5 text-orange-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Needs Reboots
+								{t("stats.needs_reboots")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{hostCounts?.needsReboot ??
@@ -1899,7 +1957,7 @@ const Hosts = () => {
 										<button
 											type="button"
 											onClick={() => handleConnectionFilterClick("connected")}
-											title="Click to filter hosts that are connected"
+											title={t("stats.connected_title")}
 											className="flex items-center gap-1.5 rounded-md px-2 py-1 -ml-2 min-h-[44px] cursor-pointer hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
 										>
 											<div className="w-2 h-2 bg-green-500 rounded-full shrink-0"></div>
@@ -1907,13 +1965,13 @@ const Hosts = () => {
 												{connectedCount}
 											</span>
 											<span className="text-sm text-secondary-500 dark:text-white">
-												Connected
+												{t("stats.connected")}
 											</span>
 										</button>
 										<button
 											type="button"
 											onClick={() => handleConnectionFilterClick("offline")}
-											title="Click to filter hosts that are offline"
+											title={t("stats.offline_title")}
 											className="flex items-center gap-1.5 rounded-md px-2 py-1 min-h-[44px] cursor-pointer hover:bg-secondary-100 dark:hover:bg-secondary-700 transition-colors"
 										>
 											<div className="w-2 h-2 bg-red-500 rounded-full shrink-0"></div>
@@ -1921,7 +1979,7 @@ const Hosts = () => {
 												{offlineCount}
 											</span>
 											<span className="text-sm text-secondary-500 dark:text-white">
-												Offline
+												{t("stats.offline")}
 											</span>
 										</button>
 									</div>
@@ -1955,23 +2013,26 @@ const Hosts = () => {
 						{selectedHosts.length > 0 && (
 							<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 								<span className="text-sm text-secondary-600 dark:text-white/80 flex-shrink-0">
-									{selectedHosts.length} host
-									{selectedHosts.length !== 1 ? "s" : ""} selected
+									{t("bulk.selected_count", { count: selectedHosts.length })}
 								</span>
 								<button
 									type="button"
 									onClick={handleBulkFetchReport}
 									disabled={bulkFetchReportMutation.isPending}
 									className="btn-outline flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm"
-									title="Fetch reports from selected hosts"
+									title={t("actions.fetch_reports_title")}
 								>
 									<Download
 										className={`h-4 w-4 flex-shrink-0 ${
 											bulkFetchReportMutation.isPending ? "animate-spin" : ""
 										}`}
 									/>
-									<span className="hidden sm:inline">Fetch Reports</span>
-									<span className="sm:hidden">Fetch</span>
+									<span className="hidden sm:inline">
+										{t("actions.fetch_reports")}
+									</span>
+									<span className="sm:hidden">
+										{t("actions.fetch_reports_short")}
+									</span>
 								</button>
 								<button
 									type="button"
@@ -1979,8 +2040,12 @@ const Hosts = () => {
 									className="btn-outline flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm"
 								>
 									<FolderPlus className="h-4 w-4 flex-shrink-0" />
-									<span className="hidden sm:inline">Assign to Group</span>
-									<span className="sm:hidden">Assign</span>
+									<span className="hidden sm:inline">
+										{t("actions.assign_to_group")}
+									</span>
+									<span className="sm:hidden">
+										{t("actions.assign_to_group_short")}
+									</span>
 								</button>
 								<button
 									type="button"
@@ -1988,15 +2053,19 @@ const Hosts = () => {
 									className="btn-danger flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm"
 								>
 									<Trash2 className="h-4 w-4 flex-shrink-0" />
-									<span>Delete</span>
+									<span>{t("actions.delete")}</span>
 								</button>
 								<button
 									type="button"
 									onClick={() => setSelectedHosts([])}
 									className="text-xs sm:text-sm text-secondary-500 dark:text-white/70 hover:text-secondary-700 dark:hover:text-white/90 min-h-[44px] px-2"
 								>
-									<span className="hidden sm:inline">Clear Selection</span>
-									<span className="sm:hidden">Clear</span>
+									<span className="hidden sm:inline">
+										{t("actions.clear_selection")}
+									</span>
+									<span className="sm:hidden">
+										{t("actions.clear_selection_short")}
+									</span>
 								</button>
 							</div>
 						)}
@@ -2011,7 +2080,7 @@ const Hosts = () => {
 									<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400 dark:text-white" />
 									<input
 										type="text"
-										placeholder="Search hosts, IP addresses, or OS..."
+										placeholder={t("filters.search_placeholder")}
 										value={searchTerm}
 										onChange={(e) => setSearchTerm(e.target.value)}
 										className="pl-10 pr-4 py-2 w-full border border-secondary-300 dark:border-secondary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400"
@@ -2025,7 +2094,7 @@ const Hosts = () => {
 									className={`btn-outline flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm ${showFilters ? "bg-primary-50 border-primary-300" : ""}`}
 								>
 									<Filter className="h-4 w-4 flex-shrink-0" />
-									<span className="hidden sm:inline">Filters</span>
+									<span className="hidden sm:inline">{t("filters.filters")}</span>
 								</button>
 								<button
 									type="button"
@@ -2033,7 +2102,7 @@ const Hosts = () => {
 									className="btn-outline flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm"
 								>
 									<Columns className="h-4 w-4 flex-shrink-0" />
-									<span className="hidden sm:inline">Columns</span>
+									<span className="hidden sm:inline">{t("filters.columns")}</span>
 								</button>
 								<div className="relative">
 									<select
@@ -2041,10 +2110,10 @@ const Hosts = () => {
 										onChange={(e) => setGroupBy(e.target.value)}
 										className="appearance-none bg-white dark:bg-secondary-800 border-2 border-secondary-300 dark:border-secondary-600 rounded-lg px-2 py-2 pr-6 text-xs sm:text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-secondary-900 dark:text-white hover:border-secondary-400 dark:hover:border-secondary-500 transition-colors min-w-[100px] sm:min-w-[120px] min-h-[44px]"
 									>
-										<option value="none">No Grouping</option>
-										<option value="group">By Group</option>
-										<option value="status">By Status</option>
-										<option value="os">By OS</option>
+										<option value="none">{t("filters.group_by_none")}</option>
+										<option value="group">{t("filters.group_by_group")}</option>
+										<option value="status">{t("filters.group_by_status")}</option>
+										<option value="os">{t("filters.group_by_os")}</option>
 									</select>
 									<ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400 dark:text-white pointer-events-none" />
 								</div>
@@ -2054,7 +2123,9 @@ const Hosts = () => {
 									className={`btn-outline flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm ${hideStale ? "bg-primary-50 border-primary-300" : ""}`}
 								>
 									<AlertTriangle className="h-4 w-4 flex-shrink-0" />
-									<span className="hidden sm:inline">Hide Stale</span>
+									<span className="hidden sm:inline">
+										{t("filters.hide_stale")}
+									</span>
 								</button>
 							</div>
 						</div>
@@ -2068,7 +2139,7 @@ const Hosts = () => {
 											htmlFor={hostGroupFilterId}
 											className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 										>
-											Host Group
+											{t("filters.host_group")}
 										</label>
 										<select
 											id={hostGroupFilterId}
@@ -2076,8 +2147,8 @@ const Hosts = () => {
 											onChange={(e) => setGroupFilter(e.target.value)}
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
-											<option value="all">All Groups</option>
-											<option value="ungrouped">Ungrouped</option>
+											<option value="all">{t("filters.all_groups")}</option>
+											<option value="ungrouped">{t("filters.ungrouped")}</option>
 											{hostGroups?.map((group) => (
 												<option key={group.id} value={group.id}>
 													{group.name}
@@ -2090,7 +2161,7 @@ const Hosts = () => {
 											htmlFor={statusFilterId}
 											className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 										>
-											Reporting
+											{t("filters.reporting_label")}
 										</label>
 										<select
 											id={statusFilterId}
@@ -2098,11 +2169,13 @@ const Hosts = () => {
 											onChange={(e) => setStatusFilter(e.target.value)}
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
-											<option value="all">All</option>
-											<option value="reporting">Reporting</option>
-											<option value="overdue">Overdue</option>
-											<option value="stale">Stale</option>
-											<option value="awaiting">Awaiting report</option>
+											<option value="all">{t("filters.all")}</option>
+											<option value="reporting">{t("filters.reporting")}</option>
+											<option value="overdue">{t("filters.overdue")}</option>
+											<option value="stale">{t("filters.stale")}</option>
+											<option value="awaiting">
+												{t("filters.awaiting_report")}
+											</option>
 										</select>
 									</div>
 									<div>
@@ -2110,7 +2183,7 @@ const Hosts = () => {
 											htmlFor={connectionFilterId}
 											className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 										>
-											Connection
+											{t("filters.connection_label")}
 										</label>
 										<select
 											id={connectionFilterId}
@@ -2118,9 +2191,9 @@ const Hosts = () => {
 											onChange={(e) => setConnectionFilter(e.target.value)}
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
-											<option value="all">All</option>
-											<option value="connected">Connected</option>
-											<option value="offline">Offline</option>
+											<option value="all">{t("filters.all")}</option>
+											<option value="connected">{t("filters.connected")}</option>
+											<option value="offline">{t("filters.offline")}</option>
 										</select>
 									</div>
 									<div>
@@ -2128,7 +2201,7 @@ const Hosts = () => {
 											htmlFor={osFilterId}
 											className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 										>
-											Operating System
+											{t("filters.operating_system")}
 										</label>
 										<select
 											id={osFilterId}
@@ -2139,7 +2212,7 @@ const Hosts = () => {
 											}}
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
-											<option value="all">All OS</option>
+											<option value="all">{t("filters.all_os")}</option>
 											{uniqueOsTypes.map((osType) => (
 												<option key={osType} value={osType.toLowerCase()}>
 													{osType}
@@ -2156,7 +2229,7 @@ const Hosts = () => {
 													htmlFor={osVersionFilterId}
 													className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 												>
-													OS Version
+													{t("filters.os_version")}
 												</label>
 												<select
 													id={osVersionFilterId}
@@ -2164,7 +2237,7 @@ const Hosts = () => {
 													onChange={(e) => setOsVersionFilter(e.target.value)}
 													className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 												>
-													<option value="all">All Versions</option>
+													<option value="all">{t("filters.all_versions")}</option>
 													{(osVersionFilter &&
 													osVersionFilter !== "all" &&
 													!uniqueOsVersionsForFilter.includes(osVersionFilter)
@@ -2193,7 +2266,7 @@ const Hosts = () => {
 											}}
 											className="btn-outline w-full min-h-[44px]"
 										>
-											Clear Filters
+											{t("filters.clear_filters")}
 										</button>
 									</div>
 								</div>
@@ -2205,10 +2278,10 @@ const Hosts = () => {
 						<div className="mb-4 flex items-start gap-2 rounded-md border border-warning-200 dark:border-warning-700 bg-warning-50 dark:bg-warning-900 p-3">
 							<AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5 text-warning-600 dark:text-warning-300" />
 							<p className="text-sm text-warning-800 dark:text-warning-200">
-								The Reporting and Connection filters are applied to the first{" "}
-								{LIVE_FILTER_FETCH_LIMIT.toLocaleString()} hosts only, out of{" "}
-								{serverTotalHosts.toLocaleString()} matching your other filters.
-								Narrow the search, group or OS filters to cover every host.
+								{t("warning.live_filter_truncated", {
+									limit: LIVE_FILTER_FETCH_LIMIT.toLocaleString(),
+									total: serverTotalHosts.toLocaleString(),
+								})}
 							</p>
 						</div>
 					)}
@@ -2217,20 +2290,17 @@ const Hosts = () => {
 						{!hosts || hosts.length === 0 ? (
 							<div className="text-center py-8">
 								<Server className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-								<p className="text-secondary-500">No hosts registered yet</p>
+								<p className="text-secondary-500">{t("empty.no_hosts")}</p>
 								<p className="text-sm text-secondary-400 mt-2">
-									Click "Add Host" to manually register a new host and get API
-									credentials
+									{t("empty.no_hosts_hint")}
 								</p>
 							</div>
 						) : visibleHosts.length === 0 ? (
 							<div className="text-center py-8">
 								<Search className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-								<p className="text-secondary-500">
-									No hosts match your current filters
-								</p>
+								<p className="text-secondary-500">{t("empty.no_matches")}</p>
 								<p className="text-sm text-secondary-400 mt-2">
-									Try adjusting your search terms or filters to see more results
+									{t("empty.no_matches_hint")}
 								</p>
 							</div>
 						) : (
@@ -2304,7 +2374,8 @@ const Hosts = () => {
 																					to={`/hosts/${host.id}`}
 																					className="text-base font-semibold text-secondary-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 block truncate"
 																				>
-																					{host.friendly_name || "Unnamed Host"}
+																					{host.friendly_name ||
+																						t("mobile.unnamed_host")}
 																				</Link>
 																			)}
 																			{visibleColumns.some(
@@ -2324,7 +2395,7 @@ const Hosts = () => {
 																			to={`/hosts/${host.id}`}
 																			className="btn-primary text-sm px-3 py-2 min-h-[44px] flex items-center gap-1 flex-shrink-0"
 																		>
-																			View
+																			{t("mobile.view")}
 																			<ExternalLink className="h-4 w-4" />
 																		</Link>
 																	)}
@@ -2366,7 +2437,7 @@ const Hosts = () => {
 																		groups.length > 0 && (
 																			<div className="flex items-center gap-1 flex-wrap">
 																				<span className="text-secondary-500 dark:text-white">
-																					Groups:
+																					{t("groups.label")}
 																				</span>
 																				{groups.map((g, idx) => (
 																					<span
@@ -2395,7 +2466,9 @@ const Hosts = () => {
 																			}
 																			className="text-sm text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 font-medium min-h-[44px] flex items-center"
 																		>
-																			{host.updatesCount || 0} Updates
+																			{t("mobile.updates_count", {
+																				count: host.updatesCount || 0,
+																			})}
 																		</button>
 																	)}
 																	{visibleColumns.some(
@@ -2410,15 +2483,20 @@ const Hosts = () => {
 																			}
 																			className="text-sm text-danger-600 hover:text-danger-700 dark:text-danger-400 dark:hover:text-danger-300 font-medium min-h-[44px] flex items-center"
 																		>
-																			{host.securityUpdatesCount || 0} Security
+																			{t("mobile.security_count", {
+																				count: host.securityUpdatesCount || 0,
+																			})}
 																		</button>
 																	)}
 																	{visibleColumns.some(
 																		(col) => col.id === "last_update",
 																	) && (
 																		<div className="text-xs text-secondary-500 dark:text-white ml-auto">
-																			Updated{" "}
-																			{formatRelativeTime(host.last_update)}
+																			{t("mobile.updated", {
+																				time: formatRelativeTime(
+																					host.last_update,
+																				),
+																			})}
 																		</div>
 																	)}
 																</div>
@@ -2461,7 +2539,7 @@ const Hosts = () => {
 																				}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("friendlyName")}
 																			</button>
 																		) : column.id === "hostname" ? (
@@ -2470,7 +2548,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("hostname")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("hostname")}
 																			</button>
 																		) : column.id === "ip" ? (
@@ -2479,7 +2557,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("ip")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("ip")}
 																			</button>
 																		) : column.id === "group" ? (
@@ -2488,7 +2566,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("group")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("group")}
 																			</button>
 																		) : column.id === "os" ? (
@@ -2497,7 +2575,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("os")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("os")}
 																			</button>
 																		) : column.id === "os_version" ? (
@@ -2506,7 +2584,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("os_version")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("os_version")}
 																			</button>
 																		) : column.id === "agent_version" ? (
@@ -2517,17 +2595,17 @@ const Hosts = () => {
 																				}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("agent_version")}
 																			</button>
 																		) : column.id === "auto_update" ? (
 																			<div className="flex items-center gap-2 font-normal text-xs text-secondary-500 dark:text-white normal-case tracking-wider">
-																				{column.label}
+																				{t(column.labelKey)}
 																			</div>
 																		) : column.id === "ws_status" ? (
 																			<div className="flex items-center gap-2 font-normal text-xs text-secondary-500 dark:text-white normal-case tracking-wider">
 																				<Wifi className="h-3 w-3" />
-																				{column.label}
+																				{t(column.labelKey)}
 																			</div>
 																		) : column.id === "integrations" ? (
 																			<button
@@ -2537,7 +2615,7 @@ const Hosts = () => {
 																				}
 																				className="flex items-center gap-2 hover:text-secondary-700 font-normal text-xs text-secondary-500 dark:text-white normal-case tracking-wider"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("integrations")}
 																			</button>
 																		) : column.id === "status" ? (
@@ -2546,7 +2624,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("status")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("status")}
 																			</button>
 																		) : column.id === "updates" ? (
@@ -2555,7 +2633,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("updates")}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("updates")}
 																			</button>
 																		) : column.id === "security_updates" ? (
@@ -2566,7 +2644,7 @@ const Hosts = () => {
 																				}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("security_updates")}
 																			</button>
 																		) : column.id === "needs_reboot" ? (
@@ -2577,7 +2655,7 @@ const Hosts = () => {
 																				}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("needs_reboot")}
 																			</button>
 																		) : column.id === "uptime" ? (
@@ -2586,7 +2664,7 @@ const Hosts = () => {
 																				onClick={() => handleSort("uptime")}
 																				className="flex items-center gap-2 hover:text-secondary-700 normal-case"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("uptime")}
 																			</button>
 																		) : column.id === "last_update" ? (
@@ -2597,11 +2675,11 @@ const Hosts = () => {
 																				}
 																				className="flex items-center gap-2 hover:text-secondary-700"
 																			>
-																				{column.label}
+																				{t(column.labelKey)}
 																				{getSortIcon("last_update")}
 																			</button>
 																		) : (
-																			column.label
+																			t(column.labelKey)
 																		)}
 																	</th>
 																))}
@@ -2654,7 +2732,7 @@ const Hosts = () => {
 							<div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
 								<div className="flex items-center gap-2">
 									<span className="text-sm text-secondary-700 dark:text-white">
-										Rows per page:
+										{t("pagination.rows_per_page")}
 									</span>
 									<select
 										value={pageSize}
@@ -2671,7 +2749,11 @@ const Hosts = () => {
 									</select>
 								</div>
 								<span className="text-sm text-secondary-700 dark:text-white">
-									{pageStart}-{pageEnd} of {totalHosts}
+									{t("pagination.range", {
+										start: pageStart,
+										end: pageEnd,
+										total: totalHosts,
+									})}
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
@@ -2680,19 +2762,22 @@ const Hosts = () => {
 									onClick={() => setPageParam(page - 1)}
 									disabled={page <= 1}
 									className="p-2 rounded border border-secondary-300 dark:border-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									aria-label="Previous hosts page"
+									aria-label={t("pagination.previous")}
 								>
 									<ChevronLeft className="h-4 w-4" />
 								</button>
 								<span className="text-sm text-secondary-700 dark:text-white">
-									Page {page} of {totalPages}
+									{t("pagination.page_of", {
+										page,
+										pages: totalPages,
+									})}
 								</span>
 								<button
 									type="button"
 									onClick={() => setPageParam(page + 1)}
 									disabled={page >= totalPages}
 									className="p-2 rounded border border-secondary-300 dark:border-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed"
-									aria-label="Next hosts page"
+									aria-label={t("pagination.next")}
 								>
 									<ChevronRight className="h-4 w-4" />
 								</button>
@@ -2753,16 +2838,17 @@ const Hosts = () => {
 								</div>
 								<div className="flex-1">
 									<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-										Global Auto-Updates Disabled
+										{t("auto_update.dialog.title")}
 									</h3>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">
-										The master auto-update setting is currently{" "}
-										<strong>disabled</strong> in Settings &gt; Agent Updates.
+										{t("auto_update.dialog.body_disabled_prefix")}{" "}
+										<strong>{t("auto_update.dialog.body_disabled_word")}</strong>{" "}
+										{t("auto_update.dialog.body_disabled_suffix")}
 									</p>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">
-										Enabling auto-update for{" "}
-										<strong>{autoUpdateDialog.hostName}</strong> won't take
-										effect until global auto-updates are enabled.
+										{t("auto_update.dialog.body_host_prefix")}{" "}
+										<strong>{autoUpdateDialog.hostName}</strong>{" "}
+										{t("auto_update.dialog.body_host_suffix")}
 									</p>
 								</div>
 							</div>
@@ -2779,14 +2865,14 @@ const Hosts = () => {
 								}
 								className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-600 border border-secondary-300 dark:border-secondary-500 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-500 transition-colors"
 							>
-								Cancel
+								{t("actions.cancel")}
 							</button>
 							<button
 								type="button"
 								onClick={handleEnableHostOnly}
 								className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-600 border border-secondary-300 dark:border-secondary-500 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-500 transition-colors"
 							>
-								Enable Host Only
+								{t("auto_update.dialog.enable_host_only")}
 							</button>
 							<button
 								type="button"
@@ -2795,8 +2881,8 @@ const Hosts = () => {
 								className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{enableGlobalAutoUpdateMutation.isPending
-									? "Enabling..."
-									: "Enable Both"}
+									? t("auto_update.dialog.enabling")
+									: t("auto_update.dialog.enable_both")}
 							</button>
 						</div>
 					</div>
@@ -2814,6 +2900,7 @@ const BulkAssignModal = ({
 	onAssign,
 	isLoading,
 }) => {
+	const { t } = useTranslation("hosts");
 	const [selectedGroupIds, setSelectedGroupIds] = useState([]);
 
 	// Fetch host groups for selection
@@ -2846,7 +2933,7 @@ const BulkAssignModal = ({
 			<div className="bg-white dark:bg-secondary-800 rounded-lg p-6 w-full max-w-md">
 				<div className="flex justify-between items-center mb-4">
 					<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-						Assign to Host Groups
+						{t("bulk_assign.title")}
 					</h3>
 					<button
 						type="button"
@@ -2859,8 +2946,9 @@ const BulkAssignModal = ({
 
 				<div className="mb-4">
 					<p className="text-sm text-secondary-600 dark:text-white mb-2">
-						Assigning {selectedHosts.length} host
-						{selectedHosts.length !== 1 ? "s" : ""}:
+						{t("bulk_assign.assigning_hosts", {
+							count: selectedHosts.length,
+						})}
 					</p>
 					<div className="max-h-32 overflow-y-auto bg-secondary-50 dark:bg-secondary-700 rounded-md p-3">
 						{selectedHostNames.map((friendlyName) => (
@@ -2877,7 +2965,7 @@ const BulkAssignModal = ({
 				<form onSubmit={handleSubmit} className="space-y-4">
 					<div>
 						<span className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-3">
-							Host Groups
+							{t("bulk_assign.host_groups")}
 						</span>
 						<div className="space-y-2 max-h-48 overflow-y-auto">
 							{/* Host Group Options */}
@@ -2911,8 +2999,7 @@ const BulkAssignModal = ({
 							))}
 						</div>
 						<p className="mt-2 text-sm text-secondary-500 dark:text-white">
-							Select one or more groups to assign these hosts to, or leave
-							ungrouped.
+							{t("bulk_assign.hint")}
 						</p>
 					</div>
 
@@ -2923,10 +3010,12 @@ const BulkAssignModal = ({
 							className="btn-outline"
 							disabled={isLoading}
 						>
-							Cancel
+							{t("actions.cancel")}
 						</button>
 						<button type="submit" className="btn-primary" disabled={isLoading}>
-							{isLoading ? "Assigning..." : "Assign to Groups"}
+							{isLoading
+								? t("bulk_assign.submitting")
+								: t("bulk_assign.submit")}
 						</button>
 					</div>
 				</form>
@@ -2943,6 +3032,7 @@ const BulkDeleteModal = ({
 	onDelete,
 	isLoading,
 }) => {
+	const { t } = useTranslation("hosts");
 	const selectedHostNames = hosts
 		.filter((host) => selectedHosts.includes(host.id))
 		.map((host) => host.friendly_name || host.hostname || host.id);
@@ -2958,7 +3048,7 @@ const BulkDeleteModal = ({
 				<div className="px-6 py-4 border-b border-secondary-200 dark:border-secondary-600">
 					<div className="flex items-center justify-between">
 						<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-							Delete Hosts
+							{t("bulk_delete.title")}
 						</h3>
 						<button
 							type="button"
@@ -2976,20 +3066,19 @@ const BulkDeleteModal = ({
 						<div className="flex items-center gap-2 mb-3">
 							<AlertTriangle className="h-5 w-5 text-danger-600" />
 							<h4 className="text-sm font-medium text-danger-800 dark:text-danger-200">
-								Warning: This action cannot be undone
+								{t("bulk_delete.warning")}
 							</h4>
 						</div>
 						<p className="text-sm text-secondary-600 dark:text-white mb-4">
-							You are about to permanently delete {selectedHosts.length} host
-							{selectedHosts.length !== 1 ? "s" : ""}. This will remove all host
-							data, including package information, update history, and API
-							credentials.
+							{t("bulk_delete.confirm_message", {
+								count: selectedHosts.length,
+							})}
 						</p>
 					</div>
 
 					<div className="mb-4">
 						<p className="text-sm text-secondary-600 dark:text-white mb-2">
-							Hosts to be deleted:
+							{t("bulk_delete.hosts_to_delete")}
 						</p>
 						<div className="max-h-32 overflow-y-auto bg-secondary-50 dark:bg-secondary-700 rounded-md p-3">
 							{selectedHostNames.map((friendlyName) => (
@@ -3011,12 +3100,14 @@ const BulkDeleteModal = ({
 								className="btn-outline"
 								disabled={isLoading}
 							>
-								Cancel
+								{t("actions.cancel")}
 							</button>
 							<button type="submit" className="btn-danger" disabled={isLoading}>
 								{isLoading
-									? "Deleting..."
-									: `Delete ${selectedHosts.length} Host${selectedHosts.length !== 1 ? "s" : ""}`}
+									? t("bulk_delete.deleting")
+									: t("bulk_delete.delete_confirm", {
+											count: selectedHosts.length,
+										})}
 							</button>
 						</div>
 					</form>
@@ -3034,6 +3125,7 @@ const ColumnSettingsModal = ({
 	onReorder,
 	onReset,
 }) => {
+	const { t } = useTranslation("hosts");
 	const [draggedIndex, setDraggedIndex] = useState(null);
 
 	const handleDragStart = (e, index) => {
@@ -3065,7 +3157,7 @@ const ColumnSettingsModal = ({
 				<div className="px-6 py-4 border-b border-secondary-200 dark:border-secondary-600 flex-shrink-0">
 					<div className="flex items-center justify-between">
 						<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-							Column Settings
+							{t("column_settings.title")}
 						</h3>
 						<button
 							type="button"
@@ -3076,7 +3168,7 @@ const ColumnSettingsModal = ({
 						</button>
 					</div>
 					<p className="text-sm text-secondary-600 dark:text-white mt-2">
-						Drag to reorder columns or toggle visibility
+						{t("column_settings.subtitle")}
 					</p>
 				</div>
 
@@ -3088,7 +3180,9 @@ const ColumnSettingsModal = ({
 								key={column.id}
 								type="button"
 								draggable
-								aria-label={`Drag to reorder ${column.label} column`}
+								aria-label={t("column_settings.drag_reorder", {
+									column: t(column.labelKey),
+								})}
 								onDragStart={(e) => handleDragStart(e, index)}
 								onDragOver={handleDragOver}
 								onDrop={(e) => handleDrop(e, index)}
@@ -3108,7 +3202,7 @@ const ColumnSettingsModal = ({
 								<div className="flex items-center gap-2.5">
 									<GripVertical className="h-4 w-4 text-secondary-400 dark:text-white flex-shrink-0" />
 									<span className="text-sm font-medium text-secondary-900 dark:text-white truncate">
-										{column.label}
+										{t(column.labelKey)}
 									</span>
 								</div>
 								<button
@@ -3124,8 +3218,12 @@ const ColumnSettingsModal = ({
 									}`}
 									aria-label={
 										column.visible
-											? `Hide ${column.label} column`
-											: `Show ${column.label} column`
+											? t("column_settings.hide_column", {
+													column: t(column.labelKey),
+												})
+											: t("column_settings.show_column", {
+													column: t(column.labelKey),
+												})
 									}
 								>
 									{column.visible ? (
@@ -3143,10 +3241,10 @@ const ColumnSettingsModal = ({
 				<div className="px-6 py-4 border-t border-secondary-200 dark:border-secondary-600 flex-shrink-0">
 					<div className="flex justify-between">
 						<button type="button" onClick={onReset} className="btn-outline">
-							Reset to Default
+							{t("column_settings.reset")}
 						</button>
 						<button type="button" onClick={onClose} className="btn-primary">
-							Done
+							{t("column_settings.done")}
 						</button>
 					</div>
 				</div>

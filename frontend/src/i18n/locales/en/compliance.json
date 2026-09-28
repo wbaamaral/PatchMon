@@ -1,0 +1,83 @@
+{
+	"title": "Security Compliance",
+	"subtitle": "Monitor and manage compliance across your hosts",
+	"tabs": {
+		"overview": "Overview",
+		"hosts": "Hosts",
+		"scan_results": "Scan Results",
+		"history": "History",
+		"settings": "Settings",
+		"aria_label": "Tabs"
+	},
+	"scanners": {
+		"openscap": "OpenSCAP",
+		"docker_bench": "Docker Bench",
+		"all_scans": "All Scans"
+	},
+	"toasts": {
+		"scan_completed": "Compliance scan completed",
+		"scan_completed_for": "Scan completed for {{name}}",
+		"scans_completed": "{{count}} scans completed",
+		"scans_started": "Started {{count}} compliance scan(s)",
+		"scans_started_partial": "Started {{success}} scan(s), {{failed}} failed",
+		"bulk_scan_failed": "Bulk scan failed: {{error}}",
+		"scan_started": "Scan started for {{name}}",
+		"scan_failed": "Scan failed for {{name}}: {{error}}",
+		"cancel_sent": "Cancel request sent for {{name}}"
+	},
+	"status": {
+		"compliant": "Compliant",
+		"warning": "Warning",
+		"critical": "Critical",
+		"not_scanned": "Not scanned",
+		"scanning": "Scanning...",
+		"starting": "Starting...",
+		"cancelling": "Cancelling...",
+		"cancel_scan": "Cancel running scan",
+		"run_scan": "Run compliance scan",
+		"triggering": "Triggering...",
+		"connected": "Connected",
+		"disconnected": "Disconnected",
+		"started_prefix": "Started",
+		"compliance_status": "Compliance status"
+	},
+	"errors": {
+		"load_failed": "Failed to load compliance dashboard"
+	},
+	"table": {
+		"host": "Host",
+		"score": "Score",
+		"profile": "Profile",
+		"status": "Status",
+		"last_scan": "Last Scan",
+		"actions": "Actions",
+		"view_passing": "View passing rules for this host",
+		"view_failing": "View failing rules for this host",
+		"view_skipped": "View skipped/N/A rules for this host"
+	},
+	"stats": {
+		"avg_compliance": "Avg Compliance",
+		"total_hosts": "Total Hosts",
+		"compliant_hosts": "Compliant Hosts",
+		"critical_hosts": "Critical Hosts",
+		"passed_rules": "Passed Rules",
+		"failed_rules": "Failed Rules",
+		"never_scanned": "Never scanned",
+		"filtered_hosts_tab": "Filtered in Hosts tab"
+	},
+	"chart": {
+		"label_hosts": "{{label}} Hosts",
+		"label_severity": "{{label}} Severity",
+		"label_score": "Score: {{label}}",
+		"scans": "Scans",
+		"hosts": "Hosts"
+	},
+	"filters": {
+		"all_profiles": "All Profiles",
+		"openscap_only": "OpenSCAP Only",
+		"docker_bench_only": "Docker Bench Only"
+	},
+	"bulk": {
+		"failed_hosts": "Failed hosts:"
+	}
+}

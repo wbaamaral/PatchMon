@@ -10,10 +10,12 @@ import {
 	Zap,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "../contexts/ToastContext";
 import api, { getGlobalTimezone } from "../utils/api";
 
 const Automation = () => {
+	const { t } = useTranslation("automation");
 	const toast = useToast();
 	const [activeTab, setActiveTab] = useState("overview");
 	const [triggeringJob, setTriggeringJob] = useState(null);
@@ -91,43 +93,43 @@ const Automation = () => {
 			case "Success":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-						Success
+						{t("status.success")}
 					</span>
 				);
 			case "Failed":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-						Failed
+						{t("status.failed")}
 					</span>
 				);
 			case "Running":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-						Running
+						{t("status.running")}
 					</span>
 				);
 			case "Retrying":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-						Retrying
+						{t("status.retrying")}
 					</span>
 				);
 			case "Archived":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-						Archived
+						{t("status.archived")}
 					</span>
 				);
 			case "Skipped (Disabled)":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-						Skipped (Disabled)
+						{t("status.skipped_disabled")}
 					</span>
 				);
 			case "Never run":
 				return (
 					<span className="px-2 py-1 text-xs font-medium rounded-md bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-						Never run
+						{t("status.never_run")}
 					</span>
 				);
 			default:
@@ -140,8 +142,8 @@ const Automation = () => {
 	};
 
 	const getNextRunTime = (schedule, _lastRun) => {
-		if (schedule === "Manual only") return "Manual trigger only";
-		if (schedule.includes("Agent-driven")) return "Agent-driven (automatic)";
+		if (schedule === "Manual only") return t("schedule.manual_trigger");
+		if (schedule.includes("Agent-driven")) return t("schedule.agent_driven");
 		if (schedule === "Daily at midnight") {
 			const now = new Date();
 			const tomorrow = new Date(now);
@@ -302,7 +304,7 @@ const Automation = () => {
 				timeZone: getGlobalTimezone() || undefined,
 			});
 		}
-		return "Unknown";
+		return t("schedule.unknown");
 	};
 
 	const getNextRunTimestamp = (schedule) => {
@@ -424,7 +426,7 @@ const Automation = () => {
 			}
 
 			if (!endpoint) {
-				toast.error(`No manual trigger available for ${jobType}`);
+				toast.error(t("toasts.no_trigger", { jobType }));
 				return;
 			}
 
@@ -433,11 +435,21 @@ const Automation = () => {
 
 			// Show success feedback with job ID or enqueued count
 			// (Overview auto-refreshes every 30s via refetchInterval)
-			const msg = dataPayload.message || "Job triggered successfully";
+			const msg = dataPayload.message || t("toasts.triggered");
 			if (dataPayload.jobId) {
-				toast.success(`${msg} - Job ID: ${dataPayload.jobId}`);
+				toast.success(
+					t("toasts.triggered_job_id", {
+						message: msg,
+						jobId: dataPayload.jobId,
+					}),
+				);
 			} else if (typeof dataPayload.enqueued === "number") {
-				toast.success(`${msg} - ${dataPayload.enqueued} job(s) queued`);
+				toast.success(
+					t("toasts.triggered_queued", {
+						message: msg,
+						count: dataPayload.enqueued,
+					}),
+				);
 			} else {
 				toast.success(msg);
 			}
@@ -445,7 +457,7 @@ const Automation = () => {
 			console.error("Error triggering job:", error);
 			const errorMsg =
 				error.response?.data?.error || error.message || "Unknown error";
-			toast.error(`Failed to trigger job: ${errorMsg}`);
+			toast.error(t("toasts.trigger_failed", { error: errorMsg }));
 		} finally {
 			setTriggeringJob(null);
 		}
@@ -511,7 +523,7 @@ const Automation = () => {
 			})
 		: [];
 
-	const tabs = [{ id: "overview", name: "Overview", icon: Settings }];
+	const tabs = [{ id: "overview", labelKey: "tabs.overview", icon: Settings }];
 
 	return (
 		<div className="space-y-6">
@@ -519,18 +531,17 @@ const Automation = () => {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-semibold text-secondary-900 dark:text-white">
-						Automation Management
+						{t("title")}
 					</h1>
 					<p className="text-sm text-secondary-600 dark:text-white mt-1">
-						Monitor and manage automated server operations, agent
-						communications, and patch deployments
+						{t("subtitle")}
 					</p>
 				</div>
 			</div>
 
 			{/* Stats Cards */}
 			<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-				{/* Scheduled Tasks Card */}
+				{/* {t("stats.scheduled_tasks")} Card */}
 				<div className="card p-4">
 					<div className="flex items-center">
 						<div className="flex-shrink-0">
@@ -538,7 +549,7 @@ const Automation = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Scheduled Tasks
+								{t("stats.scheduled_tasks")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{overviewLoading ? "..." : overview?.scheduledTasks || 0}
@@ -547,7 +558,7 @@ const Automation = () => {
 					</div>
 				</div>
 
-				{/* Running Tasks Card */}
+				{/* {t("stats.running_tasks")} Card */}
 				<div className="card p-4">
 					<div className="flex items-center">
 						<div className="flex-shrink-0">
@@ -555,7 +566,7 @@ const Automation = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Running Tasks
+								{t("stats.running_tasks")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{overviewLoading ? "..." : overview?.runningTasks || 0}
@@ -564,7 +575,7 @@ const Automation = () => {
 					</div>
 				</div>
 
-				{/* Failed Tasks Card */}
+				{/* {t("stats.failed_tasks")} Card */}
 				<div className="card p-4">
 					<div className="flex items-center">
 						<div className="flex-shrink-0">
@@ -572,7 +583,7 @@ const Automation = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Failed Tasks
+								{t("stats.failed_tasks")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{overviewLoading ? "..." : overview?.failedTasks || 0}
@@ -581,7 +592,7 @@ const Automation = () => {
 					</div>
 				</div>
 
-				{/* Total Task Runs Card */}
+				{/* {t("stats.total_task_runs")} Card */}
 				<div className="card p-4">
 					<div className="flex items-center">
 						<div className="flex-shrink-0">
@@ -589,7 +600,7 @@ const Automation = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Total Task Runs
+								{t("stats.total_task_runs")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{overviewLoading ? "..." : overview?.totalAutomations || 0}
@@ -603,7 +614,7 @@ const Automation = () => {
 			<div className="border-b border-secondary-200 dark:border-secondary-600 overflow-x-auto scrollbar-hide">
 				<nav
 					className="-mb-px flex space-x-4 sm:space-x-8 px-4"
-					aria-label="Tabs"
+					aria-label={t("aria.tabs")}
 				>
 					{tabs.map((tab) => (
 						<button
@@ -617,7 +628,7 @@ const Automation = () => {
 							}`}
 						>
 							<tab.icon className="h-4 w-4" />
-							{tab.name}
+							{t(tab.labelKey)}
 						</button>
 					))}
 				</nav>
@@ -629,9 +640,7 @@ const Automation = () => {
 					{overviewLoading ? (
 						<div className="text-center py-8">
 							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-							<p className="mt-2 text-sm text-secondary-500">
-								Loading automations...
-							</p>
+							<p className="mt-2 text-sm text-secondary-500">{t("loading")}</p>
 						</div>
 					) : (
 						<>
@@ -662,7 +671,7 @@ const Automation = () => {
 													}}
 													disabled={isTriggering(automation.queue)}
 													className="inline-flex items-center justify-center w-8 h-8 border border-transparent rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 flex-shrink-0 disabled:opacity-60 disabled:cursor-not-allowed"
-													title="Run Now"
+													title={t("actions.run_now")}
 												>
 													{isTriggering(automation.queue) ? (
 														<span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
@@ -672,7 +681,7 @@ const Automation = () => {
 												</button>
 											) : (
 												<span className="text-xs text-secondary-400 dark:text-white flex-shrink-0">
-													Manual
+													{t("actions.manual")}
 												</span>
 											)}
 										</div>
@@ -684,7 +693,7 @@ const Automation = () => {
 										<div className="space-y-2 pt-2 border-t border-secondary-200 dark:border-secondary-600">
 											<div className="flex items-center justify-between text-sm">
 												<span className="text-secondary-500 dark:text-white">
-													Frequency:
+													{t("labels.frequency")}
 												</span>
 												<span className="text-secondary-900 dark:text-white font-medium">
 													{automation.schedule}
@@ -692,7 +701,7 @@ const Automation = () => {
 											</div>
 											<div className="flex items-center justify-between text-sm">
 												<span className="text-secondary-500 dark:text-white">
-													Last Run:
+													{t("labels.last_run")}
 												</span>
 												<span className="text-secondary-900 dark:text-white">
 													{automation.lastRun}
@@ -700,7 +709,7 @@ const Automation = () => {
 											</div>
 											<div className="flex items-center justify-between text-sm">
 												<span className="text-secondary-500 dark:text-white">
-													Next Run:
+													{t("labels.next_run")}
 												</span>
 												<span className="text-secondary-900 dark:text-white">
 													{getNextRunTime(
@@ -720,14 +729,14 @@ const Automation = () => {
 									<thead className="bg-secondary-50 dark:bg-secondary-700">
 										<tr>
 											<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-												Run
+												{t("columns.run")}
 											</th>
 											<th
 												className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider cursor-pointer hover:bg-secondary-100 dark:hover:bg-secondary-600"
 												onClick={() => handleSort("name")}
 											>
 												<div className="flex items-center gap-1">
-													Task
+													{t("columns.task")}
 													{getSortIcon("name")}
 												</div>
 											</th>
@@ -736,7 +745,7 @@ const Automation = () => {
 												onClick={() => handleSort("schedule")}
 											>
 												<div className="flex items-center gap-1">
-													Frequency
+													{t("columns.frequency")}
 													{getSortIcon("schedule")}
 												</div>
 											</th>
@@ -745,7 +754,7 @@ const Automation = () => {
 												onClick={() => handleSort("lastRunTimestamp")}
 											>
 												<div className="flex items-center gap-1">
-													Last Run
+													{t("columns.last_run")}
 													{getSortIcon("lastRunTimestamp")}
 												</div>
 											</th>
@@ -754,7 +763,7 @@ const Automation = () => {
 												onClick={() => handleSort("nextRunTimestamp")}
 											>
 												<div className="flex items-center gap-1">
-													Next Run
+													{t("columns.next_run")}
 													{getSortIcon("nextRunTimestamp")}
 												</div>
 											</th>
@@ -763,7 +772,7 @@ const Automation = () => {
 												onClick={() => handleSort("status")}
 											>
 												<div className="flex items-center gap-1">
-													Status
+													{t("columns.status")}
 													{getSortIcon("status")}
 												</div>
 											</th>
@@ -787,7 +796,7 @@ const Automation = () => {
 															}}
 															disabled={isTriggering(automation.queue)}
 															className="inline-flex items-center justify-center w-6 h-6 border border-transparent rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-															title="Run Now"
+															title={t("actions.run_now")}
 														>
 															{isTriggering(automation.queue) ? (
 																<span className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
@@ -797,7 +806,7 @@ const Automation = () => {
 														</button>
 													) : (
 														<span className="text-gray-400 text-xs">
-															Manual
+															{t("actions.manual")}
 														</span>
 													)}
 												</td>

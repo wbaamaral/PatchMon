@@ -111,7 +111,7 @@ func (h *AlertsHandler) List(w http.ResponseWriter, r *http.Request) {
 	alerts, total, err := h.alerts.ListFiltered(r.Context(), params)
 	if err != nil {
 		slog.Error("alerts: list failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch alerts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_alerts")
 		return
 	}
 
@@ -141,7 +141,7 @@ func (h *AlertsHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) ListTypes(w http.ResponseWriter, r *http.Request) {
 	types, err := h.alerts.DistinctTypes(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch alert types")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_alert_types")
 		return
 	}
 	successData(w, types)
@@ -151,7 +151,7 @@ func (h *AlertsHandler) ListTypes(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.alerts.GetStats(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch alert stats")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_alert_stats")
 		return
 	}
 	successData(w, stats)
@@ -162,7 +162,7 @@ func (h *AlertsHandler) GetAvailableActions(w http.ResponseWriter, r *http.Reque
 	d := h.db.DB(r.Context())
 	actions, err := d.Queries.ListAlertActions(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch available actions")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_available_actions")
 		return
 	}
 	// Convert to frontend format: id, name, display_name, description, is_state_action, severity_override
@@ -184,12 +184,12 @@ func (h *AlertsHandler) GetAvailableActions(w http.ResponseWriter, r *http.Reque
 func (h *AlertsHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Alert ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_id_required")
 		return
 	}
 	alert, err := h.alerts.GetByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Alert not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.alert_not_found")
 		return
 	}
 	successData(w, alert)
@@ -199,13 +199,13 @@ func (h *AlertsHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Alert ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_id_required")
 		return
 	}
 	d := h.db.DB(r.Context())
 	rows, err := d.Queries.ListAlertHistoryByAlertID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch alert history")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_alert_history")
 		return
 	}
 	out := make([]map[string]interface{}, len(rows))
@@ -237,7 +237,7 @@ func (h *AlertsHandler) GetHistory(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) PerformAction(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Alert ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_id_required")
 		return
 	}
 	var req struct {
@@ -245,7 +245,7 @@ func (h *AlertsHandler) PerformAction(w http.ResponseWriter, r *http.Request) {
 		Metadata map[string]interface{} `json:"metadata"`
 	}
 	if err := decodeJSON(r, &req); err != nil || req.Action == "" {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
@@ -253,13 +253,13 @@ func (h *AlertsHandler) PerformAction(w http.ResponseWriter, r *http.Request) {
 
 	action, err := d.Queries.GetAlertActionByName(r.Context(), req.Action)
 	if err != nil {
-		Error(w, http.StatusBadRequest, "Invalid action")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_action")
 		return
 	}
 
 	_, err = h.alerts.GetByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Alert not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.alert_not_found")
 		return
 	}
 
@@ -270,13 +270,13 @@ func (h *AlertsHandler) PerformAction(w http.ResponseWriter, r *http.Request) {
 			uid = &userID
 		}
 		if err := h.alerts.UpdateResolved(r.Context(), id, uid); err != nil {
-			Error(w, http.StatusInternalServerError, "Failed to perform action")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_perform_action")
 			return
 		}
 	} else {
 		// Non-state (assigned, silenced, etc.) - keep active
 		if err := h.alerts.UpdateUnresolve(r.Context(), id); err != nil {
-			Error(w, http.StatusInternalServerError, "Failed to perform action")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_perform_action")
 			return
 		}
 	}
@@ -304,18 +304,18 @@ func (h *AlertsHandler) PerformAction(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) Assign(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Alert ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_id_required")
 		return
 	}
 	var req struct {
 		UserID string `json:"userId"`
 	}
 	if err := decodeJSON(r, &req); err != nil || req.UserID == "" {
-		Error(w, http.StatusBadRequest, "userId required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.user_id_required")
 		return
 	}
 	if err := h.alerts.UpdateAssignment(r.Context(), id, req.UserID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to assign alert")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_assign_alert")
 		return
 	}
 	d := h.db.DB(r.Context())
@@ -339,11 +339,11 @@ func (h *AlertsHandler) Assign(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) Unassign(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Alert ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_id_required")
 		return
 	}
 	if err := h.alerts.UpdateUnassign(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to unassign alert")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_unassign_alert")
 		return
 	}
 	d := h.db.DB(r.Context())
@@ -367,11 +367,11 @@ func (h *AlertsHandler) Unassign(w http.ResponseWriter, r *http.Request) {
 func (h *AlertsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Alert ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_id_required")
 		return
 	}
 	if err := h.alerts.Delete(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete alert")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_alert")
 		return
 	}
 	successData(w, map[string]interface{}{"deleted": true})
@@ -383,15 +383,15 @@ func (h *AlertsHandler) BulkDelete(w http.ResponseWriter, r *http.Request) {
 		AlertIDs []string `json:"alertIds"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.AlertIDs) == 0 {
-		Error(w, http.StatusBadRequest, "alertIds required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_ids_required")
 		return
 	}
 	if err := h.alerts.BulkDelete(r.Context(), req.AlertIDs); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete alerts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_alerts")
 		return
 	}
 	successData(w, map[string]interface{}{"deleted": len(req.AlertIDs)})
@@ -404,15 +404,15 @@ func (h *AlertsHandler) BulkAction(w http.ResponseWriter, r *http.Request) {
 		Action   string   `json:"action"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.AlertIDs) == 0 {
-		Error(w, http.StatusBadRequest, "alertIds required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_ids_required")
 		return
 	}
 	if req.Action == "" {
-		Error(w, http.StatusBadRequest, "action required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.action_required")
 		return
 	}
 
@@ -421,7 +421,7 @@ func (h *AlertsHandler) BulkAction(w http.ResponseWriter, r *http.Request) {
 
 	action, err := d.Queries.GetAlertActionByName(r.Context(), req.Action)
 	if err != nil {
-		Error(w, http.StatusBadRequest, "Invalid action")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_action")
 		return
 	}
 

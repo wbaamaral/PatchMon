@@ -13,6 +13,7 @@ import {
 	Shield,
 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { formatDate } from "../../utils/api";
 
 // These bypass the shared axios client, which rejects on non-2xx. Raw fetch
@@ -60,6 +61,7 @@ const metricsAPI = {
 };
 
 const SettingsMetrics = () => {
+	const { t } = useTranslation("settings");
 	const queryClient = useQueryClient();
 	const [showFullId, setShowFullId] = useState(false);
 
@@ -113,10 +115,10 @@ const SettingsMetrics = () => {
 					<AlertCircle className="h-5 w-5 text-red-400 dark:text-red-300" />
 					<div className="ml-3">
 						<h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-							Error loading metrics settings
+							{t("metrics.errors.load_title")}
 						</h3>
 						<p className="mt-1 text-sm text-red-700 dark:text-red-300">
-							{error.message || "Failed to load settings"}
+							{error.message || t("metrics.errors.load_failed")}
 						</p>
 					</div>
 				</div>
@@ -137,10 +139,10 @@ const SettingsMetrics = () => {
 				<BarChart3 className="h-6 w-6 text-primary-600 mr-3" />
 				<div>
 					<h2 className="text-xl font-semibold text-secondary-900 dark:text-white">
-						Anonymous Metrics & Telemetry
+						{t("metrics.title")}
 					</h2>
 					<p className="text-sm text-secondary-600 dark:text-white mt-1">
-						Help us understand PatchMon's global usage (100% anonymous)
+						{t("metrics.subtitle")}
 					</p>
 				</div>
 			</div>
@@ -151,35 +153,35 @@ const SettingsMetrics = () => {
 					<Shield className="h-6 w-6 text-blue-600 dark:text-blue-400 flex-shrink-0" />
 					<div className="ml-4 flex-1">
 						<h3 className="text-base font-semibold text-blue-900 dark:text-blue-100 mb-3">
-							Your Privacy Matters
+							{t("metrics.privacy.title")}
 						</h3>
 						<div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
 							<p className="flex items-start">
 								<CheckCircle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
 								<span>
-									<strong>We do NOT collect:</strong> IP addresses, hostnames,
-									system details, or any personally identifiable information
+									<strong>{t("metrics.privacy.not_collect_label")}</strong>{" "}
+									{t("metrics.privacy.not_collect")}
 								</span>
 							</p>
 							<p className="flex items-start">
 								<CheckCircle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
 								<span>
-									<strong>We ONLY collect:</strong> An anonymous UUID (for
-									deduplication) and the number of hosts you're monitoring
+									<strong>{t("metrics.privacy.only_collect_label")}</strong>{" "}
+									{t("metrics.privacy.only_collect")}
 								</span>
 							</p>
 							<p className="flex items-start">
 								<CheckCircle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
 								<span>
-									<strong>Purpose:</strong> Display a live counter on our
-									website showing global PatchMon adoption
+									<strong>{t("metrics.privacy.purpose_label")}</strong>{" "}
+									{t("metrics.privacy.purpose")}
 								</span>
 							</p>
 							<p className="flex items-start">
 								<Globe className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
 								<span>
-									<strong>Open Source:</strong> All code is public and auditable
-									on GitHub
+									<strong>{t("metrics.privacy.open_source_label")}</strong>{" "}
+									{t("metrics.privacy.open_source")}
 								</span>
 							</p>
 						</div>
@@ -195,7 +197,7 @@ const SettingsMetrics = () => {
 						className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 rounded-md hover:bg-blue-200 dark:hover:bg-blue-900/70 transition-colors"
 					>
 						<BookOpen className="h-4 w-4 mr-2" />
-						More Information
+						{t("metrics.privacy.more_info")}
 					</a>
 				</div>
 			</div>
@@ -205,11 +207,10 @@ const SettingsMetrics = () => {
 				<div className="flex items-start justify-between">
 					<div className="flex-1">
 						<h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
-							Enable Anonymous Metrics
+							{t("metrics.toggle.title")}
 						</h3>
 						<p className="text-sm text-secondary-600 dark:text-white">
-							Share anonymous usage statistics to help us showcase PatchMon's
-							global adoption. Data is sent automatically every 24 hours.
+							{t("metrics.toggle.description")}
 						</p>
 					</div>
 					<button
@@ -241,14 +242,14 @@ const SettingsMetrics = () => {
 							<>
 								<CheckCircle className="h-4 w-4 text-green-500 mr-2" />
 								<span className="text-green-700 dark:text-green-400">
-									Metrics enabled - Thank you for supporting PatchMon!
+									{t("metrics.toggle.enabled")}
 								</span>
 							</>
 						) : (
 							<>
 								<EyeOff className="h-4 w-4 text-secondary-500 mr-2" />
 								<span className="text-secondary-600 dark:text-white">
-									Metrics disabled - No data is being sent
+									{t("metrics.toggle.disabled")}
 								</span>
 							</>
 						)}
@@ -261,11 +262,10 @@ const SettingsMetrics = () => {
 				<div className="flex items-start justify-between mb-4">
 					<div>
 						<h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
-							Your Anonymous Instance ID
+							{t("metrics.anonymous_id.title")}
 						</h3>
 						<p className="text-sm text-secondary-600 dark:text-white">
-							This UUID identifies your instance without revealing any personal
-							information
+							{t("metrics.anonymous_id.description")}
 						</p>
 					</div>
 				</div>
@@ -279,7 +279,7 @@ const SettingsMetrics = () => {
 							type="button"
 							onClick={() => setShowFullId(!showFullId)}
 							className="p-2 text-secondary-600 dark:text-white hover:text-secondary-900 dark:hover:text-white"
-							title={showFullId ? "Hide ID" : "Show full ID"}
+							title={showFullId ? t("metrics.anonymous_id.hide_id") : t("metrics.anonymous_id.show_id")}
 						>
 							{showFullId ? (
 								<EyeOff className="h-5 w-5" />
@@ -299,12 +299,12 @@ const SettingsMetrics = () => {
 							{regenerateIdMutation.isPending ? (
 								<>
 									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-secondary-700 dark:border-secondary-200 mr-2"></div>
-									Regenerating...
+									{t("metrics.anonymous_id.regenerating")}
 								</>
 							) : (
 								<>
 									<RefreshCw className="h-4 w-4 mr-2" />
-									Regenerate ID
+									{t("metrics.anonymous_id.regenerate")}
 								</>
 							)}
 						</button>
@@ -320,12 +320,12 @@ const SettingsMetrics = () => {
 							{sendNowMutation.isPending ? (
 								<>
 									<div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-									Sending...
+									{t("metrics.actions.sending")}
 								</>
 							) : (
 								<>
 									<Send className="h-4 w-4 mr-2" />
-									Send Metrics Now
+									{t("metrics.actions.send_now")}
 								</>
 							)}
 						</button>
@@ -333,7 +333,9 @@ const SettingsMetrics = () => {
 
 					{metricsSettings?.metrics_last_sent && (
 						<p className="text-xs text-secondary-500 dark:text-white">
-							Last sent: {formatDate(metricsSettings.metrics_last_sent)}
+							{t("metrics.last_sent", {
+								date: formatDate(metricsSettings.metrics_last_sent),
+							})}
 						</p>
 					)}
 				</div>
@@ -344,7 +346,7 @@ const SettingsMetrics = () => {
 						<div className="flex">
 							<CheckCircle className="h-4 w-4 text-green-400 dark:text-green-300 mt-0.5" />
 							<p className="ml-2 text-sm text-green-700 dark:text-green-300">
-								Anonymous ID regenerated successfully
+								{t("metrics.messages.id_regenerated")}
 							</p>
 						</div>
 					</div>
@@ -355,11 +357,13 @@ const SettingsMetrics = () => {
 						<div className="flex">
 							<CheckCircle className="h-4 w-4 text-green-400 dark:text-green-300 mt-0.5" />
 							<div className="ml-2 text-sm text-green-700 dark:text-green-300">
-								<p className="font-medium">Metrics sent successfully!</p>
+								<p className="font-medium">{t("metrics.messages.sent_success")}</p>
 								{sendNowMutation.data?.data && (
 									<p className="mt-1">
-										Sent: {sendNowMutation.data.data.hostCount} hosts, version{" "}
-										{sendNowMutation.data.data.version}
+										{t("metrics.messages.sent_detail", {
+											hostCount: sendNowMutation.data.data.hostCount,
+											version: sendNowMutation.data.data.version,
+										})}
 									</p>
 								)}
 							</div>
@@ -372,7 +376,7 @@ const SettingsMetrics = () => {
 						<div className="flex">
 							<AlertCircle className="h-4 w-4 text-red-400 dark:text-red-300 mt-0.5" />
 							<div className="ml-2 text-sm text-red-700 dark:text-red-300">
-								{sendNowMutation.error?.message || "Failed to send metrics"}
+								{sendNowMutation.error?.message || t("metrics.errors.send_failed")}
 							</div>
 						</div>
 					</div>
@@ -384,19 +388,14 @@ const SettingsMetrics = () => {
 				<div className="flex">
 					<Info className="h-5 w-5 text-secondary-500 dark:text-white flex-shrink-0 mt-0.5" />
 					<div className="ml-3 text-sm text-secondary-700 dark:text-white">
-						<h4 className="font-medium mb-2">How it works:</h4>
+						<h4 className="font-medium mb-2">{t("metrics.how_it_works.title")}</h4>
 						<ul className="space-y-1 list-disc list-inside">
+							<li>{t("metrics.how_it_works.item1")}</li>
+							<li>{t("metrics.how_it_works.item2")}</li>
+							<li>{t("metrics.how_it_works.item3")}</li>
+							<li>{t("metrics.how_it_works.item4")}</li>
 							<li>
-								Metrics are sent automatically every 24 hours when enabled
-							</li>
-							<li>
-								Only host count and version number are transmitted (no sensitive
-								data)
-							</li>
-							<li>The anonymous UUID prevents duplicate counting</li>
-							<li>You can regenerate your ID or opt-out at any time</li>
-							<li>
-								All collected data is displayed publicly on{" "}
+								{t("metrics.how_it_works.item5")}{" "}
 								<a
 									href="https://patchmon.net"
 									target="_blank"

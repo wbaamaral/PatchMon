@@ -1,0 +1,71 @@
+{
+	"buttons": {
+		"save": "Salvar",
+		"cancel": "Cancelar",
+		"delete": "Excluir",
+		"edit": "Editar",
+		"close": "Fechar",
+		"confirm": "Confirmar",
+		"back": "Voltar",
+		"next": "Próximo",
+		"retry": "Tentar novamente",
+		"refresh": "Atualizar",
+		"copy": "Copiar",
+		"search": "Buscar",
+		"filter": "Filtros",
+		"loading": "Carregando...",
+		"reload_page": "Recarregar página",
+		"go_to_dashboard": "Ir para o painel"
+	},
+	"confirm": {
+		"title": "Tem certeza?",
+		"subtitle": "Esta ação não pode ser desfeita",
+		"confirm_label": "Excluir",
+		"cancel_label": "Cancelar"
+	},
+	"errors": {
+		"something_wrong": "Algo deu errado",
+		"unexpected_error": "Ocorreu um erro inesperado. Nossa equipe foi notificada e está trabalhando em uma correção.",
+		"error_details_dev": "Detalhes do erro (apenas desenvolvimento)",
+		"copy_error": "Copiar erro para a área de transferência",
+		"copied": "Copiado!",
+		"failed_to_copy": "Não foi possível copiar"
+	},
+	"loading": {
+		"generic": "Carregando...",
+		"checking_status": "Verificando status do sistema..."
+	},
+	"time": {
+		"just_now": "agora mesmo",
+		"in_a_few_seconds": "em alguns segundos",
+		"days_ago_one": "há {{count}} dia",
+		"days_ago_other": "há {{count}} dias",
+		"hours_ago_one": "há {{count}} hora",
+		"hours_ago_other": "há {{count}} horas",
+		"minutes_ago_one": "há {{count}} minuto",
+		"minutes_ago_other": "há {{count}} minutos",
+		"uptime": {
+			"days_one": "{{count}} dia",
+			"days_other": "{{count}} dias",
+			"hours_one": "{{count}} hora",
+			"hours_other": "{{count}} horas",
+			"minutes_one": "{{count}} minuto",
+			"minutes_other": "{{count}} minutos"
+		}
+	},
+	"common": {
+		"yes": "Sim",
+		"no": "Não",
+		"enabled": "Habilitado",
+		"disabled": "Desabilitado",
+		"none": "Nenhum",
+		"all": "Todos",
+		"unknown": "Desconhecido",
+		"status": "Status",
+		"name": "Nome",
+		"actions": "Ações",
+		"host": "Host",
+		"hosts_one": "{{count}} host",
+		"hosts_other": "{{count}} hosts"
+	}
+}

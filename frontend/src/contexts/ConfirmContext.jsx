@@ -8,6 +8,7 @@ import {
 	useRef,
 	useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 
 const ConfirmContext = createContext(null);
@@ -82,13 +83,14 @@ export function ConfirmProvider({ children }) {
 }
 
 function ConfirmDialog({ options, onSettle }) {
+	const { t } = useTranslation();
 	const {
-		title = "Are you sure?",
-		subtitle = "This action cannot be undone",
+		title = t("confirm.title"),
+		subtitle = t("confirm.subtitle"),
 		message,
 		warning,
-		confirmLabel = "Delete",
-		cancelLabel = "Cancel",
+		confirmLabel = t("confirm.confirm_label"),
+		cancelLabel = t("confirm.cancel_label"),
 		variant = "danger",
 	} = options;
 
@@ -170,7 +172,7 @@ function ConfirmDialog({ options, onSettle }) {
 							type="button"
 							onClick={() => onSettle(false)}
 							className="p-1 rounded hover:bg-secondary-100 dark:hover:bg-secondary-700 text-secondary-400 hover:text-secondary-600 flex-shrink-0"
-							aria-label="Close"
+							aria-label={t("buttons.close")}
 						>
 							<X className="h-5 w-5" />
 						</button>

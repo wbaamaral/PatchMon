@@ -1,5 +1,6 @@
 import { Check, Copy } from "lucide-react";
 import { Component } from "react";
+import i18n from "../i18n";
 
 /**
  * React Error Boundary component
@@ -61,6 +62,7 @@ class ErrorBoundary extends Component {
 		if (this.state.hasError) {
 			const isDevelopment = process.env.NODE_ENV === "development";
 			const errorText = `${this.state.error?.toString() || ""}\n\n${this.state.errorInfo?.componentStack || ""}`;
+			const t = i18n.t.bind(i18n);
 
 			// Custom fallback UI
 			return (
@@ -85,11 +87,10 @@ class ErrorBoundary extends Component {
 								</svg>
 								<div>
 									<h1 className="text-2xl font-bold text-secondary-900 dark:text-white mb-2">
-										Something went wrong
+										{t("errors.something_wrong")}
 									</h1>
 									<p className="text-secondary-600 dark:text-white">
-										An unexpected error occurred. Our team has been notified and
-										is working on a fix.
+										{t("errors.unexpected_error")}
 									</p>
 								</div>
 							</div>
@@ -100,23 +101,23 @@ class ErrorBoundary extends Component {
 								<div className="bg-secondary-100 dark:bg-secondary-700 rounded-md p-4">
 									<div className="flex items-center justify-between mb-3">
 										<h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
-											Error Details (Development Only)
+											{t("errors.error_details_dev")}
 										</h2>
 										<button
 											type="button"
 											onClick={this.handleCopyError}
 											className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-secondary-600 text-secondary-700 dark:text-secondary-200 rounded-md hover:bg-secondary-200 dark:hover:bg-secondary-500 transition-colors font-medium text-sm"
-											title="Copy error to clipboard"
+											title={t("errors.copy_error")}
 										>
 											{this.state.copied ? (
 												<>
 													<Check className="h-4 w-4" />
-													Copied!
+													{t("errors.copied")}
 												</>
 											) : (
 												<>
 													<Copy className="h-4 w-4" />
-													Copy
+													{t("buttons.copy")}
 												</>
 											)}
 										</button>
@@ -134,14 +135,14 @@ class ErrorBoundary extends Component {
 								onClick={this.handleReload}
 								className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium"
 							>
-								Reload Page
+								{t("buttons.reload_page")}
 							</button>
 							<button
 								type="button"
 								onClick={this.handleGoHome}
 								className="px-4 py-2 bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-secondary-200 rounded-md hover:bg-secondary-300 dark:hover:bg-secondary-500 transition-colors font-medium"
 							>
-								Go to Dashboard
+								{t("buttons.go_to_dashboard")}
 							</button>
 						</div>
 					</div>

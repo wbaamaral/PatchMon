@@ -46,7 +46,7 @@ func (h *AutoEnrollmentHandler) List(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("auto-enrollment list failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to list tokens")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_list_tokens")
 		return
 	}
 	items := make([]store.TokenListItem, len(rows))
@@ -61,7 +61,7 @@ func (h *AutoEnrollmentHandler) GetByID(w http.ResponseWriter, r *http.Request) 
 	tokenID := chi.URLParam(r, "tokenId")
 	row, err := h.tokens.GetByID(r.Context(), tokenID)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Token not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.token_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, store.IDRowToTokenListItem(row))
@@ -79,17 +79,17 @@ func (h *AutoEnrollmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Scopes             json.RawMessage `json:"scopes"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.TokenName == "" || len(req.TokenName) > 255 {
-		Error(w, http.StatusBadRequest, "Token name is required (max 255 characters)")
+		ErrorKey(w, r, http.StatusBadRequest, "error.token_name_required")
 		return
 	}
 
 	if req.DefaultHostGroupID != nil && *req.DefaultHostGroupID != "" {
 		if _, err := h.hostGroups.GetByID(r.Context(), *req.DefaultHostGroupID); err != nil {
-			Error(w, http.StatusBadRequest, "Host group not found")
+			ErrorKey(w, r, http.StatusBadRequest, "error.host_group_not_found")
 			return
 		}
 	}
@@ -113,7 +113,7 @@ func (h *AutoEnrollmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var scopesBytes []byte
 	if integrationType == "api" && len(req.Scopes) > 0 && string(req.Scopes) != "null" {
 		if err := validateScopes(req.Scopes); err != nil {
-			Error(w, http.StatusBadRequest, err.Error())
+			ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 			return
 		}
 		scopesBytes = req.Scopes
@@ -128,7 +128,7 @@ func (h *AutoEnrollmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 		if h.cfg != nil && h.cfg.Env == "development" {
 			msg = "Failed to generate token credentials: " + err.Error()
 		}
-		Error(w, http.StatusInternalServerError, msg)
+		ErrorKey(w, r, http.StatusInternalServerError, "error.internal_error_detail", "detail", msg)
 		return
 	}
 
@@ -189,14 +189,14 @@ func (h *AutoEnrollmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 		if h.cfg != nil && h.cfg.Env == "development" {
 			msg = "Failed to create token: " + err.Error()
 		}
-		Error(w, http.StatusInternalServerError, msg)
+		ErrorKey(w, r, http.StatusInternalServerError, "error.internal_error_detail", "detail", msg)
 		return
 	}
 
 	// Fetch back with joins so we have host_groups and users in response
 	row, err := h.tokens.GetByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Token created but failed to retrieve")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.token_created_retrieve_failed")
 		return
 	}
 	item := store.IDRowToTokenListItem(row)
@@ -224,7 +224,7 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	existing, err := h.tokens.GetRaw(r.Context(), tokenID)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Token not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.token_not_found")
 		return
 	}
 
@@ -238,7 +238,7 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Scopes             json.RawMessage `json:"scopes"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -253,7 +253,7 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if req.TokenName != nil {
 		if *req.TokenName == "" || len(*req.TokenName) > 255 {
-			Error(w, http.StatusBadRequest, "Token name must be between 1 and 255 characters")
+			ErrorKey(w, r, http.StatusBadRequest, "error.token_name_length")
 			return
 		}
 		tokenName = *req.TokenName
@@ -263,7 +263,7 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	if req.MaxHostsPerDay != nil {
 		if *req.MaxHostsPerDay < 1 || *req.MaxHostsPerDay > 1000 {
-			Error(w, http.StatusBadRequest, "Max hosts per day must be between 1 and 1000")
+			ErrorKey(w, r, http.StatusBadRequest, "error.max_hosts_per_day")
 			return
 		}
 		maxHostsPerDay = *req.MaxHostsPerDay
@@ -283,7 +283,7 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 			hostGroupID = nil
 		} else {
 			if _, err := h.hostGroups.GetByID(r.Context(), *req.DefaultHostGroupID); err != nil {
-				Error(w, http.StatusBadRequest, "Host group not found")
+				ErrorKey(w, r, http.StatusBadRequest, "error.host_group_not_found")
 				return
 			}
 			hostGroupID = req.DefaultHostGroupID
@@ -297,11 +297,11 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 		integrationType, _ := metaMap["integration_type"].(string)
 
 		if integrationType != "api" {
-			Error(w, http.StatusBadRequest, "Scopes can only be updated for API integration tokens")
+			ErrorKey(w, r, http.StatusBadRequest, "error.scopes_api_tokens_only")
 			return
 		}
 		if err := validateScopes(req.Scopes); err != nil {
-			Error(w, http.StatusBadRequest, err.Error())
+			ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 			return
 		}
 		scopes = req.Scopes
@@ -324,13 +324,13 @@ func (h *AutoEnrollmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 		ID:                 tokenID,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update token")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_token")
 		return
 	}
 
 	row, err := h.tokens.GetByID(r.Context(), tokenID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Token updated but failed to retrieve")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.token_updated_retrieve_failed")
 		return
 	}
 	item := store.IDRowToTokenListItem(row)
@@ -347,12 +347,12 @@ func (h *AutoEnrollmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	existing, err := h.tokens.GetRaw(r.Context(), tokenID)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Token not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.token_not_found")
 		return
 	}
 
 	if err := h.tokens.Delete(r.Context(), tokenID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete token")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_token")
 		return
 	}
 
@@ -370,7 +370,7 @@ func (h *AutoEnrollmentHandler) Delete(w http.ResponseWriter, r *http.Request) {
 // Body: { "friendly_name": "...", "machine_id": "...", "metadata": {...} }
 func (h *AutoEnrollmentHandler) Enroll(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		Error(w, http.StatusMethodNotAllowed, "Method not allowed")
+		ErrorKey(w, r, http.StatusMethodNotAllowed, "error.method_not_allowed")
 		return
 	}
 
@@ -435,15 +435,15 @@ func (h *AutoEnrollmentHandler) Enroll(w http.ResponseWriter, r *http.Request) {
 		Metadata     json.RawMessage `json:"metadata"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.FriendlyName == "" || len(req.FriendlyName) > 255 {
-		Error(w, http.StatusBadRequest, "Friendly name is required (max 255 characters)")
+		ErrorKey(w, r, http.StatusBadRequest, "error.friendly_name_max")
 		return
 	}
 	if req.MachineID != "" && len(req.MachineID) > 255 {
-		Error(w, http.StatusBadRequest, "Machine ID must be between 1 and 255 characters if provided")
+		ErrorKey(w, r, http.StatusBadRequest, "error.machine_id_length")
 		return
 	}
 
@@ -454,7 +454,7 @@ func (h *AutoEnrollmentHandler) Enroll(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("auto-enrollment bcrypt failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to generate credentials")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_credentials")
 		return
 	}
 
@@ -482,7 +482,7 @@ func (h *AutoEnrollmentHandler) Enroll(w http.ResponseWriter, r *http.Request) {
 	if entry := hostctx.EntryFromContext(ctx); entry != nil && entry.MaxHosts != nil {
 		count, countErr := h.hosts.Count(ctx)
 		if countErr == nil && count >= *entry.MaxHosts {
-			Error(w, http.StatusForbidden, "Host limit reached for this host's package")
+			ErrorKey(w, r, http.StatusForbidden, "error.host_limit_reached")
 			return
 		}
 	}
@@ -503,7 +503,7 @@ func (h *AutoEnrollmentHandler) Enroll(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("auto-enrollment create host failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to enroll host")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enroll_host")
 		return
 	}
 

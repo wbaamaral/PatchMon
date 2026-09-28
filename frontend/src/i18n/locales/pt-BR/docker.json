@@ -1,0 +1,201 @@
+{
+	"title": "Inventário Docker",
+	"subtitle": "Monitore contêineres, imagens e atualizações em toda a sua infraestrutura",
+	"tabs": {
+		"aria_label": "Abas",
+		"stacks": "Stacks",
+		"containers": "Contêineres",
+		"images": "Imagens",
+		"volumes": "Volumes",
+		"networks": "Redes",
+		"hosts": "Hosts"
+	},
+	"stats": {
+		"hosts_with_docker": "Hosts com Docker",
+		"running_containers": "Contêineres em execução",
+		"running_of_total": "/ {{count}} total",
+		"total_images": "Total de imagens",
+		"updates_available": "Atualizações disponíveis"
+	},
+	"search": {
+		"stacks": "Buscar stacks...",
+		"containers": "Buscar contêineres...",
+		"images": "Buscar imagens...",
+		"volumes": "Buscar volumes...",
+		"networks": "Buscar redes...",
+		"hosts": "Buscar hosts..."
+	},
+	"filters": {
+		"all_statuses": "Todos os status",
+		"all_sources": "Todas as origens",
+		"all_updates_status": "Todos os status de atualização",
+		"has_updates": "Com atualizações",
+		"up_to_date": "Atualizado",
+		"all_drivers": "Todos os drivers"
+	},
+	"sources": {
+		"docker_hub": "Docker Hub",
+		"github": "GitHub",
+		"gitlab": "GitLab",
+		"google": "Google",
+		"quay": "Quay.io",
+		"redhat": "Red Hat",
+		"azure": "Azure",
+		"aws": "AWS ECR",
+		"private": "Privado",
+		"local": "Local"
+	},
+	"drivers": {
+		"local": "Local",
+		"bridge": "Bridge",
+		"host": "Host",
+		"overlay": "Overlay",
+		"macvlan": "Macvlan"
+	},
+	"status": {
+		"running": "Em execução",
+		"exited": "Encerrado",
+		"paused": "Pausado",
+		"restarting": "Reiniciando",
+		"removed": "Removido",
+		"created": "Criado",
+		"dead": "Inoperante",
+		"up_to_date": "Atualizado",
+		"updates_available": "Atualizações disponíveis",
+		"available": "Disponível",
+		"unused": "Não utilizado"
+	},
+	"flags": {
+		"internal": "Interna",
+		"ipv6_enabled": "IPv6 habilitado",
+		"swarm_ingress": "Ingress do Swarm"
+	},
+	"table": {
+		"container_name": "Nome do contêiner",
+		"image": "Imagem",
+		"status": "Status",
+		"host": "Host",
+		"actions": "Ações",
+		"repository": "Repositório",
+		"tag": "Tag",
+		"source": "Origem",
+		"containers": "Contêineres",
+		"updates": "Atualizações",
+		"host_name": "Nome do host",
+		"running": "Em execução",
+		"images": "Imagens",
+		"volume_name": "Nome do volume",
+		"driver": "Driver",
+		"size": "Tamanho",
+		"in_use": "Em uso",
+		"network_name": "Nome da rede",
+		"scope": "Escopo",
+		"flags": "Flags",
+		"stack_name": "Nome da stack",
+		"services": "Serviços"
+	},
+	"labels": {
+		"image": "Imagem:",
+		"host": "Host:",
+		"tag": "Tag:",
+		"containers": "Contêineres:",
+		"size": "Tamanho:",
+		"services": "Serviços:",
+		"unknown": "Desconhecido",
+		"gb": "GB",
+		"containers_count_one": "{{count}} contêiner",
+		"containers_count_other": "{{count}} contêineres",
+		"services_count_one": "{{count}} serviço",
+		"services_count_other": "{{count}} serviços",
+		"stacks_count_one": "{{count}} stack",
+		"stacks_count_other": "{{count}} stacks",
+		"standalone_count": "{{count}} independente",
+		"standalone_header": "Contêineres independentes ({{count}})"
+	},
+	"actions": {
+		"refresh_data": "Atualizar dados",
+		"view": "Ver",
+		"view_details": "Ver detalhes",
+		"view_on": "Ver em {{name}}",
+		"delete": "Excluir",
+		"retry": "Tentar novamente",
+		"delete_container_from_inventory": "Excluir contêiner do inventário",
+		"delete_image_from_inventory": "Excluir imagem do inventário",
+		"delete_from_inventory": "Excluir do inventário"
+	},
+	"loading": {
+		"stacks": "Carregando stacks...",
+		"containers": "Carregando contêineres...",
+		"images": "Carregando imagens...",
+		"hosts": "Carregando hosts...",
+		"volumes": "Carregando volumes...",
+		"networks": "Carregando redes..."
+	},
+	"errors": {
+		"load_hosts": "Falha ao carregar hosts",
+		"load_volumes": "Falha ao carregar volumes",
+		"load_networks": "Falha ao carregar redes"
+	},
+	"empty": {
+		"try_adjusting": "Tente ajustar seus filtros de busca",
+		"no_containers": "Nenhum contêiner encontrado",
+		"no_containers_hint": "Nenhum contêiner Docker detectado em nenhum host",
+		"no_images": "Nenhuma imagem encontrada",
+		"no_images_hint": "Nenhuma imagem Docker detectada",
+		"no_hosts": "Nenhum host encontrado",
+		"no_hosts_hint": "Nenhum host com Docker detectado",
+		"no_volumes": "Nenhum volume encontrado",
+		"no_volumes_hint": "Nenhum volume Docker detectado",
+		"no_networks": "Nenhuma rede encontrada",
+		"no_networks_hint": "Nenhuma rede Docker detectada",
+		"no_stacks": "Nenhuma stack Docker Compose encontrada",
+		"no_stacks_hint": "Contêineres iniciados com docker-compose aparecerão aqui"
+	},
+	"stacks": {
+		"running_of_total": "{{running}}/{{total}} em execução"
+	},
+	"delete_modal": {
+		"deleting": "Excluindo...",
+		"delete_from_inventory": "Excluir do inventário",
+		"cancel": "Cancelar",
+		"fields": {
+			"image": "Imagem: {{image}}:{{tag}}",
+			"source": "Origem: {{source}}",
+			"host": "Host: {{name}}",
+			"driver": "Driver: {{driver}}",
+			"scope": "Escopo: {{scope}}",
+			"containers_using": "Contêineres que usam esta imagem: {{count}}",
+			"connected_containers": "Contêineres conectados: {{count}}",
+			"in_use_by_one": "Em uso por: {{count}} contêiner",
+			"in_use_by_other": "Em uso por: {{count}} contêineres"
+		},
+		"container": {
+			"title": "Excluir contêiner",
+			"confirm": "Tem certeza de que deseja excluir este contêiner do inventário?",
+			"warning": "⚠️ Isso apenas remove o contêiner do inventário do PatchMon. NÃO para nem exclui o contêiner Docker real no host."
+		},
+		"image": {
+			"title": "Excluir imagem",
+			"confirm": "Tem certeza de que deseja excluir esta imagem do inventário?",
+			"in_use_warning_one": "⚠️ Não é possível excluir: esta imagem está em uso por {{count}} contêiner. Exclua os contêineres primeiro.",
+			"in_use_warning_other": "⚠️ Não é possível excluir: esta imagem está em uso por {{count}} contêineres. Exclua os contêineres primeiro.",
+			"warning": "⚠️ Isso apenas remove a imagem do inventário do PatchMon. NÃO exclui a imagem Docker real dos hosts."
+		},
+		"volume": {
+			"title": "Excluir volume",
+			"confirm": "Tem certeza de que deseja excluir este volume do inventário?",
+			"warning": "⚠️ Isso apenas remove o volume do inventário do PatchMon. NÃO exclui o volume Docker real do host."
+		},
+		"network": {
+			"title": "Excluir rede",
+			"confirm": "Tem certeza de que deseja excluir esta rede do inventário?",
+			"warning": "⚠️ Isso apenas remove a rede do inventário do PatchMon. NÃO exclui a rede Docker real do host."
+		}
+	},
+	"toasts": {
+		"delete_container_failed": "Falha ao excluir contêiner: {{error}}",
+		"delete_image_failed": "Falha ao excluir imagem: {{error}}",
+		"delete_volume_failed": "Falha ao excluir volume: {{error}}",
+		"delete_network_failed": "Falha ao excluir rede: {{error}}"
+	}
+}

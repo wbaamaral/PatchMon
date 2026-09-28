@@ -1,0 +1,201 @@
+{
+	"title": "Docker Inventory",
+	"subtitle": "Monitor containers, images, and updates across your infrastructure",
+	"tabs": {
+		"aria_label": "Tabs",
+		"stacks": "Stacks",
+		"containers": "Containers",
+		"images": "Images",
+		"volumes": "Volumes",
+		"networks": "Networks",
+		"hosts": "Hosts"
+	},
+	"stats": {
+		"hosts_with_docker": "Hosts with Docker",
+		"running_containers": "Running Containers",
+		"running_of_total": "/ {{count}} total",
+		"total_images": "Total Images",
+		"updates_available": "Updates Available"
+	},
+	"search": {
+		"stacks": "Search stacks...",
+		"containers": "Search containers...",
+		"images": "Search images...",
+		"volumes": "Search volumes...",
+		"networks": "Search networks...",
+		"hosts": "Search hosts..."
+	},
+	"filters": {
+		"all_statuses": "All Statuses",
+		"all_sources": "All Sources",
+		"all_updates_status": "All Updates Status",
+		"has_updates": "Has Updates",
+		"up_to_date": "Up to Date",
+		"all_drivers": "All Drivers"
+	},
+	"sources": {
+		"docker_hub": "Docker Hub",
+		"github": "GitHub",
+		"gitlab": "GitLab",
+		"google": "Google",
+		"quay": "Quay.io",
+		"redhat": "Red Hat",
+		"azure": "Azure",
+		"aws": "AWS ECR",
+		"private": "Private",
+		"local": "Local"
+	},
+	"drivers": {
+		"local": "Local",
+		"bridge": "Bridge",
+		"host": "Host",
+		"overlay": "Overlay",
+		"macvlan": "Macvlan"
+	},
+	"status": {
+		"running": "Running",
+		"exited": "Exited",
+		"paused": "Paused",
+		"restarting": "Restarting",
+		"removed": "Removed",
+		"created": "Created",
+		"dead": "Dead",
+		"up_to_date": "Up to date",
+		"updates_available": "Updates Available",
+		"available": "Available",
+		"unused": "Unused"
+	},
+	"flags": {
+		"internal": "Internal",
+		"ipv6_enabled": "IPv6 Enabled",
+		"swarm_ingress": "Swarm Ingress"
+	},
+	"table": {
+		"container_name": "Container Name",
+		"image": "Image",
+		"status": "Status",
+		"host": "Host",
+		"actions": "Actions",
+		"repository": "Repository",
+		"tag": "Tag",
+		"source": "Source",
+		"containers": "Containers",
+		"updates": "Updates",
+		"host_name": "Host Name",
+		"running": "Running",
+		"images": "Images",
+		"volume_name": "Volume Name",
+		"driver": "Driver",
+		"size": "Size",
+		"in_use": "In Use",
+		"network_name": "Network Name",
+		"scope": "Scope",
+		"flags": "Flags",
+		"stack_name": "Stack Name",
+		"services": "Services"
+	},
+	"labels": {
+		"image": "Image:",
+		"host": "Host:",
+		"tag": "Tag:",
+		"containers": "Containers:",
+		"size": "Size:",
+		"services": "Services:",
+		"unknown": "Unknown",
+		"gb": "GB",
+		"containers_count_one": "{{count}} container",
+		"containers_count_other": "{{count}} containers",
+		"services_count_one": "{{count}} service",
+		"services_count_other": "{{count}} services",
+		"stacks_count_one": "{{count}} stack",
+		"stacks_count_other": "{{count}} stacks",
+		"standalone_count": "{{count}} standalone",
+		"standalone_header": "Standalone Containers ({{count}})"
+	},
+	"actions": {
+		"refresh_data": "Refresh data",
+		"view": "View",
+		"view_details": "View details",
+		"view_on": "View on {{name}}",
+		"delete": "Delete",
+		"retry": "Retry",
+		"delete_container_from_inventory": "Delete container from inventory",
+		"delete_image_from_inventory": "Delete image from inventory",
+		"delete_from_inventory": "Delete from inventory"
+	},
+	"loading": {
+		"stacks": "Loading stacks...",
+		"containers": "Loading containers...",
+		"images": "Loading images...",
+		"hosts": "Loading hosts...",
+		"volumes": "Loading volumes...",
+		"networks": "Loading networks..."
+	},
+	"errors": {
+		"load_hosts": "Failed to load hosts",
+		"load_volumes": "Failed to load volumes",
+		"load_networks": "Failed to load networks"
+	},
+	"empty": {
+		"try_adjusting": "Try adjusting your search filters",
+		"no_containers": "No containers found",
+		"no_containers_hint": "No Docker containers detected on any hosts",
+		"no_images": "No images found",
+		"no_images_hint": "No Docker images detected",
+		"no_hosts": "No hosts found",
+		"no_hosts_hint": "No hosts with Docker detected",
+		"no_volumes": "No volumes found",
+		"no_volumes_hint": "No Docker volumes detected",
+		"no_networks": "No networks found",
+		"no_networks_hint": "No Docker networks detected",
+		"no_stacks": "No Docker Compose stacks found",
+		"no_stacks_hint": "Containers started with docker-compose will appear here"
+	},
+	"stacks": {
+		"running_of_total": "{{running}}/{{total}} running"
+	},
+	"delete_modal": {
+		"deleting": "Deleting...",
+		"delete_from_inventory": "Delete from Inventory",
+		"cancel": "Cancel",
+		"fields": {
+			"image": "Image: {{image}}:{{tag}}",
+			"source": "Source: {{source}}",
+			"host": "Host: {{name}}",
+			"driver": "Driver: {{driver}}",
+			"scope": "Scope: {{scope}}",
+			"containers_using": "Containers using this: {{count}}",
+			"connected_containers": "Connected containers: {{count}}",
+			"in_use_by_one": "In use by: {{count}} container",
+			"in_use_by_other": "In use by: {{count}} containers"
+		},
+		"container": {
+			"title": "Delete Container",
+			"confirm": "Are you sure you want to delete this container from the inventory?",
+			"warning": "⚠️ This only removes the container from PatchMon's inventory. It does NOT stop or delete the actual Docker container on the host."
+		},
+		"image": {
+			"title": "Delete Image",
+			"confirm": "Are you sure you want to delete this image from the inventory?",
+			"in_use_warning_one": "⚠️ Cannot delete: This image is in use by {{count}} container. Delete the containers first.",
+			"in_use_warning_other": "⚠️ Cannot delete: This image is in use by {{count}} containers. Delete the containers first.",
+			"warning": "⚠️ This only removes the image from PatchMon's inventory. It does NOT delete the actual Docker image from hosts."
+		},
+		"volume": {
+			"title": "Delete Volume",
+			"confirm": "Are you sure you want to delete this volume from the inventory?",
+			"warning": "⚠️ This only removes the volume from PatchMon's inventory. It does NOT delete the actual Docker volume from the host."
+		},
+		"network": {
+			"title": "Delete Network",
+			"confirm": "Are you sure you want to delete this network from the inventory?",
+			"warning": "⚠️ This only removes the network from PatchMon's inventory. It does NOT delete the actual Docker network from the host."
+		}
+	},
+	"toasts": {
+		"delete_container_failed": "Failed to delete container: {{error}}",
+		"delete_image_failed": "Failed to delete image: {{error}}",
+		"delete_volume_failed": "Failed to delete volume: {{error}}",
+		"delete_network_failed": "Failed to delete network: {{error}}"
+	}
+}

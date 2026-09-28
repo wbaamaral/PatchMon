@@ -142,12 +142,12 @@ var cardMetadata = map[string]struct {
 func (h *DashboardPreferencesHandler) Get(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	prefs, err := h.store.ListByUserID(r.Context(), userID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch dashboard preferences")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_dashboard_preferences")
 		return
 	}
 	// Return in Node format (snake_case for DB columns)
@@ -185,16 +185,16 @@ type PreferenceItem struct {
 func (h *DashboardPreferencesHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	var req UpdatePreferencesRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.Preferences) == 0 {
-		Error(w, http.StatusBadRequest, "Preferences must be a non-empty array")
+		ErrorKey(w, r, http.StatusBadRequest, "error.preferences_non_empty")
 		return
 	}
 	prefs := make([]models.DashboardPreference, len(req.Preferences))
@@ -218,7 +218,7 @@ func (h *DashboardPreferencesHandler) Update(w http.ResponseWriter, r *http.Requ
 		}
 	}
 	if err := h.store.ReplaceAll(r.Context(), userID, prefs); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update dashboard preferences")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_dashboard")
 		return
 	}
 	// Return new preferences in Node format
@@ -240,7 +240,7 @@ func (h *DashboardPreferencesHandler) Update(w http.ResponseWriter, r *http.Requ
 func (h *DashboardPreferencesHandler) GetLayout(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	layout, err := h.store.GetLayout(r.Context(), userID)
@@ -267,12 +267,12 @@ type UpdateLayoutRequest struct {
 func (h *DashboardPreferencesHandler) UpdateLayout(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	var req UpdateLayoutRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	statsCols := defaultGridLayout.StatsColumns
@@ -289,7 +289,7 @@ func (h *DashboardPreferencesHandler) UpdateLayout(w http.ResponseWriter, r *htt
 		ChartsColumns: chartsCols,
 	}
 	if err := h.store.UpsertLayout(r.Context(), layout); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update dashboard layout")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_dashboard_layout")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -303,7 +303,7 @@ func (h *DashboardPreferencesHandler) UpdateLayout(w http.ResponseWriter, r *htt
 func (h *DashboardPreferencesHandler) GetDefaults(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	cards := make([]map[string]interface{}, len(defaultCardLayout))

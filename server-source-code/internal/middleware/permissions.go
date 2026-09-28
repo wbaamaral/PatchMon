@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/models"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/store"
 )
@@ -14,16 +15,16 @@ func RequirePermission(perm string, permissions *store.PermissionsStore) func(ht
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			role, _ := r.Context().Value(UserRoleKey).(string)
 			if role == "" {
-				writeJSONError(w, http.StatusUnauthorized, "Unauthorized")
+				writeJSONError(w, r, http.StatusUnauthorized, "error.unauthorized")
 				return
 			}
 			p, err := permissions.GetByRole(r.Context(), role)
 			if err != nil || p == nil {
-				writeJSONError(w, http.StatusForbidden, "Access denied")
+				writeJSONError(w, r, http.StatusForbidden, "error.forbidden")
 				return
 			}
 			if !hasPermission(p, perm) {
-				writeJSONError(w, http.StatusForbidden, "Insufficient permissions")
+				writeJSONError(w, r, http.StatusForbidden, "error.forbidden")
 				return
 			}
 			next.ServeHTTP(w, r)
@@ -31,10 +32,13 @@ func RequirePermission(perm string, permissions *store.PermissionsStore) func(ht
 	}
 }
 
-func writeJSONError(w http.ResponseWriter, status int, msg string) {
+func writeJSONError(w http.ResponseWriter, r *http.Request, status int, key string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": msg})
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error":     i18n.T(r.Context(), key),
+		"error_key": key,
+	})
 }
 
 func hasPermission(p *models.RolePermission, perm string) bool {

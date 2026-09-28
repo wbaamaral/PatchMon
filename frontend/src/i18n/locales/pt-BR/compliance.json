@@ -1,0 +1,83 @@
+{
+	"title": "Conformidade de Segurança",
+	"subtitle": "Monitore e gerencie a conformidade dos seus hosts",
+	"tabs": {
+		"overview": "Visão geral",
+		"hosts": "Hosts",
+		"scan_results": "Resultados de verificação",
+		"history": "Histórico",
+		"settings": "Configurações",
+		"aria_label": "Abas"
+	},
+	"scanners": {
+		"openscap": "OpenSCAP",
+		"docker_bench": "Docker Bench",
+		"all_scans": "Todas as verificações"
+	},
+	"toasts": {
+		"scan_completed": "Verificação de conformidade concluída",
+		"scan_completed_for": "Verificação concluída para {{name}}",
+		"scans_completed": "{{count}} verificações concluídas",
+		"scans_started": "Iniciadas {{count}} verificações de conformidade",
+		"scans_started_partial": "Iniciadas {{success}} verificações, {{failed}} falharam",
+		"bulk_scan_failed": "Verificação em massa falhou: {{error}}",
+		"scan_started": "Verificação iniciada para {{name}}",
+		"scan_failed": "Verificação falhou para {{name}}: {{error}}",
+		"cancel_sent": "Solicitação de cancelamento enviada para {{name}}"
+	},
+	"status": {
+		"compliant": "Conforme",
+		"warning": "Aviso",
+		"critical": "Crítico",
+		"not_scanned": "Não verificado",
+		"scanning": "Verificando...",
+		"starting": "Iniciando...",
+		"cancelling": "Cancelando...",
+		"cancel_scan": "Cancelar verificação em execução",
+		"run_scan": "Executar verificação de conformidade",
+		"triggering": "Acionando...",
+		"connected": "Conectado",
+		"disconnected": "Desconectado",
+		"started_prefix": "Iniciado",
+		"compliance_status": "Status de conformidade"
+	},
+	"errors": {
+		"load_failed": "Falha ao carregar painel de conformidade"
+	},
+	"table": {
+		"host": "Host",
+		"score": "Pontuação",
+		"profile": "Perfil",
+		"status": "Status",
+		"last_scan": "Última verificação",
+		"actions": "Ações",
+		"view_passing": "Ver regras aprovadas deste host",
+		"view_failing": "Ver regras reprovadas deste host",
+		"view_skipped": "Ver regras ignoradas/N/A deste host"
+	},
+	"stats": {
+		"avg_compliance": "Conformidade média",
+		"total_hosts": "Total de hosts",
+		"compliant_hosts": "Hosts conformes",
+		"critical_hosts": "Hosts críticos",
+		"passed_rules": "Regras aprovadas",
+		"failed_rules": "Regras reprovadas",
+		"never_scanned": "Nunca verificado",
+		"filtered_hosts_tab": "Filtrado na aba Hosts"
+	},
+	"chart": {
+		"label_hosts": "Hosts: {{label}}",
+		"label_severity": "Severidade: {{label}}",
+		"label_score": "Pontuação: {{label}}",
+		"scans": "Verificações",
+		"hosts": "Hosts"
+	},
+	"filters": {
+		"all_profiles": "Todos os Perfis",
+		"openscap_only": "Somente OpenSCAP",
+		"docker_bench_only": "Somente Docker Bench"
+	},
+	"bulk": {
+		"failed_hosts": "Hosts com falha:"
+	}
+}

@@ -63,7 +63,7 @@ func (h *NotificationsHandler) timezoneForRequest(ctx context.Context) string {
 func (h *NotificationsHandler) ListDestinations(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.q(r.Context()).ListNotificationDestinations(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to list destinations")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_list_destinations")
 		return
 	}
 	out := make([]map[string]interface{}, len(rows))
@@ -90,7 +90,7 @@ func (h *NotificationsHandler) CreateDestination(w http.ResponseWriter, r *http.
 		Enabled     *bool                  `json:"enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil || req.ChannelType == "" || req.DisplayName == "" {
-		Error(w, http.StatusBadRequest, "channel_type, display_name, and config required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.scopes_required")
 		return
 	}
 	cfgJSON, _ := json.Marshal(req.Config)
@@ -112,7 +112,7 @@ func (h *NotificationsHandler) CreateDestination(w http.ResponseWriter, r *http.
 		Enabled:         en,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create destination")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_destination")
 		return
 	}
 	JSON(w, http.StatusCreated, map[string]interface{}{
@@ -124,7 +124,7 @@ func (h *NotificationsHandler) CreateDestination(w http.ResponseWriter, r *http.
 func (h *NotificationsHandler) UpdateDestination(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.id_required")
 		return
 	}
 	var req struct {
@@ -133,12 +133,12 @@ func (h *NotificationsHandler) UpdateDestination(w http.ResponseWriter, r *http.
 		Enabled     *bool                  `json:"enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid JSON")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_json")
 		return
 	}
 	existing, err := h.q(r.Context()).GetNotificationDestinationByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return
 	}
 	encStr := existing.ConfigEncrypted
@@ -166,7 +166,7 @@ func (h *NotificationsHandler) UpdateDestination(w http.ResponseWriter, r *http.
 		Enabled:         en,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.update_failed")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"id": row.ID, "display_name": row.DisplayName, "enabled": row.Enabled})
@@ -177,12 +177,12 @@ func (h *NotificationsHandler) UpdateDestination(w http.ResponseWriter, r *http.
 func (h *NotificationsHandler) GetDestinationConfig(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.id_required")
 		return
 	}
 	dest, err := h.q(r.Context()).GetNotificationDestinationByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return
 	}
 	plain := "{}"
@@ -204,11 +204,11 @@ func (h *NotificationsHandler) GetDestinationConfig(w http.ResponseWriter, r *ht
 func (h *NotificationsHandler) DeleteDestination(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "internal-alerts" {
-		Error(w, http.StatusBadRequest, "The Internal Alerts destination cannot be deleted. You can disable it instead.")
+		ErrorKey(w, r, http.StatusBadRequest, "error.internal_alerts_cannot_delete")
 		return
 	}
 	if err := h.q(r.Context()).DeleteNotificationDestination(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.delete_failed")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"ok": "true"})
@@ -218,7 +218,7 @@ func (h *NotificationsHandler) DeleteDestination(w http.ResponseWriter, r *http.
 func (h *NotificationsHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.q(r.Context()).ListNotificationRoutes(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to list routes")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_list_routes")
 		return
 	}
 	out := make([]map[string]interface{}, len(rows))
@@ -260,7 +260,7 @@ func (h *NotificationsHandler) CreateRoute(w http.ResponseWriter, r *http.Reques
 		Enabled       *bool                  `json:"enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil || req.DestinationID == "" {
-		Error(w, http.StatusBadRequest, "destination_id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.destination_id_required")
 		return
 	}
 	if len(req.EventTypes) == 0 {
@@ -298,7 +298,7 @@ func (h *NotificationsHandler) CreateRoute(w http.ResponseWriter, r *http.Reques
 		Enabled:       en,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create route")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_route")
 		return
 	}
 	JSON(w, http.StatusCreated, map[string]interface{}{"id": row.ID})
@@ -317,12 +317,12 @@ func (h *NotificationsHandler) UpdateRoute(w http.ResponseWriter, r *http.Reques
 		Enabled       *bool                  `json:"enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid JSON")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_json")
 		return
 	}
 	existing, err := h.q(r.Context()).GetNotificationRouteByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return
 	}
 	did := existing.DestinationID
@@ -364,7 +364,7 @@ func (h *NotificationsHandler) UpdateRoute(w http.ResponseWriter, r *http.Reques
 		Enabled:       en,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update route")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_route")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"id": row.ID})
@@ -374,7 +374,7 @@ func (h *NotificationsHandler) UpdateRoute(w http.ResponseWriter, r *http.Reques
 func (h *NotificationsHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if err := h.q(r.Context()).DeleteNotificationRoute(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.delete_failed")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"ok": "true"})
@@ -399,7 +399,7 @@ func (h *NotificationsHandler) ListDeliveryLog(w http.ResponseWriter, r *http.Re
 		Offset: offset,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to list log")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_list_log")
 		return
 	}
 	out := make([]map[string]interface{}, len(rows))
@@ -428,16 +428,16 @@ func (h *NotificationsHandler) TestDestination(w http.ResponseWriter, r *http.Re
 		DestinationID string `json:"destination_id"`
 	}
 	if err := decodeJSON(r, &req); err != nil || req.DestinationID == "" {
-		Error(w, http.StatusBadRequest, "destination_id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.destination_id_required")
 		return
 	}
 	d := h.db.DB(r.Context())
 	if d == nil {
-		Error(w, http.StatusInternalServerError, "No database available")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.no_database")
 		return
 	}
 	if h.emit == nil {
-		Error(w, http.StatusServiceUnavailable, "Notifications not configured")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.notifications_not_configured")
 		return
 	}
 	th := hostctx.TenantHostKey(r.Context())
@@ -453,15 +453,15 @@ func (h *NotificationsHandler) TestDestination(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		switch {
 		case errors.Is(err, notifications.ErrDestinationNotFound):
-			Error(w, http.StatusNotFound, "Destination not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.destination_not_found")
 		case errors.Is(err, notifications.ErrDestinationDisabled):
-			Error(w, http.StatusBadRequest, "Destination is disabled")
+			ErrorKey(w, r, http.StatusBadRequest, "error.destination_disabled")
 		case errors.Is(err, notifications.ErrRateLimited):
-			Error(w, http.StatusTooManyRequests, "Too many notifications; try again shortly")
+			ErrorKey(w, r, http.StatusTooManyRequests, "error.too_many_notifications")
 		case errors.Is(err, notifications.ErrNotificationsDisabled):
-			Error(w, http.StatusServiceUnavailable, "Notifications not configured")
+			ErrorKey(w, r, http.StatusServiceUnavailable, "error.notifications_not_configured")
 		default:
-			Error(w, http.StatusInternalServerError, "Failed to enqueue test")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enqueue_test")
 		}
 		return
 	}
@@ -494,7 +494,7 @@ type testSMTPRequest struct {
 func (h *NotificationsHandler) TestSMTP(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.id_required")
 		return
 	}
 
@@ -517,7 +517,7 @@ func (h *NotificationsHandler) TestSMTP(w http.ResponseWriter, r *http.Request) 
 	if !hasOverride {
 		dest, err := h.q(r.Context()).GetNotificationDestinationByID(r.Context(), id)
 		if err != nil {
-			Error(w, http.StatusNotFound, "Not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 			return
 		}
 		plain := dest.ConfigEncrypted
@@ -527,12 +527,12 @@ func (h *NotificationsHandler) TestSMTP(w http.ResponseWriter, r *http.Request) 
 			}
 		}
 		if plain == "" {
-			Error(w, http.StatusBadRequest, "Destination has no SMTP config")
+			ErrorKey(w, r, http.StatusBadRequest, "error.destination_no_smtp")
 			return
 		}
 		var saved testSMTPRequest
 		if err := json.Unmarshal([]byte(plain), &saved); err != nil {
-			Error(w, http.StatusInternalServerError, "Failed to parse destination config")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_parse_destination_config")
 			return
 		}
 		cfg = saved
@@ -542,7 +542,7 @@ func (h *NotificationsHandler) TestSMTP(w http.ResponseWriter, r *http.Request) 
 		cfg.SMTPPort = 587
 	}
 	if cfg.SMTPHost == "" || cfg.From == "" || cfg.To == "" {
-		Error(w, http.StatusBadRequest, "smtp_host, from, and to are required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.smtp_required")
 		return
 	}
 
@@ -639,7 +639,7 @@ func (h *NotificationsHandler) scheduledReportToMap(row db.ScheduledReport) map[
 func (h *NotificationsHandler) ListScheduledReports(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.q(r.Context()).ListScheduledReports(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to list")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_list")
 		return
 	}
 	out := make([]map[string]interface{}, len(rows))
@@ -659,7 +659,7 @@ func (h *NotificationsHandler) CreateScheduledReport(w http.ResponseWriter, r *h
 		DestinationIDs []string               `json:"destination_ids"`
 	}
 	if err := decodeJSON(r, &req); err != nil || req.Name == "" {
-		Error(w, http.StatusBadRequest, "name required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.name_required_lower")
 		return
 	}
 	cron := req.CronExpr
@@ -678,7 +678,7 @@ func (h *NotificationsHandler) CreateScheduledReport(w http.ResponseWriter, r *h
 	}
 	next, err := notifications.NextCronRun(cron, tz, time.Now())
 	if err != nil {
-		Error(w, http.StatusBadRequest, "Invalid cron_expr")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_cron_expr")
 		return
 	}
 	id := uuid.New().String()
@@ -694,7 +694,7 @@ func (h *NotificationsHandler) CreateScheduledReport(w http.ResponseWriter, r *h
 		LastRunAt:      pgtype.Timestamp{Valid: false},
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.create_failed")
 		return
 	}
 	// Enqueue the first run at the computed next_run_at (event-driven).
@@ -715,12 +715,12 @@ func (h *NotificationsHandler) UpdateScheduledReport(w http.ResponseWriter, r *h
 		DestinationIDs []string               `json:"destination_ids"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid JSON")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_json")
 		return
 	}
 	ex, err := h.q(r.Context()).GetScheduledReportByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return
 	}
 	name := ex.Name
@@ -767,7 +767,7 @@ func (h *NotificationsHandler) UpdateScheduledReport(w http.ResponseWriter, r *h
 		LastRunAt:      ex.LastRunAt,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.update_failed")
 		return
 	}
 	// Re-enqueue if enabled and schedule changed (dedup handles existing tasks).
@@ -781,21 +781,21 @@ func (h *NotificationsHandler) UpdateScheduledReport(w http.ResponseWriter, r *h
 func (h *NotificationsHandler) RunScheduledReportNow(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.id_required")
 		return
 	}
 	ex, err := h.q(r.Context()).GetScheduledReportByID(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return
 	}
 	if !ex.Enabled {
-		Error(w, http.StatusBadRequest, "Report is disabled")
+		ErrorKey(w, r, http.StatusBadRequest, "error.report_disabled")
 		return
 	}
 	// Enqueue immediately for instant execution.
 	if err := queue.EnqueueScheduledReportAt(h.qc, id, hostFromRequest(r), time.Now()); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to schedule report")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_schedule_report")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"status": "scheduled"})
@@ -805,7 +805,7 @@ func (h *NotificationsHandler) RunScheduledReportNow(w http.ResponseWriter, r *h
 func (h *NotificationsHandler) DeleteScheduledReport(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if err := h.q(r.Context()).DeleteScheduledReport(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.delete_failed")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"ok": "true"})

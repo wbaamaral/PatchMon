@@ -168,7 +168,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if h.cfg.OidcEnabled && h.cfg.OidcDisableLocalAuth {
 		h.logLoginFailure(r, "local_auth_disabled", "", "")
-		Error(w, http.StatusForbidden, "Local authentication is disabled. Please use SSO.")
+		ErrorKey(w, r, http.StatusForbidden, "error.local_auth_disabled")
 		return
 	}
 	var req LoginRequest
@@ -177,19 +177,19 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Debug("auth login invalid body", "error", err)
 		}
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.Username == "" || req.Password == "" {
 		h.logLoginFailure(r, "missing_credentials", req.Username, "")
-		Error(w, http.StatusBadRequest, "username and password required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.username_password_required")
 		return
 	}
 	// No real identifier approaches this. Rejecting here keeps an oversized body
 	// out of the user lookup and out of the lockout key.
 	if len(req.Username) > maxLoginIdentifierBytes {
 		h.logLoginFailure(r, "username_too_long", "", "", "length", len(req.Username))
-		Error(w, http.StatusBadRequest, "username and password required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.username_password_required")
 		return
 	}
 	if h.log != nil {
@@ -214,7 +214,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			if h.log != nil {
 				h.log.Error("auth login lookup failed", "ip", h.clientIP(r), "error", err)
 			}
-			Error(w, http.StatusUnauthorized, "Invalid credentials")
+			ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_credentials")
 			return
 		}
 		// An unknown username consumes an attempt too, so that a 429 is reachable
@@ -230,7 +230,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		h.logLoginFailure(r, "user_not_found", req.Username, "")
-		Error(w, http.StatusUnauthorized, "Invalid credentials")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_credentials")
 		return
 	}
 	if h.log != nil {
@@ -245,7 +245,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.logLoginFailure(r, "account_disabled", req.Username, user.ID)
-		Error(w, http.StatusUnauthorized, "Account is disabled")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.account_disabled")
 		return
 	}
 	if user.PasswordHash == nil {
@@ -254,7 +254,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.logLoginFailure(r, "no_password_set", req.Username, user.ID)
-		Error(w, http.StatusUnauthorized, "Invalid credentials")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_credentials")
 		return
 	}
 
@@ -315,7 +315,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Debug("auth login bcrypt failed", "user_id", user.ID, "hash_len", len(hash), "bcrypt_err", err.Error())
 		}
-		Error(w, http.StatusUnauthorized, "Invalid credentials")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_credentials")
 		return
 	}
 
@@ -344,7 +344,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 				if h.log != nil {
 					h.log.Error("auth: pending-login store not configured, cannot start TFA")
 				}
-				Error(w, http.StatusInternalServerError, "Unable to start two-factor verification")
+				ErrorKey(w, r, http.StatusInternalServerError, "error.tfa_start_failed")
 				return
 			}
 			ticket, err := h.pendingLogin.Create(r.Context(), user.ID)
@@ -352,7 +352,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 				if h.log != nil {
 					h.log.Error("auth: failed to issue pending-login ticket", "user_id", user.ID, "error", err)
 				}
-				Error(w, http.StatusInternalServerError, "Unable to start two-factor verification")
+				ErrorKey(w, r, http.StatusInternalServerError, "error.tfa_start_failed")
 				return
 			}
 			JSON(w, http.StatusOK, map[string]interface{}{
@@ -385,17 +385,17 @@ type VerifyTfaRequest struct {
 func (h *AuthHandler) VerifyTfa(w http.ResponseWriter, r *http.Request) {
 	var req VerifyTfaRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	req.Token = strings.ToUpper(strings.TrimSpace(req.Token))
 	if len(req.Token) != 6 {
-		Error(w, http.StatusBadRequest, "6-character token required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.token_6_chars")
 		return
 	}
 	if !util.TokenRegex.MatchString(req.Token) {
 		h.logLoginFailure(r, "tfa_token_malformed", "", "")
-		Error(w, http.StatusBadRequest, "Token must be 6 alphanumeric characters")
+		ErrorKey(w, r, http.StatusBadRequest, "error.token_6_alphanumeric")
 		return
 	}
 
@@ -405,7 +405,7 @@ func (h *AuthHandler) VerifyTfa(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("auth: pending-login store not configured, refusing TFA verification")
 		}
-		Error(w, http.StatusInternalServerError, "Two-factor verification unavailable")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.tfa_verification_unavailable")
 		return
 	}
 	userID, err := h.pendingLogin.Consume(r.Context(), req.TfaTicket)
@@ -413,14 +413,14 @@ func (h *AuthHandler) VerifyTfa(w http.ResponseWriter, r *http.Request) {
 		// The username is whatever the client typed; the trusted identity comes
 		// from the ticket, which is exactly what failed here.
 		h.logLoginFailure(r, "tfa_ticket_invalid", "", "", "claimed_username", truncateForLog(req.Username, 64))
-		Error(w, http.StatusUnauthorized, "Login session expired, please sign in again")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.login_expired")
 		return
 	}
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil || !user.IsActive || !user.TfaEnabled || user.TfaSecret == nil {
 		h.logLoginFailure(r, "tfa_user_ineligible", "", userID)
-		Error(w, http.StatusUnauthorized, "Invalid credentials or TFA not enabled")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_credentials_or_tfa")
 		return
 	}
 
@@ -428,7 +428,7 @@ func (h *AuthHandler) VerifyTfa(w http.ResponseWriter, r *http.Request) {
 		locked, _ := h.tfaLockout.IsTFALocked(r.Context(), user.ID)
 		if locked {
 			h.logLoginFailure(r, "tfa_locked_out", user.Username, user.ID)
-			Error(w, http.StatusTooManyRequests, "Too many failed TFA attempts. Please try again later.")
+			ErrorKey(w, r, http.StatusTooManyRequests, "error.tfa_too_many_attempts")
 			return
 		}
 	}
@@ -454,7 +454,7 @@ func (h *AuthHandler) VerifyTfa(w http.ResponseWriter, r *http.Request) {
 			attempts, locked := h.tfaLockout.RecordFailedAttempt(r.Context(), user.ID)
 			if locked {
 				h.logLoginFailure(r, "invalid_tfa_code", user.Username, user.ID, "locked", true)
-				Error(w, http.StatusTooManyRequests, "Too many failed TFA attempts. Please try again later.")
+				ErrorKey(w, r, http.StatusTooManyRequests, "error.tfa_too_many_attempts")
 				return
 			}
 			h.logLoginFailure(r, "invalid_tfa_code", user.Username, user.ID)
@@ -469,7 +469,7 @@ func (h *AuthHandler) VerifyTfa(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.logLoginFailure(r, "invalid_tfa_code", user.Username, user.ID)
-		Error(w, http.StatusUnauthorized, "Invalid verification code")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_verification_code")
 		return
 	}
 
@@ -602,7 +602,7 @@ func (h *AuthHandler) completeLogin(w http.ResponseWriter, r *http.Request, user
 		if h.log != nil {
 			h.log.Error("auth token creation failed", "user_id", user.ID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to create token")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_token")
 		return
 	}
 
@@ -998,12 +998,12 @@ func (h *AuthHandler) Profile(w http.ResponseWriter, r *http.Request) {
 	}
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -1033,12 +1033,12 @@ func (h *AuthHandler) Profile(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) MeContext(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 
@@ -1093,22 +1093,22 @@ func (h *AuthHandler) MeContext(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	// OIDC users cannot modify profile fields managed by IdP
 	if user.OidcSub != nil || user.OidcProvider != nil {
-		Error(w, http.StatusForbidden, "Profile information is managed by your OIDC provider and cannot be modified here")
+		ErrorKey(w, r, http.StatusForbidden, "error.oidc_profile_managed")
 		return
 	}
 	var req map[string]interface{}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	extractStr := func(keys ...string) *string {
@@ -1145,7 +1145,7 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	u := *user
 	if username != nil {
 		if len(*username) < 3 {
-			Error(w, http.StatusBadRequest, "Username must be at least 3 characters")
+			ErrorKey(w, r, http.StatusBadRequest, "error.username_min_length")
 			return
 		}
 		u.Username = *username
@@ -1153,7 +1153,7 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	if email != nil {
 		lower := strings.ToLower(*email)
 		if lower == "" {
-			Error(w, http.StatusBadRequest, "Valid email is required")
+			ErrorKey(w, r, http.StatusBadRequest, "error.email_required")
 			return
 		}
 		u.Email = lower
@@ -1180,11 +1180,11 @@ func (h *AuthHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	exists, _ := h.users.ExistsByUsernameOrEmail(r.Context(), checkUsername, checkEmail, userID)
 	if exists {
-		Error(w, http.StatusConflict, "Username or email already exists")
+		ErrorKey(w, r, http.StatusConflict, "error.username_or_email_exists")
 		return
 	}
 	if err := h.users.Update(r.Context(), &u); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update profile")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_profile")
 		return
 	}
 	// Fetch fresh user for response
@@ -1225,12 +1225,12 @@ func newsletterDisplayName(u *models.User) string {
 func (h *AuthHandler) SubscribeNewsletter(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 
@@ -1239,7 +1239,7 @@ func (h *AuthHandler) SubscribeNewsletter(w http.ResponseWriter, r *http.Request
 		if h.log != nil {
 			h.log.Error("newsletter subscribe failed", "user_id", userID, "error", err)
 		}
-		Error(w, http.StatusBadGateway, "Failed to subscribe to newsletter")
+		ErrorKey(w, r, http.StatusBadGateway, "error.failed_to_subscribe_newsletter")
 		return
 	}
 
@@ -1247,7 +1247,7 @@ func (h *AuthHandler) SubscribeNewsletter(w http.ResponseWriter, r *http.Request
 		if h.log != nil {
 			h.log.Error("newsletter flag update failed", "user_id", userID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to record newsletter subscription")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_record_newsletter")
 		return
 	}
 
@@ -1264,7 +1264,7 @@ func (h *AuthHandler) SubscribeNewsletter(w http.ResponseWriter, r *http.Request
 func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	var req struct {
@@ -1272,38 +1272,38 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		NewPassword     string `json:"newPassword"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.CurrentPassword == "" {
-		Error(w, http.StatusBadRequest, "Current password is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.current_password_required")
 		return
 	}
 	if err := ValidatePasswordPolicy(h.resolvedFor(r.Context()), req.NewPassword); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	if user.PasswordHash == nil {
-		Error(w, http.StatusBadRequest, "Cannot change password for OIDC-only accounts")
+		ErrorKey(w, r, http.StatusBadRequest, "error.oidc_password_change")
 		return
 	}
 	hash := strings.TrimSpace(*user.PasswordHash)
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(req.CurrentPassword)); err != nil {
-		Error(w, http.StatusUnauthorized, "Current password is incorrect")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.current_password_incorrect")
 		return
 	}
 	newHash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), 12)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to hash password")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.hash_password_failed")
 		return
 	}
 	if err := h.users.UpdatePassword(r.Context(), userID, string(newHash)); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to change password")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_change_password")
 		return
 	}
 	// Security baseline: invalidate everything that grants access without
@@ -1373,7 +1373,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	deny := func(msg string) {
 		clearAuthCookies(w, r)
-		Error(w, http.StatusUnauthorized, msg)
+		ErrorKey(w, r, http.StatusUnauthorized, "error.internal_error_detail", "detail", msg)
 	}
 
 	c, err := r.Cookie("refresh_token")
@@ -1433,7 +1433,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	// effect on the next refresh rather than at the end of the refresh window.
 	accessToken, err := h.createAccessToken(user.ID, user.Role, sess.ID, expiresIn)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to refresh session")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_refresh_session")
 		return
 	}
 
@@ -1498,7 +1498,7 @@ func (h *AuthHandler) GetSessions(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	sessionID, _ := r.Context().Value(middleware.SessionIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	sessions, err := h.sessions.ListByUserID(r.Context(), userID)
@@ -1506,7 +1506,7 @@ func (h *AuthHandler) GetSessions(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("get sessions failed", "user_id", userID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to fetch sessions")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_sessions")
 		return
 	}
 	enhanced := make([]map[string]interface{}, 0, len(sessions))
@@ -1552,19 +1552,19 @@ func (h *AuthHandler) RevokeSession(w http.ResponseWriter, r *http.Request) {
 	currentSessionID, _ := r.Context().Value(middleware.SessionIDKey).(string)
 	sessionIDParam := chi.URLParam(r, "sessionId")
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	if sessionIDParam == "" {
-		Error(w, http.StatusBadRequest, "Session ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.session_id_required")
 		return
 	}
 	if sessionIDParam == currentSessionID {
-		Error(w, http.StatusBadRequest, "Cannot revoke current session")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_revoke_current_session")
 		return
 	}
 	if err := h.sessions.RevokeByID(r.Context(), sessionIDParam, userID); err != nil {
-		Error(w, http.StatusNotFound, "Session not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.session_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "Session revoked successfully"})
@@ -1575,14 +1575,14 @@ func (h *AuthHandler) RevokeAllSessions(w http.ResponseWriter, r *http.Request) 
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	currentSessionID, _ := r.Context().Value(middleware.SessionIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	if err := h.sessions.RevokeAllForUser(r.Context(), userID, currentSessionID); err != nil {
 		if h.log != nil {
 			h.log.Error("revoke all sessions failed", "user_id", userID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to revoke sessions")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_revoke_sessions")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "All other sessions revoked successfully"})
@@ -1614,33 +1614,33 @@ func (h *AuthHandler) SetupAdmin(w http.ResponseWriter, r *http.Request) {
 		Password  string `json:"password"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.FirstName == "" || req.LastName == "" || req.Username == "" || req.Email == "" || req.Password == "" {
-		Error(w, http.StatusBadRequest, "All fields are required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.all_fields_required")
 		return
 	}
 	if err := ValidatePasswordPolicy(h.resolvedFor(r.Context()), req.Password); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 
 	count, err := h.users.CountAdmins(r.Context())
 	if err != nil || count > 0 {
-		Error(w, http.StatusBadRequest, "Admin users already exist. This endpoint is only for first-time setup.")
+		ErrorKey(w, r, http.StatusBadRequest, "error.admins_exist")
 		return
 	}
 
 	exists, _ := h.users.ExistsByUsernameOrEmail(r.Context(), req.Username, req.Email, "")
 	if exists {
-		Error(w, http.StatusBadRequest, "Username or email already exists")
+		ErrorKey(w, r, http.StatusBadRequest, "error.username_or_email_exists")
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create admin")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_admin")
 		return
 	}
 	hashStr := string(hash)
@@ -1655,7 +1655,7 @@ func (h *AuthHandler) SetupAdmin(w http.ResponseWriter, r *http.Request) {
 		LastName:     &req.LastName,
 	}
 	if err := h.users.Create(r.Context(), u); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create admin")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_admin")
 		return
 	}
 	AutoSubscribeIfHosted(h.cfg != nil && h.cfg.AdminMode, h.users, h.log, u)
@@ -1666,7 +1666,7 @@ func (h *AuthHandler) SetupAdmin(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("admin setup session creation failed", "user_id", u.ID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to create session")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_session")
 		return
 	}
 	expiresAt := time.Now().Add(time.Duration(expiresIn) * time.Second).Format(time.RFC3339)
@@ -1689,7 +1689,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil || s == nil || !s.SignupEnabled {
-		Error(w, http.StatusForbidden, "User signup is currently disabled")
+		ErrorKey(w, r, http.StatusForbidden, "error.signup_disabled")
 		return
 	}
 
@@ -1701,25 +1701,25 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		Password  string `json:"password"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.FirstName == "" || req.LastName == "" || req.Username == "" || req.Email == "" || req.Password == "" {
-		Error(w, http.StatusBadRequest, "All fields are required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.all_fields_required")
 		return
 	}
 	if len(req.Username) < 3 {
-		Error(w, http.StatusBadRequest, "Username must be at least 3 characters")
+		ErrorKey(w, r, http.StatusBadRequest, "error.username_min_length")
 		return
 	}
 	if err := ValidatePasswordPolicy(h.resolvedFor(r.Context()), req.Password); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 
 	exists, _ := h.users.ExistsByUsernameOrEmail(r.Context(), req.Username, req.Email, "")
 	if exists {
-		Error(w, http.StatusConflict, "Username or email already exists")
+		ErrorKey(w, r, http.StatusConflict, "error.username_or_email_exists")
 		return
 	}
 
@@ -1733,7 +1733,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create account")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_account")
 		return
 	}
 	hashStr := string(hash)
@@ -1748,7 +1748,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		LastName:     &req.LastName,
 	}
 	if err := h.users.Create(r.Context(), u); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create account")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_account")
 		return
 	}
 	AutoSubscribeIfHosted(h.cfg != nil && h.cfg.AdminMode, h.users, h.log, u)
@@ -1758,7 +1758,7 @@ func (h *AuthHandler) Signup(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("signup session creation failed", "user_id", u.ID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to create session")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_session")
 		return
 	}
 

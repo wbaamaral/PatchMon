@@ -67,7 +67,7 @@ func NewSettingsHandlerWithConfig(settings *store.SettingsStore, users *store.Us
 func (h *SettingsHandler) Get(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	JSON(w, http.StatusOK, settingsToResponse(s, h.enc))
@@ -144,7 +144,7 @@ func (h *SettingsHandler) VersionCheckUpdates(currentVersion string) http.Handle
 		ctx := r.Context()
 		s, err := h.settings.GetFirst(ctx)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "Settings not found")
+			ErrorKey(w, r, http.StatusBadRequest, "error.settings_not_found")
 			return
 		}
 
@@ -367,7 +367,7 @@ func (h *SettingsHandler) GetLoginSettings(w http.ResponseWriter, r *http.Reques
 func (h *SettingsHandler) GetEnvConfig(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	env := func(key, fallback string) string {
@@ -421,7 +421,7 @@ func (h *SettingsHandler) GetEnvironmentConfig(w http.ResponseWriter, r *http.Re
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	// Re-resolve config from fresh settings so EffectiveValue reflects current DB state
@@ -602,33 +602,33 @@ func formatBytesEnv(n int64) string {
 func (h *SettingsHandler) UpdateEnvironmentConfig(w http.ResponseWriter, r *http.Request) {
 	key := chi.URLParam(r, "key")
 	if key == "" {
-		Error(w, http.StatusBadRequest, "Key required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.key_required")
 		return
 	}
 	if h.cfg != nil && h.cfg.AdminMode && key != "TIMEZONE" {
-		Error(w, http.StatusForbidden, "Setting not available")
+		ErrorKey(w, r, http.StatusForbidden, "error.setting_not_available")
 		return
 	}
 	var req struct {
 		Value interface{} `json:"value"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.Value == nil {
-		Error(w, http.StatusBadRequest, "Value is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.value_required")
 		return
 	}
 	slog.Debug("env config update", "key", key, "value", req.Value)
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	if err := h.settings.UpdateConfigKey(r.Context(), s.ID, key, req.Value, s); err != nil {
 		slog.Error("env config update failed", "key", key, "error", err)
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 	h.invalidateContextCaches(r.Context())
@@ -701,13 +701,13 @@ func (h *SettingsHandler) GetPublic(w http.ResponseWriter, r *http.Request) {
 func (h *SettingsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
 	var req map[string]interface{}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -722,12 +722,12 @@ func (h *SettingsHandler) Update(w http.ResponseWriter, r *http.Request) {
 	oldPackageCacheRefreshMode := s.PackageCacheRefreshMode
 	oldPackageCacheRefreshMaxAge := s.PackageCacheRefreshMaxAge
 	if err := applySettingsUpdate(s, req, h.enc); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.update_settings_failed")
 		return
 	}
 	h.invalidateContextCaches(r.Context())
@@ -1078,22 +1078,22 @@ type logoResetReq struct {
 func (h *SettingsHandler) UploadLogo(w http.ResponseWriter, r *http.Request) {
 	var req logoUploadReq
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.LogoType == "" || req.FileContent == "" {
-		Error(w, http.StatusBadRequest, "Logo type and file content are required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.logo_type_and_content_required")
 		return
 	}
 	if req.LogoType != "dark" && req.LogoType != "light" && req.LogoType != "favicon" {
-		Error(w, http.StatusBadRequest, "Logo type must be 'dark', 'light', or 'favicon'")
+		ErrorKey(w, r, http.StatusBadRequest, "error.logo_type_invalid")
 		return
 	}
 
 	const maxFileSize = 5 * 1024 * 1024 // 5MB
 	estimatedSize := (len(req.FileContent) * 3) / 4
 	if estimatedSize > maxFileSize {
-		Error(w, http.StatusBadRequest, "File size exceeds maximum allowed (5MB)")
+		ErrorKey(w, r, http.StatusBadRequest, "error.file_size_exceeded")
 		return
 	}
 
@@ -1101,7 +1101,7 @@ func (h *SettingsHandler) UploadLogo(w http.ResponseWriter, r *http.Request) {
 	if strings.HasPrefix(req.FileContent, "data:") {
 		idx := strings.Index(req.FileContent, ",")
 		if idx < 0 {
-			Error(w, http.StatusBadRequest, "Invalid data URL format")
+			ErrorKey(w, r, http.StatusBadRequest, "error.invalid_data_url_format")
 			return
 		}
 		rawBase64 = req.FileContent[idx+1:]
@@ -1110,7 +1110,7 @@ func (h *SettingsHandler) UploadLogo(w http.ResponseWriter, r *http.Request) {
 	}
 	fileBuf, err := base64.StdEncoding.DecodeString(rawBase64)
 	if err != nil {
-		Error(w, http.StatusBadRequest, "Invalid base64 file content")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_base64")
 		return
 	}
 
@@ -1131,14 +1131,14 @@ func (h *SettingsHandler) UploadLogo(w http.ResponseWriter, r *http.Request) {
 		fileBuf = []byte(sanitizedSvg)
 		contentType = "image/svg+xml"
 	} else {
-		Error(w, http.StatusBadRequest, "Invalid file type. Allowed: PNG, JPEG, SVG")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_file_type")
 		return
 	}
 
 	logoPath := "/api/v1/settings/logos/" + req.LogoType
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	switch req.LogoType {
@@ -1156,7 +1156,7 @@ func (h *SettingsHandler) UploadLogo(w http.ResponseWriter, r *http.Request) {
 		s.FaviconContentType = &contentType
 	}
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.update_settings_failed")
 		return
 	}
 
@@ -1174,21 +1174,21 @@ func (h *SettingsHandler) UploadLogo(w http.ResponseWriter, r *http.Request) {
 func (h *SettingsHandler) ResetLogo(w http.ResponseWriter, r *http.Request) {
 	var req logoResetReq
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.LogoType == "" {
-		Error(w, http.StatusBadRequest, "Logo type is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.logo_type_required")
 		return
 	}
 	if req.LogoType != "dark" && req.LogoType != "light" && req.LogoType != "favicon" {
-		Error(w, http.StatusBadRequest, "Logo type must be 'dark', 'light', or 'favicon'")
+		ErrorKey(w, r, http.StatusBadRequest, "error.logo_type_invalid")
 		return
 	}
 
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	switch req.LogoType {
@@ -1206,7 +1206,7 @@ func (h *SettingsHandler) ResetLogo(w http.ResponseWriter, r *http.Request) {
 		s.FaviconContentType = nil
 	}
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.update_settings_failed")
 		return
 	}
 
@@ -1221,13 +1221,13 @@ func (h *SettingsHandler) ResetLogo(w http.ResponseWriter, r *http.Request) {
 func (h *SettingsHandler) GetLogo(w http.ResponseWriter, r *http.Request) {
 	logoType := chi.URLParam(r, "type")
 	if logoType != "dark" && logoType != "light" && logoType != "favicon" {
-		Error(w, http.StatusBadRequest, "Logo type must be 'dark', 'light', or 'favicon'")
+		ErrorKey(w, r, http.StatusBadRequest, "error.logo_type_invalid")
 		return
 	}
 
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 

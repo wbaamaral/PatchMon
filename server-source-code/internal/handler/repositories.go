@@ -77,7 +77,7 @@ func (h *RepositoriesHandler) List(w http.ResponseWriter, r *http.Request) {
 	params.Offset = clampOffset(params.Offset)
 	result, err := h.repos.List(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch repositories")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_repositories")
 		return
 	}
 	if !paginated {
@@ -91,12 +91,12 @@ func (h *RepositoriesHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *RepositoriesHandler) GetByHost(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" {
-		Error(w, http.StatusBadRequest, "hostId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_ids_required")
 		return
 	}
 	repos, err := h.repos.GetByHost(r.Context(), hostID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch host repositories")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_host_repositories")
 		return
 	}
 	JSON(w, http.StatusOK, repos)
@@ -106,16 +106,16 @@ func (h *RepositoriesHandler) GetByHost(w http.ResponseWriter, r *http.Request) 
 func (h *RepositoriesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	repoID := chi.URLParam(r, "repositoryId")
 	if repoID == "" {
-		Error(w, http.StatusBadRequest, "repositoryId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.repo_id_required")
 		return
 	}
 	repo, err := h.repos.GetByID(r.Context(), repoID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch repository details")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_repository_details")
 		return
 	}
 	if repo == nil {
-		Error(w, http.StatusNotFound, "Repository not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.repository_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, repo)
@@ -125,7 +125,7 @@ func (h *RepositoriesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 func (h *RepositoriesHandler) Update(w http.ResponseWriter, r *http.Request) {
 	repoID := chi.URLParam(r, "repositoryId")
 	if repoID == "" {
-		Error(w, http.StatusBadRequest, "repositoryId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.repo_id_required")
 		return
 	}
 	var body struct {
@@ -136,11 +136,11 @@ func (h *RepositoriesHandler) Update(w http.ResponseWriter, r *http.Request) {
 		Priority      optionalInt `json:"priority"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if body.Name != nil && *body.Name == "" {
-		Error(w, http.StatusBadRequest, "Name is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.name_required")
 		return
 	}
 	isActive := body.IsActive
@@ -149,7 +149,7 @@ func (h *RepositoriesHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	repo, err := h.repos.Update(r.Context(), repoID, body.Name, body.Description, isActive, body.Priority.val)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update repository")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_repository")
 		return
 	}
 	JSON(w, http.StatusOK, repo)
@@ -160,23 +160,23 @@ func (h *RepositoriesHandler) ToggleHostRepository(w http.ResponseWriter, r *htt
 	hostID := chi.URLParam(r, "hostId")
 	repoID := chi.URLParam(r, "repositoryId")
 	if hostID == "" || repoID == "" {
-		Error(w, http.StatusBadRequest, "hostId and repositoryId are required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_id_and_repo_required")
 		return
 	}
 	var body struct {
 		IsEnabled bool `json:"isEnabled"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	hr, err := h.repos.ToggleHostRepository(r.Context(), hostID, repoID, body.IsEnabled)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to toggle repository status")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_toggle_repository")
 		return
 	}
 	if hr == nil {
-		Error(w, http.StatusNotFound, "Host repository not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_repository_not_found")
 		return
 	}
 	status := "disabled"
@@ -197,7 +197,7 @@ func (h *RepositoriesHandler) ToggleHostRepository(w http.ResponseWriter, r *htt
 func (h *RepositoriesHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.repos.GetStats(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch repository statistics")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_repositories_stats")
 		return
 	}
 	JSON(w, http.StatusOK, stats)
@@ -207,16 +207,16 @@ func (h *RepositoriesHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 func (h *RepositoriesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	repoID := chi.URLParam(r, "repositoryId")
 	if repoID == "" {
-		Error(w, http.StatusBadRequest, "repositoryId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.repo_id_required")
 		return
 	}
 	deleted, err := h.repos.Delete(r.Context(), repoID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete repository")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_repository")
 		return
 	}
 	if deleted == nil {
-		Error(w, http.StatusNotFound, "Repository not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.repository_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -229,7 +229,7 @@ func (h *RepositoriesHandler) Delete(w http.ResponseWriter, r *http.Request) {
 func (h *RepositoriesHandler) CleanupOrphaned(w http.ResponseWriter, r *http.Request) {
 	deleted, count, err := h.repos.CleanupOrphaned(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to cleanup orphaned repositories")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_cleanup_orphaned_repos")
 		return
 	}
 	if count == 0 {

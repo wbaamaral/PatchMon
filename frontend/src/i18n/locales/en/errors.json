@@ -1,0 +1,22 @@
+{
+	"title": "Something went wrong",
+	"something_wrong": "Something went wrong",
+	"unexpected_error": "An unexpected error occurred",
+	"try_again": "Try again",
+	"error_details_dev": "Error details (dev)",
+	"network": "Network error. Check your connection and try again.",
+	"cors": "CORS error. The API is not allowing this origin.",
+	"cors_mismatch": "CORS mismatch. The API server is running but does not accept requests from this origin. Check the CORS_ORIGINS configuration on the server.",
+	"copied": "Copied!",
+	"copy_error": "Failed to copy to clipboard",
+	"load_failed": "Failed to load data",
+	"load_hosts": "Failed to load hosts",
+	"load_networks": "Failed to load networks",
+	"load_volumes": "Failed to load volumes",
+	"login_failed": "Login failed",
+	"signup_failed": "Sign up failed",
+	"signup_invalid_response": "Invalid response from server",
+	"tfa_expired": "Verification code expired. Please log in again.",
+	"tfa_failed": "Verification failed",
+	"tfa_invalid_response": "Invalid response from server during verification"
+}

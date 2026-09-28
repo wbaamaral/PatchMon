@@ -1,0 +1,204 @@
+{
+	"title": "Faturamento",
+	"subtitle": "Seu plano, uso e faturas deste workspace.",
+	"actions": {
+		"refresh": "Atualizar",
+		"try_again": "Tentar novamente",
+		"cancel": "Cancelar",
+		"close": "Fechar",
+		"dismiss": "Dispensar",
+		"change_plan": "Alterar plano",
+		"view_faqs": "Ver perguntas frequentes",
+		"manage_billing": "Gerenciar faturamento no Stripe",
+		"opening_portal": "Abrindo portal...",
+		"sync_host_count": "Sincronizar contagem de hosts",
+		"syncing": "Sincronizando...",
+		"applying": "Aplicando...",
+		"confirm_change": "Confirmar alteração",
+		"confirm_downgrade": "Confirmar downgrade"
+	},
+	"unavailable": {
+		"title": "O faturamento não está disponível nesta instalação",
+		"self_hosted": "O painel de faturamento está disponível apenas no PatchMon Cloud. Em instalações auto-hospedadas, a Community Edition é gratuita para sempre sob AGPLv3.",
+		"no_subscription": "Nenhuma assinatura está associada a este workspace ainda. Se você esperava ver informações de faturamento aqui, contate o proprietário da conta."
+	},
+	"error": {
+		"permission_title": "Você não tem permissão para visualizar esta página",
+		"permission_body": "Peça a um administrador para conceder a você a permissão Gerenciar Faturamento.",
+		"load_title": "Não foi possível carregar as informações de faturamento",
+		"load_fallback": "Ocorreu um erro inesperado.",
+		"portal_no_url": "A sessão do portal Stripe não retornou uma URL. Tente novamente.",
+		"portal_failed": "Falha ao abrir o portal de faturamento do Stripe. Tente novamente.",
+		"apply_failed": "Falha ao aplicar a mudança de plano. Tente novamente."
+	},
+	"status_banners": {
+		"past_due": {
+			"title": "Pagamento em atraso",
+			"body": "Sua última fatura falhou. Atualize sua forma de pagamento no portal Stripe para evitar interrupção do serviço."
+		},
+		"canceled": {
+			"title": "Assinatura cancelada",
+			"body": "Sua assinatura foi cancelada. Você pode reativar pelo portal Stripe."
+		},
+		"paused": {
+			"title": "Assinatura pausada",
+			"body": "Seu período de teste terminou sem uma forma de pagamento cadastrada. Adicione uma no portal Stripe para retomar o serviço."
+		},
+		"grace": {
+			"title": "Período de carência ativo",
+			"body": "Seu plano está em período de carência. Resolva o problema pendente para evitar a perda de acesso."
+		}
+	},
+	"plan": {
+		"title": "Plano atual",
+		"unknown": "Desconhecido",
+		"trial": "Teste",
+		"active": "Ativo",
+		"ends_on": "Termina em {{date}}",
+		"renews_on": "Renova em {{date}}",
+		"next_invoice": "Próxima fatura",
+		"due_on": "vence em {{date}}"
+	},
+	"intervals": {
+		"month": "Mensal",
+		"year": "Anual"
+	},
+	"periods": {
+		"month": "mês",
+		"year": "ano"
+	},
+	"trial": {
+		"days_left_one": "{{count}} dia restante no teste",
+		"days_left_other": "{{count}} dias restantes no teste",
+		"charge_on_date": "{{amount}} será cobrado em {{date}} a menos que você altere ou cancele seu plano.",
+		"charge_no_date": "{{amount}} será cobrado a menos que você altere ou cancele seu plano."
+	},
+	"cancel_banner": {
+		"ends_on": "A assinatura termina em {{date}}",
+		"next_renewal_date": "na próxima data de renovação",
+		"reactivate_hint": "Você pode reativar a qualquer momento no portal Stripe."
+	},
+	"sync": {
+		"success_one": "Contagem de hosts sincronizada: {{count}} host ativo.",
+		"success_other": "Contagem de hosts sincronizada: {{count}} hosts ativos.",
+		"success_no_count": "Contagem de hosts sincronizada.",
+		"failed": "Falha na sincronização. Tente novamente em instantes.",
+		"last_synced": "Última sincronização {{time}}",
+		"never_synced": "Nunca sincronizado"
+	},
+	"usage": {
+		"title": "Uso de hosts",
+		"active_hosts": "Hosts ativos",
+		"annual_commitment": "Compromisso anual",
+		"prepaid_hint": "capacidade pré-paga para o ano",
+		"billed_this_period": "Faturado neste período",
+		"hosts_unit_one": "host",
+		"hosts_unit_other": "hosts",
+		"total_per_period": "= {{total}}/{{period}}",
+		"overage_one": "{{count}} host acima do seu compromisso anual. Estes serão cobrados proporcionalmente na sua próxima fatura a {{price}} por host.",
+		"overage_other": "{{count}} hosts acima do seu compromisso anual. Estes serão cobrados proporcionalmente na sua próxima fatura a {{price}} por host.",
+		"pay_for_one": "Você paga por {{count}} host × {{price}}/host/{{period}} = {{total}}",
+		"pay_for_other": "Você paga por {{count}} hosts × {{price}}/host/{{period}} = {{total}}"
+	},
+	"tiers": {
+		"starter": {
+			"name": "Starter",
+			"tagline": "Monitore seus patches. Faça patch em outro lugar."
+		},
+		"plus": {
+			"name": "Plus",
+			"tagline": "Patch, monitore, reporte. O cavalo de batalha do dia a dia."
+		},
+		"max": {
+			"name": "Max",
+			"tagline": "Tudo. SSH, RDP, IA, conformidade."
+		},
+		"feature": "Recurso",
+		"current": "Atual",
+		"per_host_mo": "/host/mês",
+		"features": {
+			"core_monitoring": "Monitoramento principal (inventário, detecção, repositórios)",
+			"agents": "Agentes Linux + FreeBSD + Windows",
+			"host_groups_dashboards": "Grupos de hosts, painéis, busca, Gethomepage",
+			"basic_alerts": "Alertas básicos (host offline, limite)",
+			"scheduled_reports": "Relatórios agendados (e-mail/PDF)",
+			"notification_destinations": "Destinos de notificação + rotas",
+			"tfa_totp": "2FA / TOTP",
+			"trusted_devices": "Dispositivos confiáveis",
+			"oidc_sso": "OIDC / SSO",
+			"discord_oauth": "Login OAuth do Discord",
+			"builtin_roles": "Papéis embutidos (admin/visualizador)",
+			"rest_api_tokens": "REST API com escopo + tokens de autoinscrição",
+			"automation": "Automação / gerenciamento de tarefas",
+			"user_limit": "Limite de usuários",
+			"manual_patch_runs": "Execuções de patch manuais",
+			"patch_policies": "Políticas de agendamento de patch + fluxo de aprovação",
+			"docker_monitoring": "Monitoramento de contêineres Docker",
+			"advanced_alerts": "Configuração avançada de alertas + regras personalizadas",
+			"custom_rbac": "Papéis RBAC personalizados",
+			"audit_log_export": "Exportação de log de auditoria",
+			"custom_domain": "Domínio personalizado (solicitar por e-mail)",
+			"custom_branding": "Marca personalizada (logo/favicon)",
+			"ssh_terminal": "Terminal SSH no navegador",
+			"rdp": "RDP no navegador (Guacamole)",
+			"byoi_ai": "Assistente de terminal IA próprio",
+			"compliance": "Conformidade (OpenSCAP + CIS + Docker Bench)",
+			"support_channels": "Canais de suporte direto"
+		},
+		"values": {
+			"three": "3",
+			"unlimited": "Ilimitado",
+			"support_email_discord": "E-mail, Discord",
+			"support_email_slack_discord": "E-mail, Slack, Discord",
+			"support_email_slack_discord_phone": "E-mail, Slack, Discord, Telefone"
+		}
+	},
+	"upgrade_cta": {
+		"label": "Fazer upgrade para {{name}}",
+		"delta": "+{{price}}/host/mês"
+	},
+	"portal": {
+		"title": "Gerenciar pagamento e faturas",
+		"body": "Atualize seu cartão, veja faturas e cancele ou reative sua assinatura no portal de faturamento do Stripe."
+	},
+	"modal": {
+		"title": "Alterar plano",
+		"subtitle": "Escolha seu novo plano e intervalo de faturamento. Mostraremos o valor exato antes da confirmação.",
+		"billing_interval": "Intervalo de faturamento",
+		"annual_save": "Anual (economize ~17%)",
+		"commit_label": "Pré-comprometer hosts (anual)",
+		"commit_too_low": "Não é possível comprometer menos que seus atuais {{count}} hosts.",
+		"commit_too_high": "O compromisso máximo é de {{max}} hosts.",
+		"commit_help": "Pré-pague por uma contagem fixa de hosts pelo ano. Você é faturado por essa capacidade mesmo que o uso real seja menor. Adicionar hosts acima disso acionará uma cobrança proporcional pelo restante do período anual.",
+		"apply_error_title": "Não foi possível aplicar a mudança de plano",
+		"success": "Plano atualizado com sucesso."
+	},
+	"preview": {
+		"noop": "Você já está neste plano e intervalo. Escolha um plano ou intervalo diferente para ver o valor.",
+		"loading": "Calculando seu novo valor...",
+		"error_title": "Prévia indisponível",
+		"renewal_fallback": "renovação",
+		"upgrade_title": "Upgrade: {{from}} {{fromInterval}} para {{to}} {{toInterval}}",
+		"upgrade_commit": "Comprometendo {{count}} hosts × {{unit}}/ano = {{total}}/ano no total.",
+		"upgrade_prorated": "{{amount}} cobrado hoje (proporcional ao restante do seu ciclo de faturamento atual).",
+		"upgrade_next_invoice": "Sua próxima fatura completa de {{amount}} será em {{date}}.",
+		"upgrade_immediate": "O novo plano fica disponível imediatamente após a confirmação.",
+		"downgrade_title": "Downgrade: {{from}} {{fromInterval}} para {{to}} {{toInterval}}",
+		"downgrade_keep": "Nenhuma mudança na fatura de hoje. Você mantém {{from}} até {{date}}.",
+		"downgrade_pay": "A partir de {{date}} você pagará {{amount}} por {{period}}.",
+		"downgrade_features": "Quaisquer recursos exclusivos de {{to}} permanecerão ativos até {{date}}.",
+		"fallback_invoice": "A próxima fatura será de {{amount}} em {{date}}."
+	},
+	"module_labels": {
+		"patching": "Patching",
+		"patching_policies": "Políticas de Patch",
+		"docker": "Monitoramento Docker",
+		"alerts_advanced": "Alertas Avançados",
+		"rbac_custom": "Papéis RBAC Personalizados",
+		"custom_branding": "Marca Personalizada",
+		"compliance": "Verificação de Conformidade",
+		"ssh_terminal": "Terminal SSH no Navegador",
+		"rdp": "RDP no Navegador",
+		"ai": "Assistente de Terminal IA"
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"title": "Algo deu errado",
+	"something_wrong": "Algo deu errado",
+	"unexpected_error": "Ocorreu um erro inesperado",
+	"try_again": "Tentar novamente",
+	"error_details_dev": "Detalhes do erro (dev)",
+	"network": "Erro de rede. Verifique sua conexão e tente novamente.",
+	"cors": "Erro de CORS. A API não está permitindo esta origem.",
+	"cors_mismatch": "Incompatibilidade de CORS. O servidor da API está em execução, mas não aceita requisições desta origem. Verifique a configuração CORS_ORIGINS no servidor.",
+	"copied": "Copiado!",
+	"copy_error": "Falha ao copiar para a área de transferência",
+	"load_failed": "Falha ao carregar dados",
+	"load_hosts": "Falha ao carregar hosts",
+	"load_networks": "Falha ao carregar redes",
+	"load_volumes": "Falha ao carregar volumes",
+	"login_failed": "Falha no login",
+	"signup_failed": "Falha no cadastro",
+	"signup_invalid_response": "Resposta inválida do servidor",
+	"tfa_expired": "Código de verificação expirado. Faça login novamente.",
+	"tfa_failed": "Falha na verificação",
+	"tfa_invalid_response": "Resposta inválida do servidor durante a verificação"
+}

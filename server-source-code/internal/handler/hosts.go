@@ -54,7 +54,7 @@ func NewHostsHandler(hosts *store.HostsStore, hostGroups *store.HostGroupsStore,
 func (h *HostsHandler) List(w http.ResponseWriter, r *http.Request) {
 	hosts, err := h.hosts.List(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_hosts_failed")
 		return
 	}
 	JSON(w, http.StatusOK, hosts)
@@ -73,7 +73,7 @@ func (h *HostsHandler) Options(w http.ResponseWriter, r *http.Request) {
 	}
 	options, err := h.hosts.ListOptions(r.Context(), search, limit, offset)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load host options")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_host_options")
 		return
 	}
 	JSON(w, http.StatusOK, options)
@@ -94,7 +94,7 @@ func (h *HostsHandler) AdminList(w http.ResponseWriter, r *http.Request) {
 
 	hosts, err := h.hosts.ListPaginated(r.Context(), pageSize, offset)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_hosts_failed")
 		return
 	}
 	total, _ := h.hosts.Count(r.Context())
@@ -141,7 +141,7 @@ func (h *HostsHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	groups, _ := h.hosts.GetHostGroups(r.Context(), host.ID)
@@ -158,17 +158,17 @@ func (h *HostsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		ExpectedPlatform  *string  `json:"expected_platform"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.FriendlyName == "" {
-		Error(w, http.StatusBadRequest, "Friendly name is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.friendly_name_required")
 		return
 	}
 
 	apiID, apiKey, apiKeyHash, err := generateApiCredentials()
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to generate credentials")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_credentials")
 		return
 	}
 
@@ -187,7 +187,7 @@ func (h *HostsHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if entry := hostctx.EntryFromContext(r.Context()); entry != nil && entry.MaxHosts != nil {
 		count, countErr := h.hosts.Count(r.Context())
 		if countErr == nil && count >= *entry.MaxHosts {
-			Error(w, http.StatusForbidden, "Host limit reached for this host's package")
+			ErrorKey(w, r, http.StatusForbidden, "error.host_limit_reached")
 			return
 		}
 	}
@@ -207,7 +207,7 @@ func (h *HostsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		ExpectedPlatform:       req.ExpectedPlatform,
 	}
 	if err := h.hosts.Create(r.Context(), host); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create host")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_host")
 		return
 	}
 
@@ -257,7 +257,7 @@ func (h *HostsHandler) UpdateGroups(w http.ResponseWriter, r *http.Request) {
 		GroupIds []string `json:"groupIds"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	groupIds := req.GroupIds
@@ -267,20 +267,20 @@ func (h *HostsHandler) UpdateGroups(w http.ResponseWriter, r *http.Request) {
 
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
 	for _, gid := range groupIds {
 		_, err = h.hostGroups.GetByID(r.Context(), gid)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "One or more host groups not found")
+			ErrorKey(w, r, http.StatusBadRequest, "error.hosts_groups_not_found")
 			return
 		}
 	}
 
 	if err := h.hosts.SetHostGroups(r.Context(), hostID, groupIds); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update host groups")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_host_groups")
 		return
 	}
 
@@ -297,7 +297,7 @@ func (h *HostsHandler) UpdateGroups(w http.ResponseWriter, r *http.Request) {
 func (h *HostsHandler) requireHost(w http.ResponseWriter, r *http.Request, hostID string) (*models.Host, bool) {
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return nil, false
 	}
 	return host, true
@@ -318,11 +318,11 @@ func (h *HostsHandler) UpdateFriendlyName(w http.ResponseWriter, r *http.Request
 		FriendlyName string `json:"friendly_name"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.FriendlyName == "" {
-		Error(w, http.StatusBadRequest, "Friendly name must be between 1 and 100 characters")
+		ErrorKey(w, r, http.StatusBadRequest, "error.friendly_name_length")
 		return
 	}
 
@@ -332,7 +332,7 @@ func (h *HostsHandler) UpdateFriendlyName(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := h.hosts.UpdateFriendlyName(r.Context(), hostID, req.FriendlyName); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update friendly name")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_friendly_name")
 		return
 	}
 	host := h.reloadHost(r, hostID, existing)
@@ -350,7 +350,7 @@ func (h *HostsHandler) UpdateNotes(w http.ResponseWriter, r *http.Request) {
 		Notes *string `json:"notes"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -360,7 +360,7 @@ func (h *HostsHandler) UpdateNotes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.hosts.UpdateNotes(r.Context(), hostID, req.Notes); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update notes")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_notes")
 		return
 	}
 	host := h.reloadHost(r, hostID, existing)
@@ -379,7 +379,7 @@ func (h *HostsHandler) UpdateConnection(w http.ResponseWriter, r *http.Request) 
 		Hostname *string `json:"hostname"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -389,7 +389,7 @@ func (h *HostsHandler) UpdateConnection(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.hosts.UpdateConnection(r.Context(), hostID, req.IP, req.Hostname); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update connection")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_connection")
 		return
 	}
 	host := h.reloadHost(r, hostID, existing)
@@ -407,18 +407,18 @@ func (h *HostsHandler) SetPrimaryInterface(w http.ResponseWriter, r *http.Reques
 		InterfaceName *string `json:"interface_name"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
 	if err := h.hosts.SetPrimaryInterface(r.Context(), hostID, req.InterfaceName); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to set primary interface")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_set_primary_interface")
 		return
 	}
 
@@ -445,12 +445,12 @@ func (h *HostsHandler) UpdateHostDownAlerts(w http.ResponseWriter, r *http.Reque
 		HostDownAlertsEnabled *bool `json:"host_down_alerts_enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
 	if err := h.hosts.UpdateHostDownAlerts(r.Context(), hostID, req.HostDownAlertsEnabled); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update host down alerts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_host_down_alerts")
 		return
 	}
 	host, _ := h.hosts.GetByID(r.Context(), hostID)
@@ -479,7 +479,7 @@ func (h *HostsHandler) UpdateAutoUpdate(w http.ResponseWriter, r *http.Request) 
 		AutoUpdate bool `json:"auto_update"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -489,7 +489,7 @@ func (h *HostsHandler) UpdateAutoUpdate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.hosts.UpdateAutoUpdate(r.Context(), hostID, req.AutoUpdate); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update auto-update")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_auto_update")
 		return
 	}
 	host := h.reloadHost(r, hostID, existing)
@@ -504,18 +504,18 @@ func (h *HostsHandler) RegenerateCredentials(w http.ResponseWriter, r *http.Requ
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
 	apiID, apiKey, apiKeyHash, err := generateApiCredentials()
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to regenerate credentials")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_regenerate_credentials")
 		return
 	}
 
 	if err := h.hosts.UpdateApiCredentials(r.Context(), hostID, apiID, apiKeyHash); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to regenerate credentials")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_regenerate_credentials")
 		return
 	}
 
@@ -535,22 +535,22 @@ func (h *HostsHandler) RegenerateCredentials(w http.ResponseWriter, r *http.Requ
 // FetchReport handles POST /hosts/:hostId/fetch-report.
 func (h *HostsHandler) FetchReport(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	task, err := queue.NewReportNowTask(host.ApiID, hostFromRequest(r))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create fetch report task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_fetch_report_task")
 		return
 	}
 	if _, err := h.queueClient.Enqueue(task); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to enqueue fetch report")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enqueue_fetch_report")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -562,18 +562,18 @@ func (h *HostsHandler) FetchReport(w http.ResponseWriter, r *http.Request) {
 // FetchReportBulk handles POST /hosts/bulk/fetch-report.
 func (h *HostsHandler) FetchReportBulk(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	var req struct {
 		HostIDs []string `json:"hostIds"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.HostIDs) == 0 {
-		Error(w, http.StatusBadRequest, "hostIds required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_ids_array_required")
 		return
 	}
 	enqueued := 0
@@ -601,18 +601,18 @@ func (h *HostsHandler) FetchReportBulk(w http.ResponseWriter, r *http.Request) {
 // RefreshIntegrationStatus handles POST /hosts/:hostId/refresh-integration-status.
 func (h *HostsHandler) RefreshIntegrationStatus(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	task, err := queue.NewRefreshIntegrationStatusTask(host.ApiID, hostFromRequest(r))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create refresh integration status task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_refresh_task")
 		return
 	}
 	info, err := h.queueClient.Enqueue(task)
@@ -624,7 +624,7 @@ func (h *HostsHandler) RefreshIntegrationStatus(w http.ResponseWriter, r *http.R
 		return
 	}
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to refresh integration status")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_refresh_integration_status")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -642,23 +642,23 @@ func (h *HostsHandler) RefreshIntegrationStatus(w http.ResponseWriter, r *http.R
 // RefreshDocker handles POST /hosts/:hostId/refresh-docker.
 func (h *HostsHandler) RefreshDocker(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	task, err := queue.NewDockerInventoryRefreshTask(host.ApiID, hostFromRequest(r))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create Docker refresh task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_docker_refresh_task")
 		return
 	}
 	info, err := h.queueClient.Enqueue(task)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to refresh Docker inventory")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_refresh_docker_inventory")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -676,23 +676,23 @@ func (h *HostsHandler) RefreshDocker(w http.ResponseWriter, r *http.Request) {
 // ForceAgentUpdate handles POST /hosts/:hostId/force-agent-update.
 func (h *HostsHandler) ForceAgentUpdate(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	task, err := queue.NewUpdateAgentTask(host.ApiID, hostFromRequest(r), true) // bypass_settings=true for force update
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create agent update task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_agent_update_task")
 		return
 	}
 	info, err := h.queueClient.Enqueue(task)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to queue agent update")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_queue_agent_update")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -712,12 +712,12 @@ func (h *HostsHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
 	if err := h.hosts.Delete(r.Context(), hostID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete host")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_host")
 		return
 	}
 
@@ -755,11 +755,11 @@ func (h *HostsHandler) BulkDelete(w http.ResponseWriter, r *http.Request) {
 		HostIds []string `json:"hostIds"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.HostIds) == 0 {
-		Error(w, http.StatusBadRequest, "At least one host ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.at_least_one_host_id")
 		return
 	}
 
@@ -768,14 +768,14 @@ func (h *HostsHandler) BulkDelete(w http.ResponseWriter, r *http.Request) {
 	for _, id := range req.HostIds {
 		existing, err := h.hosts.GetByID(r.Context(), id)
 		if err != nil || existing == nil {
-			Error(w, http.StatusNotFound, "Some hosts not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.some_hosts_not_found")
 			return
 		}
 	}
 
 	n, err := h.hosts.DeleteMany(r.Context(), req.HostIds)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_hosts")
 		return
 	}
 
@@ -793,11 +793,11 @@ func (h *HostsHandler) BulkUpdateGroups(w http.ResponseWriter, r *http.Request) 
 		GroupIds []string `json:"groupIds"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.HostIds) == 0 {
-		Error(w, http.StatusBadRequest, "Host IDs must be an array")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_ids_array")
 		return
 	}
 	groupIds := req.GroupIds
@@ -808,13 +808,13 @@ func (h *HostsHandler) BulkUpdateGroups(w http.ResponseWriter, r *http.Request) 
 	for _, gid := range groupIds {
 		_, err := h.hostGroups.GetByID(r.Context(), gid)
 		if err != nil {
-			Error(w, http.StatusBadRequest, "One or more host groups not found")
+			ErrorKey(w, r, http.StatusBadRequest, "error.hosts_groups_not_found")
 			return
 		}
 	}
 
 	if err := h.hosts.SetHostGroupsBulk(r.Context(), req.HostIds, groupIds); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update host groups")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_host_groups")
 		return
 	}
 
@@ -848,7 +848,7 @@ func (h *HostsHandler) GetIntegrations(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	connected := h.registry != nil && h.registry.IsConnected(host.ApiID)
@@ -943,12 +943,12 @@ func (h *HostsHandler) GetIntegrationStatus(w http.ResponseWriter, r *http.Reque
 	hostID := chi.URLParam(r, "hostId")
 	integrationName := chi.URLParam(r, "integrationName")
 	if integrationName != "compliance" && integrationName != "docker" {
-		Error(w, http.StatusBadRequest, "Invalid integration name")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_integration_name")
 		return
 	}
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	if h.integrationStatus != nil {
@@ -987,22 +987,22 @@ func (h *HostsHandler) GetIntegrationStatus(w http.ResponseWriter, r *http.Reque
 // RequestComplianceStatus handles POST /hosts/:hostId/integrations/compliance/request-status.
 func (h *HostsHandler) RequestComplianceStatus(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	task, err := queue.NewRefreshIntegrationStatusTask(host.ApiID, hostFromRequest(r))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create refresh integration status task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_refresh_task")
 		return
 	}
 	if _, err := h.queueClient.Enqueue(task); err != nil && err != asynq.ErrDuplicateTask && err != asynq.ErrTaskIDConflict {
-		Error(w, http.StatusInternalServerError, "Failed to request compliance status")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_request_compliance_status")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -1019,17 +1019,17 @@ func (h *HostsHandler) SetComplianceMode(w http.ResponseWriter, r *http.Request)
 		Mode string `json:"mode"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	validModes := map[string]bool{"disabled": true, "on-demand": true, "enabled": true}
 	if !validModes[req.Mode] {
-		Error(w, http.StatusBadRequest, "mode must be one of: disabled, on-demand, enabled")
+		ErrorKey(w, r, http.StatusBadRequest, "error.mode_invalid")
 		return
 	}
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	complianceEnabled := req.Mode != "disabled"
@@ -1038,7 +1038,7 @@ func (h *HostsHandler) SetComplianceMode(w http.ResponseWriter, r *http.Request)
 		ComplianceEnabled:      &complianceEnabled,
 		ComplianceOnDemandOnly: &complianceOnDemandOnly,
 	}); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to store pending compliance mode")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_store_pending_compliance")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -1064,11 +1064,11 @@ func (h *HostsHandler) SetComplianceScanners(w http.ResponseWriter, r *http.Requ
 		DockerBenchEnabled *bool `json:"docker_bench_enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.OpenscapEnabled == nil && req.DockerBenchEnabled == nil {
-		Error(w, http.StatusBadRequest, "At least one of openscap_enabled or docker_bench_enabled must be provided")
+		ErrorKey(w, r, http.StatusBadRequest, "error.openscap_or_docker_bench_required")
 		return
 	}
 	// GetByID returns (nil, nil) for "no such row", so the nil check is what
@@ -1076,7 +1076,7 @@ func (h *HostsHandler) SetComplianceScanners(w http.ResponseWriter, r *http.Requ
 	// through to a no-op update reported as success.
 	existing, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || existing == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	fields := store.PendingConfigFields{}
@@ -1087,7 +1087,7 @@ func (h *HostsHandler) SetComplianceScanners(w http.ResponseWriter, r *http.Requ
 		fields.ComplianceDockerBenchEnabled = req.DockerBenchEnabled
 	}
 	if err := h.pendingConfig.SetPendingConfig(r.Context(), hostID, fields); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to store pending scanner settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_store_pending_scanner")
 		return
 	}
 	resp := map[string]interface{}{}
@@ -1111,7 +1111,7 @@ func (h *HostsHandler) SetComplianceDefaultProfile(w http.ResponseWriter, r *htt
 		ProfileID *string `json:"profile_id"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	// GetByID returns (nil, nil) for "no such row", so the nil check is what
@@ -1119,11 +1119,11 @@ func (h *HostsHandler) SetComplianceDefaultProfile(w http.ResponseWriter, r *htt
 	// through to a no-op update reported as success.
 	existing, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || existing == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	if err := h.hosts.UpdateComplianceDefaultProfile(r.Context(), hostID, req.ProfileID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to save default profile")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_save_default_profile")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -1144,17 +1144,17 @@ func (h *HostsHandler) ToggleIntegration(w http.ResponseWriter, r *http.Request)
 	hostID := chi.URLParam(r, "hostId")
 	integrationName := chi.URLParam(r, "integrationName")
 	if integrationName != "docker" && integrationName != "compliance" {
-		Error(w, http.StatusBadRequest, "Invalid integration name")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_integration_name")
 		return
 	}
 	var req ToggleIntegrationRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	fields := store.PendingConfigFields{}
@@ -1169,7 +1169,7 @@ func (h *HostsHandler) ToggleIntegration(w http.ResponseWriter, r *http.Request)
 		}
 	}
 	if err := h.pendingConfig.SetPendingConfig(r.Context(), hostID, fields); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to store pending integration toggle")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_store_pending_toggle")
 		return
 	}
 	mode := "disabled"
@@ -1203,21 +1203,21 @@ func (h *HostsHandler) ApplyPendingConfig(w http.ResponseWriter, r *http.Request
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
 		slog.Warn("apply-pending-config: host not found", "host_id", hostID, "error", err)
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	if !h.registry.IsConnected(host.ApiID) {
 		slog.Info("apply-pending-config: agent not connected", "host_id", hostID, "api_id", host.ApiID)
-		Error(w, http.StatusServiceUnavailable, "Agent is not connected. Ensure the agent's server_url in config.yml points to this server.")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.agent_not_connected_detail")
 		return
 	}
 	pending, err := h.pendingConfig.GetPendingConfig(r.Context(), hostID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load pending config")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_pending_config")
 		return
 	}
 	if pending == nil {
-		Error(w, http.StatusBadRequest, "No pending configuration changes")
+		ErrorKey(w, r, http.StatusBadRequest, "error.no_pending_config")
 		return
 	}
 
@@ -1266,26 +1266,26 @@ func (h *HostsHandler) ApplyPendingConfig(w http.ResponseWriter, r *http.Request
 	}
 	if err := h.registry.SendJSON(host.ApiID, msg); err != nil {
 		slog.Error("apply-pending-config: failed to send to agent", "host_id", hostID, "api_id", host.ApiID, "error", err)
-		Error(w, http.StatusServiceUnavailable, "Failed to send config to agent")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.failed_to_send_config_agent")
 		return
 	}
 	slog.Info("apply-pending-config: sent apply_config to agent", "host_id", hostID, "api_id", host.ApiID)
 
 	// Apply to hosts table
 	if err := h.hosts.UpdateDockerEnabled(r.Context(), hostID, dockerEnabled); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update host")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_host")
 		return
 	}
 	if err := h.hosts.UpdateComplianceMode(r.Context(), hostID, complianceEnabled, complianceOnDemandOnly); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update compliance mode")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_compliance_mode")
 		return
 	}
 	if err := h.hosts.UpdateComplianceScanners(r.Context(), hostID, openscapEnabled, dockerBenchEnabled); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update scanner settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_scanner_settings")
 		return
 	}
 	if err := h.pendingConfig.ClearPendingConfig(r.Context(), hostID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to clear pending config")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_clear_pending_config")
 		return
 	}
 

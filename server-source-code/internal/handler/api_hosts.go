@@ -129,7 +129,7 @@ func (h *ApiHostsHandler) ListHosts(w http.ResponseWriter, r *http.Request) {
 	}
 	hosts, groupsMap, statsMap, err := h.hosts.ListForScopedApi(ctx, groupIDs, includeStats)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_hosts")
 		return
 	}
 
@@ -207,12 +207,12 @@ func (h *ApiHostsHandler) GetHostStats(w http.ResponseWriter, r *http.Request) {
 	d := h.db.DB(ctx)
 	id := chi.URLParam(r, "id")
 	if _, err := h.hosts.GetByID(ctx, id); err != nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	stats, err := d.Queries.GetHostPackageStats(ctx, id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch host statistics")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_host_statistics")
 		return
 	}
 	repoRows, _ := d.Queries.GetHostRepositoryCountByHostIDs(ctx, []string{id})
@@ -238,7 +238,7 @@ func (h *ApiHostsHandler) GetHostInfo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	groups, _ := h.hosts.GetHostGroups(ctx, id)
@@ -281,7 +281,7 @@ func (h *ApiHostsHandler) GetHostNetwork(w http.ResponseWriter, r *http.Request)
 	id := chi.URLParam(r, "id")
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	ip := ""
@@ -315,7 +315,7 @@ func (h *ApiHostsHandler) GetHostSystem(w http.ResponseWriter, r *http.Request) 
 	id := chi.URLParam(r, "id")
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	arch := ""
@@ -398,12 +398,12 @@ func (h *ApiHostsHandler) GetHostPackages(w http.ResponseWriter, r *http.Request
 
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	rows, err := d.Queries.GetHostPackagesForScopedApi(ctx, id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch packages")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_packages")
 		return
 	}
 	hostname := ""
@@ -463,7 +463,7 @@ func (h *ApiHostsHandler) GetHostPackageReports(w http.ResponseWriter, r *http.R
 	}
 
 	if _, err := h.hosts.GetByID(ctx, id); err != nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	rows, err := d.Queries.GetUpdateHistory(ctx, db.GetUpdateHistoryParams{
@@ -472,7 +472,7 @@ func (h *ApiHostsHandler) GetHostPackageReports(w http.ResponseWriter, r *http.R
 		Offset: 0,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch package reports")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_package_reports")
 		return
 	}
 	reports := make([]map[string]interface{}, len(rows))
@@ -521,7 +521,7 @@ func (h *ApiHostsHandler) GetHostAgentQueue(w http.ResponseWriter, r *http.Reque
 
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	queueStatus := map[string]int{"waiting": 0, "active": 0, "delayed": 0, "failed": 0}
@@ -576,7 +576,7 @@ func (h *ApiHostsHandler) GetHostNotes(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	notes := ""
@@ -595,7 +595,7 @@ func (h *ApiHostsHandler) GetHostIntegrations(w http.ResponseWriter, r *http.Req
 	id := chi.URLParam(r, "id")
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	dockerDesc := "Monitor Docker containers, images, volumes, and networks. Collects real-time container status events."
@@ -628,7 +628,7 @@ func (h *ApiHostsHandler) DeleteHost(w http.ResponseWriter, r *http.Request) {
 	}
 	host, err := h.hosts.GetByID(ctx, id)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	hostname := ""
@@ -636,7 +636,7 @@ func (h *ApiHostsHandler) DeleteHost(w http.ResponseWriter, r *http.Request) {
 		hostname = *host.Hostname
 	}
 	if err := h.hosts.Delete(ctx, id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete host")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_host")
 		return
 	}
 

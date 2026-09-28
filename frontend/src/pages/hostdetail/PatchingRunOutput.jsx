@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { RefreshCw } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { patchingAPI } from "../../utils/patchingApi";
 
 const PatchingRunOutput = ({ runId }) => {
+	const { t } = useTranslation("hosts");
 	const {
 		data: run,
 		isLoading,
@@ -29,7 +31,7 @@ const PatchingRunOutput = ({ runId }) => {
 	if (error || !run) {
 		return (
 			<div className="py-4 text-sm text-red-600 dark:text-red-400">
-				Failed to load run output
+				{t("detail.run_output.load_failed")}
 			</div>
 		);
 	}
@@ -37,7 +39,7 @@ const PatchingRunOutput = ({ runId }) => {
 	const shellDisplay =
 		run.shell_output != null && run.shell_output !== ""
 			? run.shell_output.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
-			: "(No output yet)";
+			: t("detail.run_output.no_output");
 
 	return (
 		<div className="py-4">

@@ -1,0 +1,184 @@
+{
+	"title": "Reporting",
+	"subtitle": "View and manage system alerts and notifications",
+	"error": {
+		"load": "Error loading alerts",
+		"load_hint": "Failed to load alerts",
+		"try_again": "Try again",
+		"delete_failed": "Failed to delete alerts",
+		"bulk_action_failed": "Failed to perform bulk action"
+	},
+	"tabs": {
+		"overview": "Overview",
+		"alerts": "Alerts",
+		"alert_settings": "Alert Lifecycle",
+		"destinations": "Destinations",
+		"rules": "Event Rules",
+		"reports": "Scheduled Reports",
+		"log": "Delivery Log",
+		"aria_label": "Tabs"
+	},
+	"stats": {
+		"informational": "Informational",
+		"warning": "Warning",
+		"error": "Error",
+		"critical": "Critical",
+		"total_active": "Total Active"
+	},
+	"severity": {
+		"informational": "Informational",
+		"warning": "Warning",
+		"error": "Error",
+		"critical": "Critical",
+		"all": "All Severities"
+	},
+	"status": {
+		"open": "Open",
+		"acknowledged": "Acknowledged",
+		"investigating": "Investigating",
+		"escalated": "Escalated",
+		"silenced": "Silenced",
+		"done": "Done",
+		"resolved": "Resolved",
+		"all": "All Status",
+		"acked": "Acked"
+	},
+	"filters": {
+		"search_placeholder": "Search alerts...",
+		"all_types": "All Types",
+		"all_assignments": "All Assignments",
+		"assigned_to_me": "Assigned to me",
+		"assigned": "Assigned",
+		"unassigned": "Unassigned",
+		"assigned_to_responder": "Assigned to responder",
+		"unknown_user": "Unknown user",
+		"loading_users": "Loading users"
+	},
+	"bulk": {
+		"selected_one": "{{count}} alert selected",
+		"selected_other": "{{count}} alerts selected",
+		"selected_legacy": "{{count}} alert(s) selected",
+		"updated": "{{count}} alert(s) updated: {{action}}",
+		"deleted_one": "{{count}} alert deleted",
+		"deleted_other": "{{count}} alerts deleted",
+		"delete": "Delete",
+		"delete_confirm_title": "Delete alerts",
+		"delete_confirm_message_one": "Are you sure you want to delete {{count}} alert?",
+		"delete_confirm_message_other": "Are you sure you want to delete {{count}} alerts?",
+		"delete_confirm_label_one": "Delete {{count}} alert",
+		"delete_confirm_label_other": "Delete {{count}} alerts"
+	},
+	"empty": {
+		"no_alerts": "No alerts found",
+		"try_filters": "Try adjusting your search filters",
+		"no_active": "No active alerts"
+	},
+	"loading_alerts": "Loading alerts...",
+	"table": {
+		"severity": "Severity",
+		"type": "Type",
+		"title": "Title",
+		"message": "Message",
+		"assigned_to": "Assigned To",
+		"status": "Status",
+		"created": "Created",
+		"actions": "Actions"
+	},
+	"pagination": {
+		"rows_per_page": "Rows per page:",
+		"range": "{{start}}-{{end}} of {{total}}",
+		"page_of": "Page {{page}} of {{pages}}",
+		"previous": "Previous page",
+		"next": "Next page"
+	},
+	"actions_menu": {
+		"workflow": "Workflow",
+		"resolve": "Resolve"
+	},
+	"modal": {
+		"title": "Alert Details",
+		"severity": "Severity",
+		"type": "Type",
+		"status": "Status",
+		"created": "Created",
+		"assigned_to": "Assigned To",
+		"unassigned": "Unassigned",
+		"alert_title": "Title",
+		"message": "Message",
+		"metadata": "Metadata",
+		"actions": "Actions",
+		"history": "History",
+		"history_by": "by {{user}}",
+		"history_system": "System",
+		"no_history": "No history available",
+		"close": "Close",
+		"close_modal": "Close modal"
+	},
+	"toasts": {
+		"refresh": "Refresh alerts"
+	},
+	"widgets": {
+		"severity_doughnut": {
+			"title": "Alerts by Severity",
+			"empty": "No active alerts",
+			"view_all": "View all alerts",
+			"label_critical": "Critical",
+			"label_error": "Error",
+			"label_warning": "Warning",
+			"label_informational": "Informational",
+			"label_no_alerts": "No alerts"
+		},
+		"by_type": {
+			"title": "Alerts by Type",
+			"empty": "No active alerts",
+			"view_all": "View all alerts",
+			"label_no_alerts": "No alerts"
+		},
+		"volume_trend": {
+			"title": "Alert Volume Trend",
+			"volume": "Volume",
+			"severity": "Severity",
+			"new_alerts": "New Alerts",
+			"resolved": "Resolved",
+			"empty": "No alert data for this period",
+			"view_history": "View alert history"
+		},
+		"recent": {
+			"title": "Recent Alerts",
+			"empty": "No recent alerts",
+			"view_all": "View all alerts",
+			"severity": "Severity",
+			"alert": "Alert",
+			"time": "Time",
+			"status": "Status"
+		},
+		"status_boxes": {
+			"title": "Alert Summary",
+			"active_alerts": "Active Alerts",
+			"critical": "Critical",
+			"warnings": "Warnings",
+			"resolved_today": "Resolved Today"
+		},
+		"attention": {
+			"title": "Requiring Attention",
+			"unacknowledged": "Unacknowledged",
+			"unassigned": "Unassigned",
+			"escalated": "Escalated",
+			"stale": "Stale (>24h no update)",
+			"view_open": "View open alerts"
+		},
+		"responder_workload": {
+			"title": "Responder Workload",
+			"avg": "Avg: {{value}}",
+			"empty": "No active assignments",
+			"active_unassigned": "Active unassigned",
+			"my_active": "My active alerts",
+			"view_all": "View all alerts"
+		},
+		"delivery": {
+			"title": "Delivery by Destination",
+			"empty": "No delivery data for this period",
+			"view_log": "View delivery log"
+		}
+	}
+}

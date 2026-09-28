@@ -1,0 +1,204 @@
+{
+	"title": "Billing",
+	"subtitle": "Your plan, usage, and invoices for this workspace.",
+	"actions": {
+		"refresh": "Refresh",
+		"try_again": "Try again",
+		"cancel": "Cancel",
+		"close": "Close",
+		"dismiss": "Dismiss",
+		"change_plan": "Change plan",
+		"view_faqs": "View FAQs",
+		"manage_billing": "Manage billing in Stripe",
+		"opening_portal": "Opening portal...",
+		"sync_host_count": "Sync host count",
+		"syncing": "Syncing...",
+		"applying": "Applying...",
+		"confirm_change": "Confirm change",
+		"confirm_downgrade": "Confirm downgrade"
+	},
+	"unavailable": {
+		"title": "Billing is not available on this installation",
+		"self_hosted": "The Billing dashboard is only available on PatchMon Cloud. On self-hosted installations, Community Edition is free forever under AGPLv3.",
+		"no_subscription": "No subscription is associated with this workspace yet. If you expected to see billing information here, contact your account owner."
+	},
+	"error": {
+		"permission_title": "You don't have permission to view this page",
+		"permission_body": "Ask an administrator to grant you the Manage Billing permission.",
+		"load_title": "Could not load billing information",
+		"load_fallback": "An unexpected error occurred.",
+		"portal_no_url": "Stripe portal session did not return a URL. Please try again.",
+		"portal_failed": "Failed to open the Stripe billing portal. Please try again.",
+		"apply_failed": "Failed to apply the tier change. Please try again."
+	},
+	"status_banners": {
+		"past_due": {
+			"title": "Payment past due",
+			"body": "Your last invoice failed. Please update your payment method in the Stripe portal to avoid service interruption."
+		},
+		"canceled": {
+			"title": "Subscription canceled",
+			"body": "Your subscription has been canceled. You can reactivate from the Stripe portal."
+		},
+		"paused": {
+			"title": "Subscription paused",
+			"body": "Your trial ended without a payment method on file. Add one in the Stripe portal to resume service."
+		},
+		"grace": {
+			"title": "Grace period active",
+			"body": "Your plan is in a grace period. Please resolve the outstanding issue to avoid losing access."
+		}
+	},
+	"plan": {
+		"title": "Current plan",
+		"unknown": "Unknown",
+		"trial": "Trial",
+		"active": "Active",
+		"ends_on": "Ends {{date}}",
+		"renews_on": "Renews {{date}}",
+		"next_invoice": "Next invoice",
+		"due_on": "due {{date}}"
+	},
+	"intervals": {
+		"month": "Monthly",
+		"year": "Annual"
+	},
+	"periods": {
+		"month": "month",
+		"year": "year"
+	},
+	"trial": {
+		"days_left_one": "{{count}} day left in trial",
+		"days_left_other": "{{count}} days left in trial",
+		"charge_on_date": "{{amount}} will be charged on {{date}} unless you change or cancel your plan.",
+		"charge_no_date": "{{amount}} will be charged unless you change or cancel your plan."
+	},
+	"cancel_banner": {
+		"ends_on": "Subscription ends on {{date}}",
+		"next_renewal_date": "the next renewal date",
+		"reactivate_hint": "You can reactivate any time in the Stripe portal."
+	},
+	"sync": {
+		"success_one": "Host count synced: {{count}} active host.",
+		"success_other": "Host count synced: {{count}} active hosts.",
+		"success_no_count": "Host count synced.",
+		"failed": "Sync failed. Try again in a moment.",
+		"last_synced": "Last synced {{time}}",
+		"never_synced": "Never synced"
+	},
+	"usage": {
+		"title": "Host usage",
+		"active_hosts": "Active hosts",
+		"annual_commitment": "Annual commitment",
+		"prepaid_hint": "prepaid capacity for the year",
+		"billed_this_period": "Billed this period",
+		"hosts_unit_one": "host",
+		"hosts_unit_other": "hosts",
+		"total_per_period": "= {{total}}/{{period}}",
+		"overage_one": "{{count}} host above your annual commitment. These will be prorated on your next invoice at {{price}} per host.",
+		"overage_other": "{{count}} hosts above your annual commitment. These will be prorated on your next invoice at {{price}} per host.",
+		"pay_for_one": "You pay for {{count}} host × {{price}}/host/{{period}} = {{total}}",
+		"pay_for_other": "You pay for {{count}} hosts × {{price}}/host/{{period}} = {{total}}"
+	},
+	"tiers": {
+		"starter": {
+			"name": "Starter",
+			"tagline": "Monitor your patches. Patch elsewhere."
+		},
+		"plus": {
+			"name": "Plus",
+			"tagline": "Patch, monitor, report. The everyday workhorse."
+		},
+		"max": {
+			"name": "Max",
+			"tagline": "Everything. SSH, RDP, AI, compliance."
+		},
+		"feature": "Feature",
+		"current": "Current",
+		"per_host_mo": "/host/mo",
+		"features": {
+			"core_monitoring": "Core monitoring (inventory, detection, repos)",
+			"agents": "Linux + FreeBSD + Windows agents",
+			"host_groups_dashboards": "Host groups, dashboards, search, Gethomepage",
+			"basic_alerts": "Basic alerts (host-down, threshold)",
+			"scheduled_reports": "Scheduled reports (email/PDF)",
+			"notification_destinations": "Notification destinations + routes",
+			"tfa_totp": "2FA / TOTP",
+			"trusted_devices": "Trusted devices",
+			"oidc_sso": "OIDC / SSO",
+			"discord_oauth": "Discord OAuth login",
+			"builtin_roles": "Built-in roles (admin/viewer)",
+			"rest_api_tokens": "Scoped REST API + auto-enrollment tokens",
+			"automation": "Automation / job management",
+			"user_limit": "User limit",
+			"manual_patch_runs": "Manual patch runs",
+			"patch_policies": "Patch scheduling policies + approval workflow",
+			"docker_monitoring": "Docker container monitoring",
+			"advanced_alerts": "Advanced alert config + custom rules",
+			"custom_rbac": "Custom RBAC roles",
+			"audit_log_export": "Audit log export",
+			"custom_domain": "Custom domain (email to request)",
+			"custom_branding": "Custom branding (logo/favicon)",
+			"ssh_terminal": "Browser SSH terminal",
+			"rdp": "Browser RDP (Guacamole)",
+			"byoi_ai": "BYO-AI terminal assistant",
+			"compliance": "Compliance (OpenSCAP + CIS + Docker Bench)",
+			"support_channels": "Direct support channels"
+		},
+		"values": {
+			"three": "3",
+			"unlimited": "Unlimited",
+			"support_email_discord": "Email, Discord",
+			"support_email_slack_discord": "Email, Slack, Discord",
+			"support_email_slack_discord_phone": "Email, Slack, Discord, Phone"
+		}
+	},
+	"upgrade_cta": {
+		"label": "Upgrade to {{name}}",
+		"delta": "+{{price}}/host/month"
+	},
+	"portal": {
+		"title": "Manage payment and invoices",
+		"body": "Update your card, view invoices, and cancel or reactivate your subscription in the Stripe billing portal."
+	},
+	"modal": {
+		"title": "Change plan",
+		"subtitle": "Pick your new tier and billing interval. We'll show you the exact charge before confirming.",
+		"billing_interval": "Billing interval",
+		"annual_save": "Annual (save ~17%)",
+		"commit_label": "Pre-commit hosts (annual)",
+		"commit_too_low": "Can't commit to fewer than your current {{count}} hosts.",
+		"commit_too_high": "Maximum commitment is {{max}} hosts.",
+		"commit_help": "Prepay for a fixed host count for the year. You're billed for this capacity even if actual usage is lower. Adding hosts above this will trigger a prorated charge against the remaining annual period.",
+		"apply_error_title": "Could not apply the tier change",
+		"success": "Plan updated successfully."
+	},
+	"preview": {
+		"noop": "You're already on this tier and interval. Pick a different tier or interval to see the charge.",
+		"loading": "Calculating your new charge...",
+		"error_title": "Preview unavailable",
+		"renewal_fallback": "renewal",
+		"upgrade_title": "Upgrade: {{from}} {{fromInterval}} to {{to}} {{toInterval}}",
+		"upgrade_commit": "Committing to {{count}} hosts × {{unit}}/year = {{total}}/year total.",
+		"upgrade_prorated": "{{amount}} charged today (prorated for the remainder of your current billing cycle).",
+		"upgrade_next_invoice": "Your next full invoice of {{amount}} lands on {{date}}.",
+		"upgrade_immediate": "The new tier is available immediately after confirmation.",
+		"downgrade_title": "Downgrade: {{from}} {{fromInterval}} to {{to}} {{toInterval}}",
+		"downgrade_keep": "No change to today's bill. You keep {{from}} until {{date}}.",
+		"downgrade_pay": "From {{date}} onwards you'll pay {{amount}} per {{period}}.",
+		"downgrade_features": "Any {{to}}-only features will remain active until {{date}}.",
+		"fallback_invoice": "Next invoice will be {{amount}} on {{date}}."
+	},
+	"module_labels": {
+		"patching": "Patching",
+		"patching_policies": "Patching Policies",
+		"docker": "Docker Monitoring",
+		"alerts_advanced": "Advanced Alerts",
+		"rbac_custom": "Custom RBAC Roles",
+		"custom_branding": "Custom Branding",
+		"compliance": "Compliance Scanning",
+		"ssh_terminal": "Browser SSH Terminal",
+		"rdp": "Browser RDP",
+		"ai": "AI Terminal Assistant"
+	}
+}

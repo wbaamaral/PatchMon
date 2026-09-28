@@ -34,7 +34,7 @@ func NewDashboardHandler(dashboard *store.DashboardStore, hosts *store.HostsStor
 func (h *DashboardHandler) Stats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.dashboard.GetStats(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load dashboard stats")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_dashboard_stats")
 		return
 	}
 	JSON(w, http.StatusOK, stats)
@@ -44,7 +44,7 @@ func (h *DashboardHandler) Stats(w http.ResponseWriter, r *http.Request) {
 func (h *DashboardHandler) NavigationStats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.dashboard.GetNavigationStats(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load navigation stats")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_navigation_stats")
 		return
 	}
 	JSON(w, http.StatusOK, stats)
@@ -54,7 +54,7 @@ func (h *DashboardHandler) NavigationStats(w http.ResponseWriter, r *http.Reques
 func (h *DashboardHandler) HostFilterOptions(w http.ResponseWriter, r *http.Request) {
 	options, err := h.dashboard.GetHostFilterOptions(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load host filter options")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_host_filter_options")
 		return
 	}
 	JSON(w, http.StatusOK, options)
@@ -123,33 +123,33 @@ func (h *DashboardHandler) Hosts(w http.ResponseWriter, r *http.Request) {
 	limitRaw := q.Get("limit")
 	filter := q.Get("filter")
 	if !validHostsListFilter(filter) {
-		Error(w, http.StatusBadRequest, "Unsupported host filter")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_filter_unsupported")
 		return
 	}
 	if filter == "offline" && limitRaw != "" {
-		Error(w, http.StatusBadRequest, "offline filter is not supported with server-side pagination")
+		ErrorKey(w, r, http.StatusBadRequest, "error.offline_filter_pagination")
 		return
 	}
 	sortKey := q.Get("sort")
 	if _, ok := store.HostsListSortKey(sortKey); !ok {
-		Error(w, http.StatusBadRequest, "Unsupported sort field")
+		ErrorKey(w, r, http.StatusBadRequest, "error.sort_field_unsupported")
 		return
 	}
 	order := strings.ToLower(q.Get("order"))
 	if order != "" && order != "asc" && order != "desc" {
-		Error(w, http.StatusBadRequest, "Unsupported sort order")
+		ErrorKey(w, r, http.StatusBadRequest, "error.sort_order_unsupported")
 		return
 	}
 	selectedIDs := []string{}
 	if filter == "selected" {
 		selectedRaw := q.Get("selected")
 		if len(selectedRaw) > maxSelectedHostIDsQueryLength {
-			Error(w, http.StatusBadRequest, "selected query is too large")
+			ErrorKey(w, r, http.StatusBadRequest, "error.query_too_large")
 			return
 		}
 		ids, tooMany := parseCSVQuery(selectedRaw, maxSelectedHostIDs)
 		if tooMany {
-			Error(w, http.StatusBadRequest, "too many selected hosts requested")
+			ErrorKey(w, r, http.StatusBadRequest, "error.too_many_selected_hosts")
 			return
 		}
 		selectedIDs = ids
@@ -182,7 +182,7 @@ func (h *DashboardHandler) Hosts(w http.ResponseWriter, r *http.Request) {
 	}
 	res, err := h.dashboard.GetHostsWithCounts(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_hosts_failed")
 		return
 	}
 	if res == nil {
@@ -209,7 +209,7 @@ func (h *DashboardHandler) HostCounts(w http.ResponseWriter, r *http.Request) {
 
 	counts, err := h.dashboard.GetHostCounts(r.Context(), staleThreshold, downThreshold)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load host counts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_host_counts")
 		return
 	}
 	JSON(w, http.StatusOK, counts)
@@ -227,7 +227,7 @@ func (h *DashboardHandler) HostDetail(w http.ResponseWriter, r *http.Request) {
 
 	detail, err := h.dashboard.GetHostDetail(r.Context(), hostID, limit, offset)
 	if err != nil || detail == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
@@ -334,7 +334,7 @@ func formatBytes(b int64) string {
 func (h *DashboardHandler) Packages(w http.ResponseWriter, r *http.Request) {
 	pkgs, err := h.dashboard.GetPackagesWithHosts(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load packages")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_packages")
 		return
 	}
 	JSON(w, http.StatusOK, pkgs)
@@ -346,7 +346,7 @@ func (h *DashboardHandler) PackageTrends(w http.ResponseWriter, r *http.Request)
 	hostID := r.URL.Query().Get("hostId")
 	data, err := h.dashboard.GetPackageTrends(r.Context(), days, hostID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load package trends")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_package_trends")
 		return
 	}
 	JSON(w, http.StatusOK, data)
@@ -356,7 +356,7 @@ func (h *DashboardHandler) PackageTrends(w http.ResponseWriter, r *http.Request)
 func (h *DashboardHandler) RecentUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.dashboard.GetRecentUsers(r.Context(), 5)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load recent users")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_recent_users")
 		return
 	}
 	JSON(w, http.StatusOK, users)
@@ -366,7 +366,7 @@ func (h *DashboardHandler) RecentUsers(w http.ResponseWriter, r *http.Request) {
 func (h *DashboardHandler) RecentCollection(w http.ResponseWriter, r *http.Request) {
 	hosts, err := h.dashboard.GetRecentCollection(r.Context(), 5)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load recent collection")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_recent_collection")
 		return
 	}
 	JSON(w, http.StatusOK, hosts)
@@ -383,7 +383,7 @@ func (h *DashboardHandler) HostQueue(w http.ResponseWriter, r *http.Request) {
 
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
@@ -526,7 +526,7 @@ func (h *DashboardHandler) HostActivity(w http.ResponseWriter, r *http.Request) 
 
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
@@ -576,7 +576,7 @@ func (h *DashboardHandler) HostActivity(w http.ResponseWriter, r *http.Request) 
 	})
 	if err != nil {
 		slog.Error("agent activity list failed", "host_id", hostID, "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to load agent activity")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_agent_activity")
 		return
 	}
 

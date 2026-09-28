@@ -1,0 +1,198 @@
+{
+	"status": {
+		"up_to_date": "Atualizado",
+		"update_available": "Atualização disponível",
+		"security_update_available": "Atualização de segurança disponível",
+		"security_update": "Atualização de segurança",
+		"security": "Segurança",
+		"update": "Atualização",
+		"reboot_required": "Reinicialização necessária",
+		"required": "Necessária",
+		"no": "Não"
+	},
+	"labels": {
+		"unknown": "Desconhecido",
+		"never": "Nunca",
+		"not_available": "N/D",
+		"version": "Versão:",
+		"repo": "Repo:",
+		"status": "Status:",
+		"latest": "Mais recente:",
+		"repos": "Repos:",
+		"on": "Em:",
+		"host_word_one": "host",
+		"host_word_other": "hosts"
+	},
+	"actions": {
+		"refresh": "Atualizar",
+		"refreshing": "Atualizando...",
+		"refresh_title": "Atualizar pacotes e dados de estatísticas",
+		"try_again": "Tentar novamente",
+		"close": "Fechar",
+		"close_modal": "Fechar modal",
+		"columns": "Colunas",
+		"clear_filter": "Limpar filtro",
+		"clear_selection": "Limpar seleção",
+		"view_description": "Ver descrição",
+		"show_all_hosts_title": "Mostrar pacotes de todos os hosts",
+		"patch_all": "Aplicar tudo",
+		"patch_all_title": "Executar atualizações de pacotes do sistema neste host",
+		"patch_selected": "Aplicar selecionados ({{count}})",
+		"windows_patching": "Patching gerenciado via Windows Update",
+		"windows_patching_title": "O patching do Windows é gerenciado pelo Windows Update ou WinGet no host",
+		"select_host": "Selecionar host",
+		"deselect_host": "Desmarcar host",
+		"select_all_page": "Selecionar todos na página",
+		"deselect_all_page": "Desmarcar todos na página",
+		"select_all_patchable": "Selecionar todos os hosts com patch na página",
+		"deselect_all_patchable": "Desmarcar todos os hosts com patch na página",
+		"no_patchable_title": "Nenhum host com patch nesta página",
+		"patch": "Aplicar patch",
+		"queuing": "Enfileirando…",
+		"view_run": "Ver execução",
+		"back": "Voltar",
+		"back_to_packages": "Voltar aos pacotes"
+	},
+	"toasts": {
+		"submitted_runs_one": "1 execução enviada para aprovação",
+		"submitted_runs_other": "{{count}} execuções enviadas para aprovação",
+		"patch_all_queued": "Aplicar tudo enfileirado. Acompanhe o progresso em Patching.",
+		"patch_queued": "Patch enfileirado. Acompanhe o progresso em Patching."
+	},
+	"pagination": {
+		"rows_per_page": "Linhas por página:",
+		"range": "{{start}}-{{end}} de {{total}}",
+		"page_of": "Página {{current}} de {{total}}",
+		"previous": "Anterior",
+		"next": "Próxima"
+	},
+	"list": {
+		"title": {
+			"all_hosts": "Pacotes em todos os hosts",
+			"host_scoped_named": "Pacotes do host {{name}}",
+			"host_scoped_default": "Pacotes deste host"
+		},
+		"subtitle": {
+			"all": "Gerencie atualizações de pacotes e patches de segurança",
+			"host_scoped": "Todos os números abaixo contam apenas este host"
+		},
+		"cards": {
+			"packages": "Pacotes",
+			"packages_title": "Clique para mostrar todos os pacotes",
+			"packages_title_host": "Clique para mostrar todos os pacotes deste host",
+			"installations": "Instalações",
+			"outdated_packages": "Pacotes desatualizados",
+			"outdated_title": "Clique para filtrar pacotes que precisam de atualização",
+			"outdated_title_host": "Clique para filtrar os pacotes deste host que precisam de atualização",
+			"security_packages": "Pacotes de segurança",
+			"security_title": "Clique para filtrar pacotes com atualizações de segurança",
+			"security_title_host": "Clique para filtrar os pacotes deste host com atualizações de segurança",
+			"outdated_hosts": "Hosts desatualizados",
+			"outdated_hosts_title": "Clique para ver os hosts que precisam de atualização"
+		},
+		"filters": {
+			"all_categories": "Todas as categorias",
+			"all_packages": "Todos os pacotes",
+			"packages_needing_updates": "Pacotes que precisam de atualização",
+			"security_updates_only": "Somente atualizações de segurança",
+			"regular_updates_only": "Somente atualizações regulares",
+			"all_hosts": "Todos os hosts"
+		},
+		"search_placeholder": "Buscar pacotes...",
+		"columns": {
+			"name": "Pacote",
+			"package_hosts": "Instalado em",
+			"status": "Status",
+			"latest_version": "Versão mais recente",
+			"source_repos": "Repos de origem"
+		},
+		"columns_modal": {
+			"title": "Personalizar colunas",
+			"reset": "Redefinir padrão",
+			"done": "Concluído"
+		},
+		"selection": {
+			"selected_one": "{{count}} pacote selecionado",
+			"selected_other": "{{count}} pacotes selecionados"
+		},
+		"labels": {
+			"category": "Categoria: {{name}}",
+			"hosts_fraction": "{{updated}}/{{total}} hosts",
+			"hosts_count_one": "{{count}} host",
+			"hosts_count_other": "{{count}} hosts",
+			"hosts_need_updates": "{{updated}} de {{total}} hosts precisam de atualização",
+			"installed_on_one": "Instalado em {{count}} host",
+			"installed_on_other": "Instalado em {{count}} hosts"
+		},
+		"empty": {
+			"no_packages": "Nenhum pacote encontrado",
+			"no_match": "Nenhum pacote corresponde aos seus filtros",
+			"no_packages_hint": "Os pacotes aparecerão aqui quando os hosts começarem a relatar seus pacotes instalados"
+		},
+		"errors": {
+			"loading_packages": "Erro ao carregar pacotes",
+			"load_packages": "Falha ao carregar pacotes"
+		},
+		"actions": {
+			"patch_selected_on_host_one": "Aplicar patch de {{count}} pacote selecionado em {{host}}",
+			"patch_selected_on_host_other": "Aplicar patch de {{count}} pacotes selecionados em {{host}}",
+			"patch_selected_on_chosen_one": "Aplicar patch de {{count}} pacote selecionado nos hosts escolhidos",
+			"patch_selected_on_chosen_other": "Aplicar patch de {{count}} pacotes selecionados nos hosts escolhidos",
+			"this_host": "este host"
+		}
+	},
+	"detail": {
+		"cards": {
+			"latest_version": "Versão mais recente",
+			"updated": "Atualizado",
+			"hosts_with_package": "Hosts com o pacote",
+			"up_to_date": "Atualizado"
+		},
+		"sections": {
+			"source_repositories": "Repositórios de origem",
+			"description": "Descrição",
+			"description_tooltip": "A descrição foi obtida diretamente do gerenciador de pacotes do host."
+		},
+		"tabs": {
+			"aria_label": "Abas",
+			"hosts": "Hosts",
+			"activity": "Atividade"
+		},
+		"search_placeholder": "Buscar hosts...",
+		"filters": {
+			"only_pending": "Somente atualização pendente"
+		},
+		"table": {
+			"host": "Host",
+			"current_version": "Versão atual",
+			"status": "Status",
+			"source_repo": "Repo de origem",
+			"last_updated": "Última atualização",
+			"reboot_required": "Reinicialização necessária",
+			"actions": "Ações"
+		},
+		"empty": {
+			"package_not_found": "Pacote não encontrado",
+			"no_description": "Nenhuma descrição disponível.",
+			"no_hosts_match": "Nenhum host corresponde à sua busca",
+			"all_up_to_date": "Todos os hosts estão atualizados para este pacote",
+			"no_hosts_have_package": "Nenhum host tem este pacote instalado",
+			"no_activity": "Nenhuma atividade de atualização para este pacote ainda",
+			"no_activity_hint": "Execuções de patch concluídas aparecerão aqui"
+		},
+		"errors": {
+			"loading_package": "Erro ao carregar pacote",
+			"load_package": "Falha ao carregar detalhes do pacote",
+			"loading_hosts": "Erro ao carregar hosts",
+			"load_hosts": "Falha ao carregar hosts"
+		},
+		"actions": {
+			"patch_selected_title_one": "Aplicar patch de {{count}} host selecionado com {{package}}",
+			"patch_selected_title_other": "Aplicar patch de {{count}} hosts selecionados com {{package}}",
+			"reboot_required_title": "Reinicialização necessária"
+		},
+		"activity": {
+			"upgraded_on_host": "Atualizado no host:"
+		}
+	}
+}

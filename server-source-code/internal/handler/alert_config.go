@@ -28,7 +28,7 @@ func alertConfigSuccessData(w http.ResponseWriter, data interface{}) {
 func (h *AlertConfigHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	configs, err := h.alertConfig.GetAll(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch alert config")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_alert_config")
 		return
 	}
 	// Convert to frontend format (snake_case for API consistency with Node)
@@ -43,12 +43,12 @@ func (h *AlertConfigHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 func (h *AlertConfigHandler) GetByType(w http.ResponseWriter, r *http.Request) {
 	alertType := chi.URLParam(r, "alertType")
 	if alertType == "" {
-		Error(w, http.StatusBadRequest, "Alert type required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_type_required")
 		return
 	}
 	cfg, err := h.alertConfig.GetByType(r.Context(), alertType)
 	if err != nil {
-		Error(w, http.StatusNotFound, "Alert config not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.alert_config_not_found")
 		return
 	}
 	alertConfigSuccessData(w, alertConfigToMap(&cfg.AlertConfig, cfg.AutoAssignUser))
@@ -58,7 +58,7 @@ func (h *AlertConfigHandler) GetByType(w http.ResponseWriter, r *http.Request) {
 func (h *AlertConfigHandler) Update(w http.ResponseWriter, r *http.Request) {
 	alertType := chi.URLParam(r, "alertType")
 	if alertType == "" {
-		Error(w, http.StatusBadRequest, "Alert type required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.alert_type_required")
 		return
 	}
 	existing, err := h.alertConfig.GetByType(r.Context(), alertType)
@@ -68,7 +68,7 @@ func (h *AlertConfigHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	var req map[string]interface{}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -79,7 +79,7 @@ func (h *AlertConfigHandler) Update(w http.ResponseWriter, r *http.Request) {
 	applyAlertConfigUpdate(cfg, req)
 
 	if err := h.alertConfig.Upsert(r.Context(), cfg); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update alert config")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_alert_config")
 		return
 	}
 
@@ -97,7 +97,7 @@ func (h *AlertConfigHandler) BulkUpdate(w http.ResponseWriter, r *http.Request) 
 		Configs []map[string]interface{} `json:"configs"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	var failed []string
@@ -120,7 +120,7 @@ func (h *AlertConfigHandler) BulkUpdate(w http.ResponseWriter, r *http.Request) 
 	configs, err := h.alertConfig.GetAll(r.Context())
 	if err != nil {
 		slog.Error("alert config bulk update: failed to reload configs", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to reload alert configs after update")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_reload_alert_configs")
 		return
 	}
 	out := make([]map[string]interface{}, len(configs))
@@ -138,7 +138,7 @@ func (h *AlertConfigHandler) BulkUpdate(w http.ResponseWriter, r *http.Request) 
 func (h *AlertConfigHandler) PreviewCleanup(w http.ResponseWriter, r *http.Request) {
 	toClean, err := h.alertConfig.GetAlertsToCleanup(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to preview cleanup")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_preview_cleanup")
 		return
 	}
 	alertConfigSuccessData(w, map[string]interface{}{
@@ -152,7 +152,7 @@ func (h *AlertConfigHandler) PreviewCleanup(w http.ResponseWriter, r *http.Reque
 func (h *AlertConfigHandler) TriggerCleanup(w http.ResponseWriter, r *http.Request) {
 	deleted, err := h.alertConfig.CleanupOldAlerts(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to run cleanup")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_run_cleanup")
 		return
 	}
 	alertConfigSuccessData(w, map[string]interface{}{

@@ -8,6 +8,8 @@
  * the server remains the authority on what is actually sent.
  */
 
+import i18n from "../i18n";
+
 const DISCORD_HOSTS = new Set([
 	"discord.com",
 	"discordapp.com",
@@ -28,22 +30,22 @@ export const WEBHOOK_FORMATS = {
 	GENERIC: "generic",
 };
 
-const LABELS = {
+const LABEL_KEYS = {
 	[WEBHOOK_FORMATS.DISCORD]: {
-		label: "Discord",
-		detail: "Rich embed with severity colour",
+		labelKey: "alerts:webhook_hint.discord.label",
+		detailKey: "alerts:webhook_hint.discord.detail",
 	},
 	[WEBHOOK_FORMATS.SLACK]: {
-		label: "Slack",
-		detail: "Slack incoming-webhook message",
+		labelKey: "alerts:webhook_hint.slack.label",
+		detailKey: "alerts:webhook_hint.slack.detail",
 	},
 	[WEBHOOK_FORMATS.SLACK_COMPATIBLE]: {
-		label: "Mattermost or Rocket.Chat",
-		detail: "Slack-compatible message",
+		labelKey: "alerts:webhook_hint.slack_compatible.label",
+		detailKey: "alerts:webhook_hint.slack_compatible.detail",
 	},
 	[WEBHOOK_FORMATS.GENERIC]: {
-		label: "Generic JSON",
-		detail: "Structured PatchMon fields, plus a top-level text",
+		labelKey: "alerts:webhook_hint.generic.label",
+		detailKey: "alerts:webhook_hint.generic.detail",
 	},
 };
 
@@ -97,5 +99,10 @@ function isSlackCompatible(host, path) {
 
 /** Human-readable name and one-line description for a format, or null. */
 export function webhookFormatLabel(format) {
-	return LABELS[format] ?? null;
+	const keys = LABEL_KEYS[format];
+	if (!keys) return null;
+	return {
+		label: i18n.t(keys.labelKey),
+		detail: i18n.t(keys.detailKey),
+	};
 }

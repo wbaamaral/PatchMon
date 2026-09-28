@@ -29,17 +29,17 @@ type AcceptRequest struct {
 func (h *ReleaseNotesAcceptanceHandler) Accept(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 
 	var req AcceptRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.Version == "" {
-		Error(w, http.StatusBadRequest, "Version is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.version_required")
 		return
 	}
 
@@ -48,14 +48,14 @@ func (h *ReleaseNotesAcceptanceHandler) Accept(w http.ResponseWriter, r *http.Re
 			h.log.Error("release notes acceptance upsert failed", "error", err, "user_id", userID, "version", req.Version)
 		}
 		if errors.Is(err, store.ErrReleaseNotesFKViolation) {
-			Error(w, http.StatusUnauthorized, "Session may have expired. Please log in again.")
+			ErrorKey(w, r, http.StatusUnauthorized, "error.session_expired_login")
 			return
 		}
 		if errors.Is(err, store.ErrReleaseNotesTableMissing) {
-			Error(w, http.StatusServiceUnavailable, "Database migration required. Please restart the application.")
+			ErrorKey(w, r, http.StatusServiceUnavailable, "error.db_migration_required")
 			return
 		}
-		Error(w, http.StatusInternalServerError, "Failed to accept release notes")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_accept_release_notes")
 		return
 	}
 

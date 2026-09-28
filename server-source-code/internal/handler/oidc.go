@@ -240,7 +240,7 @@ func (h *OidcHandler) Login(w http.ResponseWriter, r *http.Request) {
 	client := h.entryFor(r.Context()).client
 
 	if client == nil {
-		Error(w, http.StatusBadRequest, "OIDC authentication is not configured")
+		ErrorKey(w, r, http.StatusBadRequest, "error.oidc_not_configured")
 		return
 	}
 	if h.requireHTTPS(w, r) {
@@ -252,7 +252,7 @@ func (h *OidcHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("oidc auth url failed", "error", err)
 		}
-		Error(w, http.StatusServiceUnavailable, "Failed to reach the OIDC provider; please try again shortly")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.oidc_provider_unreachable")
 		return
 	}
 	ttl := time.Duration(h.cfg.OidcSessionTTL) * time.Second
@@ -269,7 +269,7 @@ func (h *OidcHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("oidc store session failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to initiate OIDC login")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_initiate_oidc_login")
 		return
 	}
 	// Narrow Path to the OIDC routes so this cookie isn't transmitted on every
@@ -491,16 +491,16 @@ func (h *OidcHandler) GetSettings(w http.ResponseWriter, r *http.Request) {
 // Copies OIDC config from env vars to the database.
 func (h *OidcHandler) ImportFromEnv(w http.ResponseWriter, r *http.Request) {
 	if h.settings == nil {
-		Error(w, http.StatusServiceUnavailable, "Settings not available")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.settings_not_available")
 		return
 	}
 	if !config.ConfiguredViaEnv(h.cfg) {
-		Error(w, http.StatusBadRequest, "OIDC is not configured via .env")
+		ErrorKey(w, r, http.StatusBadRequest, "error.oidc_env_not_configured")
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	// Copy env values to settings
@@ -540,7 +540,7 @@ func (h *OidcHandler) ImportFromEnv(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to import OIDC settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_import_oidc_settings")
 		return
 	}
 	h.evictOidcClient(r.Context())
@@ -556,22 +556,22 @@ func (h *OidcHandler) ImportFromEnv(w http.ResponseWriter, r *http.Request) {
 // UpdateSettings handles PUT /api/v1/auth/oidc/settings.
 func (h *OidcHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	if h.settings == nil {
-		Error(w, http.StatusServiceUnavailable, "Settings not available")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.settings_not_available")
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	var req map[string]interface{}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	applyOidcSettingsUpdate(s, req, h.enc)
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update OIDC settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_oidc_settings")
 		return
 	}
 	secretSet := false
@@ -779,7 +779,7 @@ func (h *OidcHandler) requireHTTPS(w http.ResponseWriter, r *http.Request) bool 
 		if h.log != nil {
 			h.log.Error("oidc rejected: HTTPS required")
 		}
-		Error(w, http.StatusForbidden, "HTTPS required for authentication")
+		ErrorKey(w, r, http.StatusForbidden, "error.https_required")
 		return true
 	}
 	return false

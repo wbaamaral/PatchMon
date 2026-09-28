@@ -12,7 +12,8 @@
 		"test": "vitest",
 		"test:run": "vitest run",
 		"test:ui": "vitest --ui",
-		"test:coverage": "vitest --coverage"
+		"test:coverage": "vitest --coverage",
+		"i18n:check": "node ../tools/i18n-check.mjs"
 	},
 	"dependencies": {
 		"@dnd-kit/core": "6.3.1",
@@ -28,6 +29,8 @@
 		"cors": "^2.8.6",
 		"date-fns": "4.1.0",
 		"express": "^4.22.1",
+		"i18next": "^25.4.2",
+		"react-i18next": "^15.5.3",
 		"express-rate-limit": "^7.5.0",
 		"guacamole-common-js": "^1.5.0",
 		"http-proxy-middleware": "^3.0.5",

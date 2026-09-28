@@ -1,0 +1,56 @@
+{
+	"title": "Gerenciamento de automação",
+	"subtitle": "Monitore e gerencie operações automatizadas do servidor, comunicações do agente e implantações de patches",
+	"tabs": {
+		"overview": "Visão geral"
+	},
+	"aria": {
+		"tabs": "Abas"
+	},
+	"stats": {
+		"scheduled_tasks": "Tarefas agendadas",
+		"running_tasks": "Tarefas em execução",
+		"failed_tasks": "Tarefas com falha",
+		"total_task_runs": "Total de execuções de tarefas"
+	},
+	"loading": "Carregando automações...",
+	"actions": {
+		"run_now": "Executar agora",
+		"manual": "Manual"
+	},
+	"labels": {
+		"frequency": "Frequência:",
+		"last_run": "Última execução:",
+		"next_run": "Próxima execução:"
+	},
+	"columns": {
+		"run": "Executar",
+		"task": "Tarefa",
+		"frequency": "Frequência",
+		"last_run": "Última execução",
+		"next_run": "Próxima execução",
+		"status": "Status"
+	},
+	"status": {
+		"success": "Sucesso",
+		"failed": "Falhou",
+		"running": "Em execução",
+		"retrying": "Tentando novamente",
+		"archived": "Arquivado",
+		"skipped_disabled": "Ignorado (Desabilitado)",
+		"never_run": "Nunca executado"
+	},
+	"schedule": {
+		"manual_trigger": "Somente gatilho manual",
+		"agent_driven": "Controlado pelo agente (automático)",
+		"unknown": "Desconhecido"
+	},
+	"toasts": {
+		"no_trigger": "Nenhum gatilho manual disponível para {{jobType}}",
+		"triggered": "Tarefa acionada com sucesso",
+		"triggered_job_id": "{{message}} - ID da tarefa: {{jobId}}",
+		"triggered_queued_one": "{{message}} - {{count}} tarefa na fila",
+		"triggered_queued_other": "{{message}} - {{count}} tarefas na fila",
+		"trigger_failed": "Falha ao acionar tarefa: {{error}}"
+	}
+}

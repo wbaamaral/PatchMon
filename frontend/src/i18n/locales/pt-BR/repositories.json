@@ -1,0 +1,143 @@
+{
+	"actions": {
+		"cancel": "Cancelar",
+		"delete": "Excluir",
+		"delete_repository": "Excluir repositório",
+		"deleting": "Excluindo...",
+		"edit": "Editar",
+		"edit_repository": "Editar repositório",
+		"save_changes": "Salvar alterações",
+		"saving": "Salvando...",
+		"refresh": "Atualizar",
+		"refreshing": "Atualizando...",
+		"refresh_title": "Atualizar dados dos repositórios",
+		"columns": "Colunas",
+		"done": "Concluído",
+		"reset_to_default": "Restaurar padrão",
+		"back_to_repositories": "Voltar aos repositórios",
+		"close": "Fechar",
+		"close_modal": "Fechar modal",
+		"delete_title": "Excluir repositório"
+	},
+	"status": {
+		"active": "Ativo",
+		"inactive": "Inativo",
+		"secure": "Seguro",
+		"insecure": "Inseguro",
+		"secure_https": "Seguro (HTTPS)",
+		"insecure_http": "Inseguro (HTTP)",
+		"never": "Nunca",
+		"no": "Não",
+		"required": "Necessário",
+		"reboot_required": "Reinicialização necessária"
+	},
+	"delete_modal": {
+		"title": "Excluir repositório",
+		"cannot_undo": "Esta ação não pode ser desfeita",
+		"confirm": "Tem certeza de que deseja excluir \"{{name}}\"?",
+		"warning_label": "Aviso:",
+		"warning_one": "Este repositório está atualmente atribuído a {{count}} host.",
+		"warning_other": "Este repositório está atualmente atribuído a {{count}} hosts."
+	},
+	"pagination": {
+		"rows_per_page": "Linhas por página:",
+		"range": "{{start}}-{{end}} de {{total}}",
+		"page": "Página {{current}} de {{total}}",
+		"previous": "Anterior",
+		"next": "Próxima",
+		"previous_label": "Página anterior de repositórios",
+		"next_label": "Próxima página de repositórios"
+	},
+	"list": {
+		"title": "Repositórios",
+		"subtitle": "Gerencie e monitore seus repositórios de pacotes",
+		"error_load": "Falha ao carregar repositórios: {{message}}",
+		"stats": {
+			"total": "Total de repositórios",
+			"total_title": "Clique para limpar todos os filtros de repositórios",
+			"active": "Repositórios ativos",
+			"active_title": "Clique para filtrar apenas repositórios ativos",
+			"secure": "Seguro (HTTPS)",
+			"secure_title": "Clique para filtrar apenas repositórios HTTPS",
+			"security_score": "Pontuação de segurança"
+		},
+		"search_placeholder": "Buscar repositórios...",
+		"filtered_by": "Filtrado por: {{name}}",
+		"filters": {
+			"security_all": "Todos os tipos de segurança",
+			"https_only": "Somente HTTPS",
+			"http_only": "Somente HTTP",
+			"status_all": "Todos os status",
+			"active_only": "Somente ativos",
+			"inactive_only": "Somente inativos"
+		},
+		"empty": {
+			"no_repositories": "Nenhum repositório encontrado",
+			"no_matches": "Nenhum repositório corresponde aos seus filtros",
+			"no_reports": "Nenhum repositório foi reportado pelos seus hosts ainda"
+		},
+		"columns": {
+			"name": "Repositório",
+			"url": "URL",
+			"distribution": "Distribuição",
+			"security": "Segurança",
+			"status": "Status",
+			"host_count": "Hosts",
+			"actions": "Ações"
+		},
+		"column_settings_title": "Configurações de colunas",
+		"host_count_one": "{{count}} Host",
+		"host_count_other": "{{count}} Hosts"
+	},
+	"detail": {
+		"title": "Repositório",
+		"error_load": "Falha ao carregar repositório: {{message}}",
+		"not_found_title": "Repositório não encontrado",
+		"not_found_body": "O repositório que você procura não existe.",
+		"information_title": "Informações do repositório",
+		"fields": {
+			"name": "Nome do repositório",
+			"priority": "Prioridade",
+			"priority_placeholder": "Prioridade opcional",
+			"description": "Descrição",
+			"description_placeholder": "Descrição opcional",
+			"is_active": "O repositório está ativo",
+			"url": "URL",
+			"distribution": "Distribuição",
+			"components": "Componentes",
+			"type": "Tipo de repositório",
+			"security": "Segurança",
+			"created": "Criado em"
+		},
+		"hosts_title": "Hosts que usam este repositório ({{count}})",
+		"hosts_search_placeholder": "Buscar hosts...",
+		"hosts_empty_search": "Nenhum host corresponde à sua busca",
+		"hosts_empty": "Este repositório ainda não foi reportado por nenhum host.",
+		"hosts_columns": {
+			"host": "Host",
+			"os": "Sistema operacional",
+			"last_checked": "Última verificação",
+			"last_update": "Última atualização",
+			"reboot_required": "Reinicialização necessária"
+		},
+		"checked": "Verificado:",
+		"updated": "Atualizado:",
+		"packages_title": "Pacotes deste repositório",
+		"packages_search_placeholder": "Buscar pacotes...",
+		"packages_empty_search": "Nenhum pacote corresponde à sua busca",
+		"packages_empty": "Nenhum pacote encontrado neste repositório.",
+		"packages_columns": {
+			"name": "Nome do pacote",
+			"latest_version": "Versão mais recente",
+			"status": "Status",
+			"installed_on": "Instalado em"
+		},
+		"package_status": {
+			"security_update": "Atualização de segurança",
+			"update_available": "Atualização disponível",
+			"up_to_date": "Atualizado"
+		},
+		"install_count_one": "{{count}} host",
+		"install_count_other": "{{count}} hosts"
+	}
+}

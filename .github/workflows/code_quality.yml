@@ -37,3 +37,73 @@ jobs:
             --no-errors-on-unmatched \
             --files-ignore-unknown=true \
             .
+
+      - name: i18n catalog parity check
+        run: node tools/i18n-check.mjs
+
+  i18n-ratchet:
+    name: i18n ratchet (backend)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Check Error(w, ratchet
+        run: bash tools/check-error-i18n.sh
+
+  go-test:
+    name: Go build & test (backend)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "server-source-code/go.mod"
+          cache-dependency-path: "server-source-code/go.sum"
+
+      - name: Build
+        working-directory: server-source-code
+        run: go build ./...
+
+      - name: Vet
+        working-directory: server-source-code
+        run: go vet ./...
+
+      - name: Test
+        working-directory: server-source-code
+        run: go test ./... -count=1
+
+  frontend-test:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        working-directory: frontend
+        run: npx vitest run

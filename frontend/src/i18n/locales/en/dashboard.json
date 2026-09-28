@@ -1,0 +1,140 @@
+{
+	"welcome": "Welcome back, {{name}} 👋",
+	"default_name": "User",
+	"subtitle": "Overview of your PatchMon infrastructure",
+	"never": "Never",
+	"actions": {
+		"edit_dashboard": "Edit dashboard",
+		"customize_layout_title": "Customize dashboard layout",
+		"refresh_title": "Refresh dashboard data"
+	},
+	"edit": {
+		"instructions": "Drag cards to reorder. Drag the right edge of a card to make it wider or narrower. Change row columns below if needed, then Save order to apply.",
+		"saving": "Saving...",
+		"save_order": "Save order",
+		"reset_defaults": "Reset to Defaults",
+		"cancel": "Cancel",
+		"row_layout": "Row layout:",
+		"stats_row": "Stats row",
+		"charts_row": "Charts row",
+		"columns_one": "{{count}} column",
+		"columns_other": "{{count}} columns",
+		"hide_card": "Hide card",
+		"show_card": "Show card"
+	},
+	"a11y": {
+		"card_width": "Card width in columns",
+		"drag_to_reorder": "Drag to reorder"
+	},
+	"stats": {
+		"needs_reboots": "Needs Reboots",
+		"total_hosts": "Total Hosts",
+		"needs_updating": "Needs Updating",
+		"up_to_date": "Up to date",
+		"outdated_packages": "Outdated Packages",
+		"security_updates": "Security Updates",
+		"host_groups": "Host Groups",
+		"users": "Users",
+		"repositories": "Repositories",
+		"compliance": "Compliance",
+		"compliance_count": "{{compliant}}/{{total}} hosts"
+	},
+	"errored": {
+		"title_one": "{{count}} host hasn't reported in {{threshold}}+",
+		"title_other": "{{count}} hosts haven't reported in {{threshold}}+",
+		"description": "These hosts may be offline or experiencing connectivity issues.",
+		"all_reporting": "All hosts are reporting normally",
+		"no_failures": "No hosts have failed to report in the last {{threshold}}."
+	},
+	"offline": {
+		"title_one": "{{count}} stale host",
+		"title_other": "{{count}} stale hosts",
+		"description": "These hosts haven't reported in over {{threshold}}.",
+		"all_reporting": "All hosts are reporting",
+		"no_stale": "No hosts are stale."
+	},
+	"charts": {
+		"os_distribution": "OS Distribution",
+		"update_status": "Update Status",
+		"view_hosts_needing_updates": "View hosts needing updates",
+		"outdated_by_priority": "Outdated Packages by Priority",
+		"host_compliance_status": "Host Compliance Status",
+		"openscap_distribution": "OpenSCAP Benchmark Distribution",
+		"failures_by_severity": "Failures by Severity",
+		"compliance_profiles": "Compliance Profiles in Use",
+		"last_scan_age": "Last Scan Age",
+		"dataset_hosts": "Hosts",
+		"axis_time_hours": "Time (Hours)",
+		"axis_date": "Date",
+		"axis_packages": "Number of Packages",
+		"now": "Now",
+		"unknown_date": "Unknown Date",
+		"unknown": "Unknown",
+		"tooltip_no_data": "{{label}}: No data",
+		"tooltip_value": "{{label}}: {{value}}",
+		"hour_am": "{{hour}} AM",
+		"hour_pm": "{{hour}} PM"
+	},
+	"package_trends": {
+		"title": "Package Trends Over Time",
+		"refresh": "Refresh",
+		"trigger_stats_title": "Trigger system statistics collection",
+		"refresh_data_title": "Refresh data",
+		"all_hosts": "All Hosts",
+		"loading_hosts": "Loading hosts...",
+		"no_hosts": "No hosts available",
+		"job_ran": "Ran collection job #{{jobId}}",
+		"no_data": "No data available",
+		"periods": {
+			"last_24_hours": "Last 24 hours",
+			"last_7_days": "Last 7 days",
+			"last_30_days": "Last 30 days",
+			"last_90_days": "Last 90 days",
+			"last_6_months": "Last 6 months",
+			"last_year": "Last year"
+		}
+	},
+	"quick_stats": {
+		"need_updates": "Need Updates",
+		"security": "Security",
+		"security_title": "Security Issues",
+		"reporting": "Reporting",
+		"avg_per_host": "Avg/Host",
+		"avg_per_host_title": "Avg per Host",
+		"outdated": "outdated"
+	},
+	"recent_users": {
+		"title": "Recent Users Logged in",
+		"count_one": "{{count}} user",
+		"count_other": "{{count}} users",
+		"empty": "No users found",
+		"username": "Username",
+		"last_login": "Last Login"
+	},
+	"recent_collection": {
+		"title": "Recent Collection",
+		"count_one": "{{count}} host",
+		"count_other": "{{count}} hosts",
+		"empty": "No hosts found",
+		"host": "Host",
+		"last_update": "Last Update"
+	},
+	"errors": {
+		"title": "Error loading dashboard",
+		"load_failed": "Failed to load dashboard statistics",
+		"try_again": "Try again"
+	},
+	"toasts": {
+		"welcome": "Welcome to PatchMon!"
+	},
+	"time": {
+		"minutes_one": "{{count}} minute",
+		"minutes_other": "{{count}} minutes",
+		"hours_one": "{{count}} hour",
+		"hours_other": "{{count}} hours",
+		"days_one": "{{count}} day",
+		"days_other": "{{count}} days",
+		"hours_minutes": "{{hours}}h {{minutes}}m",
+		"days_hours": "{{days}}d {{hours}}h"
+	}
+}

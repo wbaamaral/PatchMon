@@ -20,7 +20,7 @@ func NewSearchHandler(search *store.SearchStore) *SearchHandler {
 func (h *SearchHandler) HandleGlobalSearch(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if q == "" {
-		Error(w, http.StatusBadRequest, "Search query parameter 'q' is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.search_query_required")
 		return
 	}
 	if len(q) > 200 {
@@ -34,7 +34,7 @@ func (h *SearchHandler) HandleGlobalSearch(w http.ResponseWriter, r *http.Reques
 
 	results, err := h.search.GlobalSearch(r.Context(), q, limit)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to perform search")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_perform_search")
 		return
 	}
 

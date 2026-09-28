@@ -1,0 +1,71 @@
+{
+	"buttons": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"close": "Close",
+		"confirm": "Confirm",
+		"back": "Back",
+		"next": "Next",
+		"retry": "Retry",
+		"refresh": "Refresh",
+		"copy": "Copy",
+		"search": "Search",
+		"filter": "Filters",
+		"loading": "Loading...",
+		"reload_page": "Reload Page",
+		"go_to_dashboard": "Go to Dashboard"
+	},
+	"confirm": {
+		"title": "Are you sure?",
+		"subtitle": "This action cannot be undone",
+		"confirm_label": "Delete",
+		"cancel_label": "Cancel"
+	},
+	"errors": {
+		"something_wrong": "Something went wrong",
+		"unexpected_error": "An unexpected error occurred. Our team has been notified and is working on a fix.",
+		"error_details_dev": "Error Details (Development Only)",
+		"copy_error": "Copy error to clipboard",
+		"copied": "Copied!",
+		"failed_to_copy": "Unable to copy"
+	},
+	"loading": {
+		"generic": "Loading...",
+		"checking_status": "Checking system status..."
+	},
+	"time": {
+		"just_now": "just now",
+		"in_a_few_seconds": "in a few seconds",
+		"days_ago_one": "{{count}} day ago",
+		"days_ago_other": "{{count}} days ago",
+		"hours_ago_one": "{{count}} hour ago",
+		"hours_ago_other": "{{count}} hours ago",
+		"minutes_ago_one": "{{count}} minute ago",
+		"minutes_ago_other": "{{count}} minutes ago",
+		"uptime": {
+			"days_one": "{{count}} day",
+			"days_other": "{{count}} days",
+			"hours_one": "{{count}} hour",
+			"hours_other": "{{count}} hours",
+			"minutes_one": "{{count}} minute",
+			"minutes_other": "{{count}} minutes"
+		}
+	},
+	"common": {
+		"yes": "Yes",
+		"no": "No",
+		"enabled": "Enabled",
+		"disabled": "Disabled",
+		"none": "None",
+		"all": "All",
+		"unknown": "Unknown",
+		"status": "Status",
+		"name": "Name",
+		"actions": "Actions",
+		"host": "Host",
+		"hosts_one": "{{count}} host",
+		"hosts_other": "{{count}} hosts"
+	}
+}
