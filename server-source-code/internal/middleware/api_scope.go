@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-
-	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 )
 
 // RequireApiScope returns a middleware that checks the API token has the required scope
@@ -67,14 +65,6 @@ func apiErrorWithMessage(w http.ResponseWriter, message string) {
 	})
 }
 
-func apiError(w http.ResponseWriter, r *http.Request, status int, key string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(map[string]string{
-		"error":     i18n.T(r.Context(), key),
-		"error_key": key,
-	})
-}
 
 func sliceContains(s []string, x string) bool {
 	for _, v := range s {
