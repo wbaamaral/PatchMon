@@ -105,12 +105,12 @@ func (h *DiscordHandler) Config(w http.ResponseWriter, r *http.Request) {
 // Login handles GET /api/v1/auth/discord/login.
 func (h *DiscordHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if h.discordStore == nil {
-		Error(w, http.StatusServiceUnavailable, "Discord authentication is not available")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.discord_not_available")
 		return
 	}
 	cfg, err := h.loadDiscordConfig(r.Context())
 	if err != nil || cfg == nil {
-		Error(w, http.StatusBadRequest, "Discord is not fully configured. Please set Client ID and Client Secret in Settings > Discord Auth.")
+		ErrorKey(w, r, http.StatusBadRequest, "error.discord_not_configured")
 		return
 	}
 	state, err := discord.GenerateState()
@@ -118,7 +118,7 @@ func (h *DiscordHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("discord generate state failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to initiate Discord login")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_initiate_discord_login")
 		return
 	}
 	codeVerifier, _, err := discord.GeneratePKCE()
@@ -126,7 +126,7 @@ func (h *DiscordHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("discord generate pkce failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to initiate Discord login")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_initiate_discord_login")
 		return
 	}
 	authURL, err := cfg.GenerateAuthURL(state, codeVerifier)
@@ -134,7 +134,7 @@ func (h *DiscordHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("discord auth url failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to initiate Discord login")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_initiate_discord_login")
 		return
 	}
 	sessionData := &store.DiscordSessionData{
@@ -148,7 +148,7 @@ func (h *DiscordHandler) Login(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("discord store session failed", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to initiate Discord login")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_initiate_discord_login")
 		return
 	}
 	secure := h.cfg.Env == "production" && (r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https")
@@ -378,32 +378,32 @@ func (h *DiscordHandler) Callback(w http.ResponseWriter, r *http.Request) {
 // Link handles POST /api/v1/auth/discord/link.
 func (h *DiscordHandler) Link(w http.ResponseWriter, r *http.Request) {
 	if h.discordStore == nil {
-		Error(w, http.StatusServiceUnavailable, "Discord authentication is not available")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.discord_not_available")
 		return
 	}
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	cfg, err := h.loadDiscordConfig(r.Context())
 	if err != nil || cfg == nil {
-		Error(w, http.StatusBadRequest, "Discord authentication is not enabled")
+		ErrorKey(w, r, http.StatusBadRequest, "error.discord_not_enabled")
 		return
 	}
 	state, err := discord.GenerateState()
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to generate Discord link URL")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_discord_link")
 		return
 	}
 	codeVerifier, _, err := discord.GeneratePKCE()
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to generate Discord link URL")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_discord_link")
 		return
 	}
 	authURL, err := cfg.GenerateAuthURL(state, codeVerifier)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to generate Discord link URL")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_discord_link")
 		return
 	}
 	sessionData := &store.DiscordSessionData{
@@ -414,7 +414,7 @@ func (h *DiscordHandler) Link(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:    time.Now().UnixMilli(),
 	}
 	if err := h.discordStore.Store(r.Context(), state, sessionData, 10*time.Minute); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to generate Discord link URL")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_discord_link")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"url": authURL})
@@ -424,26 +424,26 @@ func (h *DiscordHandler) Link(w http.ResponseWriter, r *http.Request) {
 func (h *DiscordHandler) Unlink(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	if user.DiscordID == nil || *user.DiscordID == "" {
-		Error(w, http.StatusBadRequest, "No Discord account linked")
+		ErrorKey(w, r, http.StatusBadRequest, "error.no_discord_linked")
 		return
 	}
 	hasPassword := user.PasswordHash != nil && *user.PasswordHash != ""
 	hasOIDC := user.OidcSub != nil && *user.OidcSub != ""
 	if !hasPassword && !hasOIDC {
-		Error(w, http.StatusBadRequest, "Cannot unlink Discord. You must have a password or another login method configured first.")
+		ErrorKey(w, r, http.StatusBadRequest, "error.discord_unlink_no_password")
 		return
 	}
 	if err := h.users.UpdateDiscordUnlink(r.Context(), userID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to unlink Discord account")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_unlink_discord")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"message": "Discord account unlinked successfully"})
@@ -480,17 +480,17 @@ func (h *DiscordHandler) GetSettings(w http.ResponseWriter, r *http.Request) {
 func (h *DiscordHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	var req map[string]interface{}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	applyDiscordSettingsUpdate(s, req, h.enc)
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update Discord settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_discord_settings")
 		return
 	}
 	secretSet := false

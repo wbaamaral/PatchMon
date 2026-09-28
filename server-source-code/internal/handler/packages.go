@@ -51,7 +51,7 @@ func (h *PackagesHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 	pkgs, total, totalInstalls, err := h.packages.List(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load packages")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_packages")
 		return
 	}
 	pages := (total + params.Limit - 1) / params.Limit
@@ -75,16 +75,16 @@ func (h *PackagesHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *PackagesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	packageID := chi.URLParam(r, "packageId")
 	if packageID == "" {
-		Error(w, http.StatusBadRequest, "packageId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.package_id_required")
 		return
 	}
 	pkg, err := h.packages.GetByID(r.Context(), packageID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch package details")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_package_details")
 		return
 	}
 	if pkg == nil {
-		Error(w, http.StatusNotFound, "Package not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.package_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, pkg)
@@ -94,7 +94,7 @@ func (h *PackagesHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 func (h *PackagesHandler) GetHosts(w http.ResponseWriter, r *http.Request) {
 	packageID := chi.URLParam(r, "packageId")
 	if packageID == "" {
-		Error(w, http.StatusBadRequest, "packageId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.package_id_required")
 		return
 	}
 	q := r.URL.Query()
@@ -126,7 +126,7 @@ func (h *PackagesHandler) GetHosts(w http.ResponseWriter, r *http.Request) {
 	}
 	hosts, total, err := h.packages.GetHosts(r.Context(), packageID, params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch package hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_package_hosts")
 		return
 	}
 	pages := (total + params.Limit - 1) / params.Limit
@@ -148,7 +148,7 @@ func (h *PackagesHandler) GetHosts(w http.ResponseWriter, r *http.Request) {
 func (h *PackagesHandler) GetActivity(w http.ResponseWriter, r *http.Request) {
 	packageID := chi.URLParam(r, "packageId")
 	if packageID == "" {
-		Error(w, http.StatusBadRequest, "packageId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.package_id_required")
 		return
 	}
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
@@ -162,7 +162,7 @@ func (h *PackagesHandler) GetActivity(w http.ResponseWriter, r *http.Request) {
 	offset = clampOffset(offset)
 	activities, err := h.packages.GetActivity(r.Context(), packageID, limit, offset)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch package activity")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_package_activity")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"activities": activities})
@@ -172,7 +172,7 @@ func (h *PackagesHandler) GetActivity(w http.ResponseWriter, r *http.Request) {
 func (h *PackagesHandler) GetCategories(w http.ResponseWriter, r *http.Request) {
 	cats, err := h.packages.GetCategories(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch categories")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_categories")
 		return
 	}
 	JSON(w, http.StatusOK, cats)

@@ -26,6 +26,7 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import PatchWizard from "../components/PatchWizard";
 import { useAuth } from "../contexts/AuthContext";
@@ -61,6 +62,7 @@ function formatRepoName(name) {
 }
 
 const Packages = () => {
+	const { t } = useTranslation("packages");
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const toast = useToast();
@@ -116,11 +118,31 @@ const Packages = () => {
 	// Column configuration
 	const [columnConfig, setColumnConfig] = useState(() => {
 		const defaultConfig = [
-			{ id: "name", label: "Package", visible: true, order: 0 },
-			{ id: "packageHosts", label: "Installed On", visible: true, order: 1 },
-			{ id: "status", label: "Status", visible: true, order: 2 },
-			{ id: "latestVersion", label: "Latest Version", visible: true, order: 3 },
-			{ id: "sourceRepos", label: "Source Repos", visible: true, order: 4 },
+			{ id: "name", labelKey: "list.columns.name", visible: true, order: 0 },
+			{
+				id: "packageHosts",
+				labelKey: "list.columns.package_hosts",
+				visible: true,
+				order: 1,
+			},
+			{
+				id: "status",
+				labelKey: "list.columns.status",
+				visible: true,
+				order: 2,
+			},
+			{
+				id: "latestVersion",
+				labelKey: "list.columns.latest_version",
+				visible: true,
+				order: 3,
+			},
+			{
+				id: "sourceRepos",
+				labelKey: "list.columns.source_repos",
+				visible: true,
+				order: 4,
+			},
 		];
 
 		const saved = localStorage.getItem("packages-column-config");
@@ -295,7 +317,7 @@ const Packages = () => {
 			navigate(`/patching/runs/${immediate[0].runId}`);
 			return;
 		}
-		toast.success("Patch all queued. View progress in Patching.");
+		toast.success(t("toasts.patch_all_queued"));
 	};
 
 	const handleSelectPackage = (packageName) => {
@@ -463,11 +485,31 @@ const Packages = () => {
 
 	const resetColumns = () => {
 		const defaultConfig = [
-			{ id: "name", label: "Package", visible: true, order: 0 },
-			{ id: "packageHosts", label: "Installed On", visible: true, order: 1 },
-			{ id: "status", label: "Status", visible: true, order: 2 },
-			{ id: "latestVersion", label: "Latest Version", visible: true, order: 3 },
-			{ id: "sourceRepos", label: "Source Repos", visible: true, order: 4 },
+			{ id: "name", labelKey: "list.columns.name", visible: true, order: 0 },
+			{
+				id: "packageHosts",
+				labelKey: "list.columns.package_hosts",
+				visible: true,
+				order: 1,
+			},
+			{
+				id: "status",
+				labelKey: "list.columns.status",
+				visible: true,
+				order: 2,
+			},
+			{
+				id: "latestVersion",
+				labelKey: "list.columns.latest_version",
+				visible: true,
+				order: 3,
+			},
+			{
+				id: "sourceRepos",
+				labelKey: "list.columns.source_repos",
+				visible: true,
+				order: 4,
+			},
 		];
 		updateColumnConfig(defaultConfig);
 	};
@@ -490,7 +532,7 @@ const Packages = () => {
 								</div>
 								{pkg.category && (
 									<div className="text-xs text-secondary-400 dark:text-white">
-										Category: {pkg.category}
+										{t("list.labels.category", { name: pkg.category })}
 									</div>
 								)}
 							</div>
@@ -506,7 +548,7 @@ const Packages = () => {
 									});
 								}}
 								className="ml-1 flex-shrink-0 p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded transition-colors"
-								title="View description"
+								title={t("actions.view_description")}
 							>
 								<Info className="h-4 w-4 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300" />
 							</button>
@@ -525,13 +567,19 @@ const Packages = () => {
 
 				const displayText =
 					hostsNeedingUpdates > 0 && hostsNeedingUpdates < installedHostsCount
-						? `${hostsNeedingUpdates}/${installedHostsCount} hosts`
-						: `${installedHostsCount} host${installedHostsCount !== 1 ? "s" : ""}`;
+						? t("list.labels.hosts_fraction", {
+								updated: hostsNeedingUpdates,
+								total: installedHostsCount,
+							})
+						: t("list.labels.hosts_count", { count: installedHostsCount });
 
 				const titleText =
 					hostsNeedingUpdates > 0 && hostsNeedingUpdates < installedHostsCount
-						? `${hostsNeedingUpdates} of ${installedHostsCount} hosts need updates`
-						: `Installed on ${installedHostsCount} host${installedHostsCount !== 1 ? "s" : ""}`;
+						? t("list.labels.hosts_need_updates", {
+								updated: hostsNeedingUpdates,
+								total: installedHostsCount,
+							})
+						: t("list.labels.installed_on", { count: installedHostsCount });
 
 				return (
 					<button
@@ -551,25 +599,27 @@ const Packages = () => {
 				const needsUpdates = (pkg.stats?.updatesNeeded || 0) > 0;
 
 				if (!needsUpdates) {
-					return <span className="badge-success">Up to Date</span>;
+					return (
+						<span className="badge-success">{t("status.up_to_date")}</span>
+					);
 				}
 
 				return (pkg.stats?.securityUpdates || 0) > 0 ? (
 					<span className="badge-danger">
 						<Shield className="h-3 w-3" />
-						Security Update Available
+						{t("status.security_update_available")}
 					</span>
 				) : (
-					<span className="badge-warning">Update Available</span>
+					<span className="badge-warning">{t("status.update_available")}</span>
 				);
 			}
 			case "latestVersion":
 				return (
 					<div
 						className="text-sm text-secondary-900 dark:text-white max-w-xs truncate"
-						title={pkg.latestVersion || "N/A"}
+						title={pkg.latestVersion || t("labels.not_available")}
 					>
-						{pkg.latestVersion || "N/A"}
+						{pkg.latestVersion || t("labels.not_available")}
 					</div>
 				);
 			case "sourceRepos": {
@@ -645,17 +695,17 @@ const Packages = () => {
 						<AlertTriangle className="h-5 w-5 text-danger-400" />
 						<div className="ml-3">
 							<h3 className="text-sm font-medium text-danger-800">
-								Error loading packages
+								{t("list.errors.loading_packages")}
 							</h3>
 							<p className="text-sm text-danger-700 mt-1">
-								{error.message || "Failed to load packages"}
+								{error.message || t("list.errors.load_packages")}
 							</p>
 							<button
 								type="button"
 								onClick={() => refetch()}
 								className="mt-2 btn-danger text-xs"
 							>
-								Try again
+								{t("actions.try_again")}
 							</button>
 						</div>
 					</div>
@@ -672,25 +722,29 @@ const Packages = () => {
 					<div className="flex flex-wrap items-center gap-2 sm:gap-3">
 						<h1 className="text-2xl font-semibold text-secondary-900 dark:text-white">
 							{isHostScoped
-								? `Packages for ${patchModalHostName || "this"} Host`
-								: "Packages on all Hosts"}
+								? patchModalHostName
+									? t("list.title.host_scoped_named", {
+											name: patchModalHostName,
+										})
+									: t("list.title.host_scoped_default")
+								: t("list.title.all_hosts")}
 						</h1>
 						{isHostScoped && (
 							<button
 								type="button"
 								onClick={clearHostFilter}
 								className="btn-outline flex items-center gap-1.5 px-3 py-1.5 min-h-[44px] sm:min-h-0 text-xs sm:text-sm"
-								title="Show packages across every host"
+								title={t("actions.show_all_hosts_title")}
 							>
 								<X className="h-3.5 w-3.5" />
-								Clear filter
+								{t("actions.clear_filter")}
 							</button>
 						)}
 					</div>
 					<p className="text-sm text-secondary-600 dark:text-white mt-1">
 						{isHostScoped
-							? "Every figure below counts this host only"
-							: "Manage package updates and security patches"}
+							? t("list.subtitle.host_scoped")
+							: t("list.subtitle.all")}
 					</p>
 				</div>
 				<div className="flex items-center gap-3">
@@ -703,14 +757,19 @@ const Packages = () => {
 								className="btn-primary flex items-center gap-2"
 								title={
 									hostFilter && hostFilter !== "all"
-										? `Patch ${selectedPackages.length} selected package(s) on ${
-												patchModalHostName || "this host"
-											}`
-										: `Patch ${selectedPackages.length} selected package(s) on chosen hosts`
+										? t("list.actions.patch_selected_on_host", {
+												count: selectedPackages.length,
+												host: patchModalHostName || t("list.actions.this_host"),
+											})
+										: t("list.actions.patch_selected_on_chosen", {
+												count: selectedPackages.length,
+											})
 								}
 							>
 								<Wrench className="h-4 w-4" />
-								Patch selected ({selectedPackages.length})
+								{t("actions.patch_selected", {
+									count: selectedPackages.length,
+								})}
 							</button>
 						)}
 					{hostFilter &&
@@ -721,10 +780,10 @@ const Packages = () => {
 								type="button"
 								onClick={() => setShowPatchConfirmModal(true)}
 								className="btn-primary flex items-center gap-2"
-								title="Run system package updates on this host"
+								title={t("actions.patch_all_title")}
 							>
 								<Wrench className="h-4 w-4" />
-								Patch all
+								{t("actions.patch_all")}
 							</button>
 						)}
 					{hostFilter &&
@@ -733,9 +792,9 @@ const Packages = () => {
 						isWindowsHostFilter && (
 							<span
 								className="text-xs text-secondary-400 dark:text-secondary-300 italic"
-								title="Windows patching is managed through Windows Update or WinGet on the host"
+								title={t("actions.windows_patching_title")}
 							>
-								Patching managed via Windows Update
+								{t("actions.windows_patching")}
 							</span>
 						)}
 					<button
@@ -743,12 +802,12 @@ const Packages = () => {
 						onClick={() => handleRefresh()}
 						disabled={isRefreshing}
 						className="btn-outline flex items-center gap-2"
-						title="Refresh packages and statistics data"
+						title={t("actions.refresh_title")}
 					>
 						<RefreshCw
 							className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
 						/>
-						{isRefreshing ? "Refreshing..." : "Refresh"}
+						{isRefreshing ? t("actions.refreshing") : t("actions.refresh")}
 					</button>
 				</div>
 			</div>
@@ -774,15 +833,15 @@ const Packages = () => {
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full min-h-[44px]"
 					title={
 						isHostScoped
-							? "Click to show all of this host's packages"
-							: "Click to show all packages"
+							? t("list.cards.packages_title_host")
+							: t("list.cards.packages_title")
 					}
 				>
 					<div className="flex items-center">
 						<Package className="h-5 w-5 text-primary-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Packages
+								{t("list.cards.packages")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{totalPackagesCount}
@@ -797,7 +856,7 @@ const Packages = () => {
 							<Package className="h-5 w-5 text-blue-600 mr-2" />
 							<div>
 								<p className="text-sm text-secondary-500 dark:text-white">
-									Installations
+									{t("list.cards.installations")}
 								</p>
 								<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 									{totalInstallationsCount}
@@ -817,15 +876,15 @@ const Packages = () => {
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
 					title={
 						isHostScoped
-							? "Click to filter this host's packages that need updates"
-							: "Click to filter packages that need updates"
+							? t("list.cards.outdated_title_host")
+							: t("list.cards.outdated_title")
 					}
 				>
 					<div className="flex items-center">
 						<Package className="h-5 w-5 text-warning-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Outdated Packages
+								{t("list.cards.outdated_packages")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{outdatedPackagesCount}
@@ -844,15 +903,15 @@ const Packages = () => {
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
 					title={
 						isHostScoped
-							? "Click to filter this host's packages with security updates"
-							: "Click to filter packages with security updates"
+							? t("list.cards.security_title_host")
+							: t("list.cards.security_title")
 					}
 				>
 					<div className="flex items-center">
 						<Shield className="h-5 w-5 text-danger-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Security Packages
+								{t("list.cards.security_packages")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{securityUpdatesCount}
@@ -866,13 +925,13 @@ const Packages = () => {
 						type="button"
 						onClick={() => navigate("/hosts?filter=needsUpdates")}
 						className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
-						title="Click to view hosts that need updates"
+						title={t("list.cards.outdated_hosts_title")}
 					>
 						<div className="flex items-center">
 							<Server className="h-5 w-5 text-warning-600 mr-2" />
 							<div>
 								<p className="text-sm text-secondary-500 dark:text-white">
-									Outdated Hosts
+									{t("list.cards.outdated_hosts")}
 								</p>
 								<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 									{dashboardStats?.cards?.hostsNeedingUpdates ?? 0}
@@ -890,15 +949,16 @@ const Packages = () => {
 						{selectedPackages.length > 0 && (
 							<div className="flex items-center gap-2">
 								<span className="text-sm text-secondary-600 dark:text-white/80">
-									{selectedPackages.length} package
-									{selectedPackages.length !== 1 ? "s" : ""} selected
+									{t("list.selection.selected", {
+										count: selectedPackages.length,
+									})}
 								</span>
 								<button
 									type="button"
 									onClick={() => setSelectedPackages([])}
 									className="text-sm text-secondary-500 dark:text-white/70 hover:text-secondary-700 dark:hover:text-white/90"
 								>
-									Clear selection
+									{t("actions.clear_selection")}
 								</button>
 							</div>
 						)}
@@ -913,7 +973,7 @@ const Packages = () => {
 									<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400 dark:text-white" />
 									<input
 										type="text"
-										placeholder="Search packages..."
+										placeholder={t("list.search_placeholder")}
 										value={searchTerm}
 										onChange={(e) => setSearchTerm(e.target.value)}
 										className="w-full pl-10 pr-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400"
@@ -928,7 +988,9 @@ const Packages = () => {
 									onChange={(e) => setCategoryFilter(e.target.value)}
 									className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white"
 								>
-									<option value="all">All Categories</option>
+									<option value="all">
+										{t("list.filters.all_categories")}
+									</option>
 									{categories.map((category) => (
 										<option key={category} value={category}>
 											{category}
@@ -944,14 +1006,18 @@ const Packages = () => {
 									onChange={(e) => setUpdateStatusFilter(e.target.value)}
 									className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white"
 								>
-									<option value="all-packages">All Packages</option>
+									<option value="all-packages">
+										{t("list.filters.all_packages")}
+									</option>
 									<option value="needs-updates">
-										Packages Needing Updates
+										{t("list.filters.packages_needing_updates")}
 									</option>
 									<option value="security-updates">
-										Security Updates Only
+										{t("list.filters.security_updates_only")}
 									</option>
-									<option value="regular-updates">Regular Updates Only</option>
+									<option value="regular-updates">
+										{t("list.filters.regular_updates_only")}
+									</option>
 								</select>
 							</div>
 
@@ -962,7 +1028,7 @@ const Packages = () => {
 									onChange={(e) => selectHostFilter(e.target.value)}
 									className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white"
 								>
-									<option value="all">All Hosts</option>
+									<option value="all">{t("list.filters.all_hosts")}</option>
 									{hosts?.map((host) => (
 										<option key={host.id} value={host.id}>
 											{host.friendly_name}
@@ -979,7 +1045,7 @@ const Packages = () => {
 									className="flex items-center gap-2 px-3 py-2 text-sm text-secondary-700 dark:text-white bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-600 transition-colors"
 								>
 									<Columns className="h-4 w-4" />
-									Columns
+									{t("actions.columns")}
 								</button>
 							</div>
 						</div>
@@ -991,13 +1057,12 @@ const Packages = () => {
 								<Package className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 								<p className="text-secondary-500 dark:text-white">
 									{packages?.length === 0
-										? "No packages found"
-										: "No packages match your filters"}
+										? t("list.empty.no_packages")
+										: t("list.empty.no_match")}
 								</p>
 								{packages?.length === 0 && (
 									<p className="text-sm text-secondary-400 dark:text-white mt-2">
-										Packages will appear here once hosts start reporting their
-										installed packages
+										{t("list.empty.no_packages_hint")}
 									</p>
 								)}
 							</div>
@@ -1052,7 +1117,7 @@ const Packages = () => {
 																});
 															}}
 															className="flex-shrink-0 p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded transition-colors"
-															title="View description"
+															title={t("actions.view_description")}
 														>
 															<Info className="h-4 w-4 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300" />
 														</button>
@@ -1068,18 +1133,18 @@ const Packages = () => {
 															if (!needsUpdates) {
 																return (
 																	<span className="badge-success text-xs">
-																		Up to Date
+																		{t("status.up_to_date")}
 																	</span>
 																);
 															}
 															return pkg.isSecurityUpdate ? (
 																<span className="badge-danger text-xs flex items-center gap-1">
 																	<Shield className="h-3 w-3" />
-																	Security
+																	{t("status.security")}
 																</span>
 															) : (
 																<span className="badge-warning text-xs">
-																	Update
+																	{t("status.update")}
 																</span>
 															);
 														})()}
@@ -1090,7 +1155,7 @@ const Packages = () => {
 														className="text-sm hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded px-2 py-1 -mx-2 transition-colors"
 													>
 														<span className="text-secondary-500 dark:text-white">
-															On:&nbsp;
+															{t("labels.on")}&nbsp;
 														</span>
 														<span className="text-secondary-900 dark:text-white font-semibold">
 															{(() => {
@@ -1114,7 +1179,9 @@ const Packages = () => {
 																	pkg.stats?.totalInstalls ||
 																	pkg.packageHosts?.length ||
 																	0;
-																return ` host${installedHostsCount !== 1 ? "s" : ""}`;
+																return ` ${t("labels.host_word", {
+																	count: installedHostsCount,
+																})}`;
 															})()}
 														</span>
 													</button>
@@ -1124,10 +1191,10 @@ const Packages = () => {
 												<div className="pt-2 border-t border-secondary-200 dark:border-secondary-600">
 													<div className="text-sm">
 														<span className="text-secondary-500 dark:text-white">
-															Latest:&nbsp;
+															{t("labels.latest")}&nbsp;
 														</span>
 														<span className="text-secondary-900 dark:text-white font-mono text-sm">
-															{pkg.latestVersion || "N/A"}
+															{pkg.latestVersion || t("labels.not_available")}
 														</span>
 													</div>
 												</div>
@@ -1136,7 +1203,7 @@ const Packages = () => {
 												{pkg.sourceRepos?.length > 0 && (
 													<div className="flex items-center gap-2 flex-wrap">
 														<span className="text-xs text-secondary-500 dark:text-white">
-															Repos:
+															{t("labels.repos")}
 														</span>
 														{pkg.sourceRepos.slice(0, 3).map((repo) => (
 															<span
@@ -1173,8 +1240,8 @@ const Packages = () => {
 															paginatedPackages.every((p) =>
 																selectedPackages.includes(p.name),
 															)
-																? "Deselect all on page"
-																: "Select all on page"
+																? t("actions.deselect_all_page")
+																: t("actions.select_all_page")
 														}
 													>
 														{paginatedPackages.length > 0 &&
@@ -1198,12 +1265,12 @@ const Packages = () => {
 																onClick={() => handleSort(column.id)}
 																className="flex items-center gap-1 hover:text-secondary-700 dark:hover:text-secondary-200 transition-colors"
 															>
-																{column.label}
+																{t(column.labelKey)}
 																{getSortIcon(column.id)}
 															</button>
 														) : (
 															<span className="flex items-center gap-1">
-																{column.label}
+																{t(column.labelKey)}
 															</span>
 														)}
 													</th>
@@ -1259,7 +1326,7 @@ const Packages = () => {
 							<div className="flex items-center gap-4">
 								<div className="flex items-center gap-2">
 									<span className="text-sm text-secondary-700 dark:text-white">
-										Rows per page:
+										{t("pagination.rows_per_page")}
 									</span>
 									<select
 										value={pageSize}
@@ -1275,7 +1342,11 @@ const Packages = () => {
 									</select>
 								</div>
 								<span className="text-sm text-secondary-700 dark:text-white">
-									{startIndex + 1}-{endIndex} of {totalPackages}
+									{t("pagination.range", {
+										start: startIndex + 1,
+										end: endIndex,
+										total: totalPackages,
+									})}
 								</span>
 							</div>
 							<div className="flex items-center gap-2">
@@ -1288,7 +1359,10 @@ const Packages = () => {
 									<ChevronLeft className="h-4 w-4" />
 								</button>
 								<span className="text-sm text-secondary-700 dark:text-white">
-									Page {currentPage} of {totalPages}
+									{t("pagination.page_of", {
+										current: currentPage,
+										total: totalPages,
+									})}
 								</span>
 								<button
 									type="button"
@@ -1322,7 +1396,7 @@ const Packages = () => {
 						type="button"
 						onClick={() => setDescriptionModal(null)}
 						className="fixed inset-0 cursor-default"
-						aria-label="Close modal"
+						aria-label={t("actions.close_modal")}
 					/>
 					<div className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl max-w-lg w-full mx-4 relative z-10">
 						<div className="px-6 py-4 border-b border-secondary-200 dark:border-secondary-600">
@@ -1350,7 +1424,7 @@ const Packages = () => {
 								onClick={() => setDescriptionModal(null)}
 								className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
 							>
-								Close
+								{t("actions.close")}
 							</button>
 						</div>
 					</div>
@@ -1390,11 +1464,7 @@ const Packages = () => {
 						queryClient.invalidateQueries({ queryKey: ["patching-runs"] });
 						const runs = info?.runs || [];
 						if (mode === "approval") {
-							toast.success(
-								runs.length === 1
-									? "Submitted 1 run for approval"
-									: `Submitted ${runs.length} runs for approval`,
-							);
+							toast.success(t("toasts.submitted_runs", { count: runs.length }));
 							if (!info?.deferred) navigate("/patching?tab=runs");
 							return;
 						}
@@ -1433,6 +1503,7 @@ const ColumnSettingsModal = ({
 	onReorder,
 	onReset,
 }) => {
+	const { t } = useTranslation("packages");
 	const [draggedIndex, setDraggedIndex] = useState(null);
 
 	const handleDragStart = (e, index) => {
@@ -1462,7 +1533,7 @@ const ColumnSettingsModal = ({
 			<div className="bg-white dark:bg-secondary-800 rounded-lg p-6 w-full max-w-md">
 				<div className="flex justify-between items-center mb-4">
 					<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-						Customize Columns
+						{t("list.columns_modal.title")}
 					</h3>
 					<button
 						type="button"
@@ -1494,7 +1565,7 @@ const ColumnSettingsModal = ({
 							<div className="flex items-center gap-3">
 								<GripVertical className="h-4 w-4 text-secondary-400 dark:text-white" />
 								<span className="text-sm font-medium text-secondary-900 dark:text-white">
-									{column.label}
+									{t(column.labelKey)}
 								</span>
 							</div>
 							<button
@@ -1525,14 +1596,14 @@ const ColumnSettingsModal = ({
 						onClick={onReset}
 						className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-600"
 					>
-						Reset to Default
+						{t("list.columns_modal.reset")}
 					</button>
 					<button
 						type="button"
 						onClick={onClose}
 						className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
 					>
-						Done
+						{t("list.columns_modal.done")}
 					</button>
 				</div>
 			</div>

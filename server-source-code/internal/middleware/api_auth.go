@@ -4,26 +4,29 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	"log/slog"
-
 	"github.com/PatchMon/PatchMon/server-source-code/internal/clientip"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/db"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/store"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const ApiTokenKey contextKey = "api_token"
 
-// apiError writes a JSON error response for scoped API (doc parity).
-func apiError(w http.ResponseWriter, code int, errorMsg string) {
+// apiError writes a localized JSON error response for scoped API.
+func apiError(w http.ResponseWriter, r *http.Request, status int, key string) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_ = json.NewEncoder(w).Encode(map[string]string{"error": errorMsg})
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(map[string]string{
+		"error":     i18n.T(r.Context(), key),
+		"error_key": key,
+	})
 }
 
 // ApiAuth returns a middleware that validates Basic Auth with an API scoped credential
@@ -46,7 +49,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: missing or invalid authorization header", "path", r.URL.Path)
 				}
-				apiError(w, http.StatusUnauthorized, "Missing or invalid authorization header")
+				apiError(w, r, http.StatusUnauthorized, "error.missing_auth_header")
 				return
 			}
 			encoded := strings.TrimSpace(strings.TrimPrefix(auth, "Basic "))
@@ -55,7 +58,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: base64 decode error", "path", r.URL.Path, "error", err)
 				}
-				apiError(w, http.StatusUnauthorized, "Missing or invalid authorization header")
+				apiError(w, r, http.StatusUnauthorized, "error.missing_auth_header")
 				return
 			}
 			parts := strings.SplitN(string(decoded), ":", 2)
@@ -63,7 +66,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: invalid credentials format", "path", r.URL.Path)
 				}
-				apiError(w, http.StatusUnauthorized, "Invalid credentials format")
+				apiError(w, r, http.StatusUnauthorized, "error.invalid_credentials_format")
 				return
 			}
 			apiKey, apiSecret := parts[0], parts[1]
@@ -78,7 +81,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: token not found", "path", r.URL.Path, "api_key", apiKey, "error", err)
 				}
-				apiError(w, http.StatusUnauthorized, "Invalid API key")
+				apiError(w, r, http.StatusUnauthorized, "error.invalid_api_key")
 				return
 			}
 
@@ -86,7 +89,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: token disabled", "path", r.URL.Path, "token_id", token.ID)
 				}
-				apiError(w, http.StatusUnauthorized, "API key is disabled")
+				apiError(w, r, http.StatusUnauthorized, "error.api_key_disabled")
 				return
 			}
 
@@ -94,7 +97,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: token expired", "path", r.URL.Path, "token_id", token.ID)
 				}
-				apiError(w, http.StatusUnauthorized, "API key has expired")
+				apiError(w, r, http.StatusUnauthorized, "error.api_key_expired")
 				return
 			}
 
@@ -108,7 +111,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: wrong integration type", "path", r.URL.Path, "type", metadata.IntegrationType)
 				}
-				apiError(w, http.StatusUnauthorized, "Invalid API key type")
+				apiError(w, r, http.StatusUnauthorized, "error.invalid_api_key_type")
 				return
 			}
 
@@ -116,7 +119,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 				if log != nil {
 					log.Debug("api_auth failed: secret mismatch", "path", r.URL.Path, "token_id", token.ID, "error", err)
 				}
-				apiError(w, http.StatusUnauthorized, "Invalid API secret")
+				apiError(w, r, http.StatusUnauthorized, "error.invalid_api_secret")
 				return
 			}
 
@@ -126,7 +129,7 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 					if log != nil {
 						log.Debug("api_auth failed: IP not allowed", "path", r.URL.Path, "client_ip", clientIP)
 					}
-					apiError(w, http.StatusForbidden, "IP address not allowed")
+					apiError(w, r, http.StatusForbidden, "error.ip_not_allowed")
 					return
 				}
 			}

@@ -13,7 +13,7 @@ func RequireApiScope(resource, action string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token := GetApiToken(r.Context())
 			if token == nil {
-				apiError(w, http.StatusUnauthorized, "Unauthorized")
+				apiError(w, r, http.StatusUnauthorized, "error.unauthorized")
 				return
 			}
 

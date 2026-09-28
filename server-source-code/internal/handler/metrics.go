@@ -27,9 +27,9 @@ func NewMetricsHandler(settings *store.SettingsStore, hosts *store.HostsStore, c
 }
 
 // adminModeGuard returns true (and writes a 403) when AdminMode is active.
-func (h *MetricsHandler) adminModeGuard(w http.ResponseWriter) bool {
+func (h *MetricsHandler) adminModeGuard(w http.ResponseWriter, r *http.Request) bool {
 	if h.cfg != nil && h.cfg.AdminMode {
-		Error(w, http.StatusForbidden, "Metrics is not available in managed mode")
+		ErrorKey(w, r, http.StatusForbidden, "error.metrics_not_available")
 		return true
 	}
 	return false
@@ -37,12 +37,12 @@ func (h *MetricsHandler) adminModeGuard(w http.ResponseWriter) bool {
 
 // Get handles GET /api/v1/metrics - returns metrics settings.
 func (h *MetricsHandler) Get(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *MetricsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		anonymousID := uuid.New().String()
 		s.MetricsAnonymousID = &anonymousID
 		if err := h.settings.Update(r.Context(), s); err != nil {
-			Error(w, http.StatusInternalServerError, "Failed to save anonymous ID")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_save_anonymous_id")
 			return
 		}
 	}
@@ -70,30 +70,30 @@ func (h *MetricsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 // Update handles PUT /api/v1/metrics - updates metrics_enabled.
 func (h *MetricsHandler) Update(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	var req struct {
 		MetricsEnabled *bool `json:"metrics_enabled"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.MetricsEnabled == nil {
-		Error(w, http.StatusBadRequest, "metrics_enabled must be a boolean")
+		ErrorKey(w, r, http.StatusBadRequest, "error.metrics_enabled_boolean")
 		return
 	}
 
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
 	s.MetricsEnabled = *req.MetricsEnabled
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update metrics settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_metrics_settings")
 		return
 	}
 
@@ -105,19 +105,19 @@ func (h *MetricsHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 // RegenerateID handles POST /api/v1/metrics/regenerate-id.
 func (h *MetricsHandler) RegenerateID(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
 	newID := uuid.New().String()
 	s.MetricsAnonymousID = &newID
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to regenerate anonymous ID")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_regenerate_anonymous_id")
 		return
 	}
 
@@ -129,12 +129,12 @@ func (h *MetricsHandler) RegenerateID(w http.ResponseWriter, r *http.Request) {
 
 // SendNow handles POST /api/v1/metrics/send-now - sends metrics to patchmon.cloud.
 func (h *MetricsHandler) SendNow(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
@@ -154,7 +154,7 @@ func (h *MetricsHandler) SendNow(w http.ResponseWriter, r *http.Request) {
 
 	hostCount, err := h.hosts.Count(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to get host count")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_get_host_count")
 		return
 	}
 
@@ -177,7 +177,7 @@ func (h *MetricsHandler) SendNow(w http.ResponseWriter, r *http.Request) {
 
 	req, err := http.NewRequestWithContext(r.Context(), http.MethodPost, apiURL+"/metrics/submit", bytes.NewReader(body))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to prepare metrics request")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_prepare_metrics_request")
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")

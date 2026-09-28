@@ -1,0 +1,483 @@
+{
+	"oidc": {
+		"toast": {
+			"saved": "OIDC settings saved",
+			"save_failed": "Failed to save OIDC settings",
+			"imported": "OIDC settings imported from .env",
+			"import_failed": "Failed to import from .env"
+		},
+		"env_banner": {
+			"title": "OIDC is configured via .env"
+		},
+		"config": {
+			"title": "Configuration"
+		},
+		"warnings": {
+			"trust_email": "Trust unverified email is on. Anyone who can set their own email address at your identity provider can sign in as an existing PatchMon user. Only leave this on if you control who can change addresses in your directory.",
+			"https_disabled": "Development only - Enforce HTTPS is disabled. Only use for local testing."
+		},
+		"oauth2": {
+			"title": "OAuth2 Configuration"
+		},
+		"field": {
+			"secret_set": "Set",
+			"secret_not_set": "Not set",
+			"client_id_placeholder": "Enter your OIDC Client ID",
+			"redirect_uri_placeholder": "Leave empty to use callback URL above",
+			"button_text_placeholder": "Login with SSO",
+			"callback_help": "Add this URL to your IdP's allowed redirect URIs"
+		},
+		"role_mapping": {
+			"title": "Role Mapping",
+			"description": "Map IdP group names to PatchMon roles. Users are assigned the highest matching role. Default role is used when no group matches.",
+			"superadmin_warning": {
+				"title": "Superadmin group is not configured",
+				"body": "Role sync is enabled but no Superadmin IdP group is set. OIDC will not grant superadmin to any user, and existing superadmins will not be demoted on login. Set the Superadmin group below to manage the superadmin role via OIDC."
+			},
+			"table": {
+				"role": "PatchMon Role",
+				"mapped": "OIDC Mapped Role (IdP Group Name)",
+				"default_fallback": "Default (fallback)",
+				"default_help": "Role when no IdP group matches",
+				"not_configurable": "Not configurable via OIDC"
+			}
+		},
+		"setup": {
+			"title": "Setup Instructions",
+			"step1": "Configure your IdP (Keycloak, Okta, Auth0, etc.) with a new OAuth2 client",
+			"step2": "Add the callback URL to allowed redirect URIs:",
+			"step3": "Request scopes:",
+			"step3_hint": "(or equivalent for your IdP)",
+			"step4_label": "Authentik users:",
+			"step4_assign": "Assign this mapping to your OAuth2 provider.",
+			"step5": "Copy Issuer URL, Client ID, and Client Secret into the fields above"
+		}
+	},
+	"common": {
+		"save": "Save",
+		"cancel": "Cancel",
+		"edit": "Edit",
+		"delete": "Delete",
+		"create": "Create",
+		"close": "Close",
+		"copy": "Copy",
+		"copied": "Copied",
+		"active": "Active",
+		"inactive": "Inactive",
+		"documentation": "Documentation",
+		"view_guide": "View Guide",
+		"export_csv": "Export CSV",
+		"exporting": "Exporting..."
+	},
+	"host_groups": {
+		"actions": {
+			"create_group": "Create Group",
+			"create_group_title": "Create host group",
+			"edit_group_title": "Edit group",
+			"delete_group": "Delete Group",
+			"update_group": "Update Group",
+			"view_hosts_in": "View hosts in {{name}}",
+			"creating": "Creating...",
+			"updating": "Updating...",
+			"deleting": "Deleting..."
+		},
+		"table": {
+			"group": "Group",
+			"description": "Description",
+			"color": "Color",
+			"hosts": "Hosts",
+			"actions": "Actions",
+			"no_description": "No description"
+		},
+		"hosts_count_one": "{{count}} host",
+		"hosts_count_other": "{{count}} hosts",
+		"empty": {
+			"title": "No host groups found",
+			"subtitle": "Click \"Create Group\" to create the first host group"
+		},
+		"error": {
+			"title": "Error loading host groups",
+			"fallback": "Failed to load host groups"
+		},
+		"form": {
+			"name": "Name *",
+			"description": "Description",
+			"color": "Color",
+			"name_placeholder": "e.g., Production Servers",
+			"description_placeholder": "Optional description for this group",
+			"color_placeholder": "#3B82F6"
+		},
+		"create_modal": {
+			"title": "Create Host Group"
+		},
+		"edit_modal": {
+			"title": "Edit Host Group"
+		},
+		"delete_modal": {
+			"title": "Delete Host Group",
+			"cannot_undo": "This action cannot be undone",
+			"confirm": "Are you sure you want to delete the host group \"{{name}}\"?",
+			"note_label": "Note:",
+			"note_body_one": "This group contains {{count}} host. These hosts will be moved to \"No group\" after deletion.",
+			"note_body_other": "This group contains {{count}} hosts. These hosts will be moved to \"No group\" after deletion.",
+			"hosts_in_group": "Hosts in this group:"
+		}
+	},
+	"environment": {
+		"title": "Environment Variables",
+		"priority_1": "Priority 1",
+		"priority_1_desc": ".env file",
+		"priority_2": "Priority 2",
+		"priority_2_desc": "Database settings (configurable below)",
+		"priority_3": "Priority 3",
+		"priority_3_desc": "Coded defaults",
+		"env_only_note": "Variables marked \"Configure via .env\" are startup/deployment related and can only be changed in the .env file (not in the database).",
+		"restart_note": "If any changes are made then please restart the PatchMon server.",
+		"conflict": {
+			"title": "Misconfiguration detected",
+			"body": "Some variables have both env and database values. Env takes precedence. Remove from .env for the database value to take effect."
+		},
+		"table": {
+			"variable": "Variable",
+			"help": "Help",
+			"value": "Value",
+			"default": "Default",
+			"source": "Source",
+			"action": "Action"
+		},
+		"source": {
+			"env": ".env",
+			"db": "Database",
+			"default": "Default"
+		},
+		"actions": {
+			"save": "Save",
+			"cancel": "Cancel",
+			"edit": "Edit",
+			"override": "Override",
+			"configure_via_env": "Configure via .env",
+			"remove_from_env": "Remove from .env"
+		},
+		"tooltips": {
+			"show_help": "Show help",
+			"remove_from_env": "Remove from .env for the database value to take effect",
+			"configure_via_env": "Startup/deployment only - configure via .env"
+		},
+		"errors": {
+			"title": "Error loading environment config",
+			"load_failed": "Failed to load settings"
+		},
+		"toasts": {
+			"saved": "Saved. Restart the application for changes to take effect.",
+			"update_failed": "Failed to update"
+		}
+	},
+	"discord": {
+		"title": "Discord Authentication",
+		"subtitle": "Allow users to sign in with their Discord account",
+		"enable_title": "Enable Discord OAuth",
+		"enable_desc": "Allow users to log in and link their Discord accounts",
+		"oauth_config": "OAuth2 Configuration",
+		"field": {
+			"client_id": "Client ID",
+			"client_id_placeholder": "Enter your Discord application Client ID",
+			"client_secret": "Client Secret",
+			"secret_set": "Set",
+			"secret_not_set": "Not set",
+			"secret_placeholder": "Enter your Discord Client Secret",
+			"secret_placeholder_replace": "Enter new secret to replace",
+			"redirect_uri": "Redirect URI",
+			"redirect_uri_placeholder": "https://your-domain.com/api/v1/auth/discord/callback",
+			"redirect_uri_help": "Your redirect URI should be:",
+			"button_text": "Button Text",
+			"button_text_placeholder": "Login with Discord"
+		},
+		"actions": {
+			"save": "Save",
+			"apply": "Apply",
+			"applying": "Applying..."
+		},
+		"setup": {
+			"title": "Setup Instructions",
+			"step1_prefix": "Go to the",
+			"step1_link": "Discord Developer Portal",
+			"step2": "Click \"New Application\" and give it a name",
+			"step3": "Navigate to the \"OAuth2\" section in the sidebar",
+			"step4": "Add your redirect URI:",
+			"step5": "Copy the Client ID and Client Secret into the fields above",
+			"step6": "Set scopes to:"
+		}
+	},
+	"ai": {
+		"title": "AI Terminal Assistant",
+		"subtitle": "Configure AI-powered terminal assistance and command completion",
+		"api_key_warning": {
+			"title": "API Key Needs to be Re-entered",
+			"body_before": "Your AI API key was encrypted with a different secret and cannot be decrypted. This can happen if",
+			"body_after": "was changed or not set consistently.",
+			"action": "Please re-enter your API key below to restore AI functionality."
+		},
+		"enable_title": "Enable AI Assistant",
+		"enable_desc": "Enable AI-powered terminal assistance in the SSH terminal",
+		"provider_config": "AI Provider Configuration",
+		"field": {
+			"provider": "Provider",
+			"model": "Model",
+			"api_key": "API Key",
+			"api_key_placeholder": "Enter your API key",
+			"api_key_configured": "API key is configured",
+			"api_key_invalid": "API key needs to be re-entered (encryption key changed)",
+			"get_key": "Get your API key from:"
+		},
+		"provider_desc": {
+			"openrouter": "Access multiple AI models through a single API",
+			"anthropic": "Direct access to Anthropic Claude models",
+			"openai": "Direct access to OpenAI GPT models",
+			"gemini": "Direct access to Google Gemini models"
+		},
+		"test": {
+			"button": "Test Connection",
+			"failed": "Connection test failed"
+		},
+		"features": {
+			"title": "AI Terminal Features",
+			"assistant": "AI Assistant Panel",
+			"assistant_desc": "Ask questions about terminal output and get help",
+			"completion": "Command Completion",
+			"completion_desc": "Get AI-powered command suggestions as you type",
+			"diagnosis": "Error Diagnosis",
+			"diagnosis_desc": "Let AI explain errors and suggest solutions",
+			"context": "Context Aware",
+			"context_desc": "AI uses terminal history for better suggestions"
+		}
+	},
+	"integrations": {
+		"title": "API integrations",
+		"subtitle": "Manage auto-enrollment tokens for Proxmox and other integrations",
+		"tabs": {
+			"proxmox": "Proxmox",
+			"auto_enrollment": "Auto-Enrollment (Direct)",
+			"scoped": "Scoped Credentials",
+			"gethomepage": "GetHomepage",
+			"docker": "Docker",
+			"checkmk": "Checkmk"
+		},
+		"token": {
+			"badge": {
+				"proxmox_lxc": "Proxmox LXC",
+				"api": "API",
+				"direct_host": "Direct Host",
+				"gethomepage": "GetHomepage"
+			},
+			"usage": "Usage: {{used}}/{{max}} hosts today",
+			"default_group": "Default Group:",
+			"scopes": "Scopes:",
+			"allowed_ips": "Allowed IPs:",
+			"created": "Created:",
+			"last_used": "Last Used:",
+			"expires": "Expires:",
+			"expired": "(Expired)",
+			"edit": "Edit",
+			"disable": "Disable",
+			"enable": "Enable"
+		},
+		"proxmox": {
+			"title": "Proxmox Auto-Enrollment",
+			"subtitle": "Manage tokens for Proxmox LXC container auto-enrollment",
+			"new_token": "New Token",
+			"empty_title": "No Proxmox tokens created yet.",
+			"empty_desc": "Create a token to enable Proxmox LXC container auto-enrollment.",
+			"doc_heading": "Proxmox LXC Auto-Enrollment",
+			"doc_desc": "Automatically discover and enroll LXC containers from your Proxmox hosts."
+		},
+		"direct": {
+			"title": "Direct Host Auto-Enrollment",
+			"subtitle": "Manage tokens for direct host enrollment without Proxmox",
+			"new_token": "New Token",
+			"empty_title": "No direct enrollment tokens created yet.",
+			"empty_desc": "Create a token to enable direct host enrollment.",
+			"doc_heading": "Direct Host Enrollment",
+			"doc_desc": "Enroll individual hosts directly without Proxmox infrastructure."
+		},
+		"scoped": {
+			"title": "Scoped API Credentials",
+			"subtitle": "Manage API credentials with granular scope-based permissions",
+			"new_credential": "New Credential",
+			"empty_title": "No scoped credentials created yet.",
+			"empty_desc": "Create a credential to enable programmatic API access with granular permissions.",
+			"doc_heading": "Scoped Credentials",
+			"doc_desc": "Programmatic access to PatchMon data with granular scope-based permissions.",
+			"swagger_docs": "Swagger documentation"
+		},
+		"gethomepage": {
+			"title": "GetHomepage Widget Integration",
+			"subtitle": "Create API keys to display PatchMon statistics in your GetHomepage dashboard",
+			"new_api_key": "New API Key",
+			"empty_title": "No GetHomepage API keys created yet.",
+			"empty_desc": "Create an API key to enable GetHomepage widget integration.",
+			"how_to": "How to Use GetHomepage Integration",
+			"step1": "Create a new API key using the button above",
+			"step2": "Copy the API key and secret from the success dialog",
+			"step3_prefix": "Add the following widget configuration to your GetHomepage",
+			"step3_suffix": "file:",
+			"base64_title": "How to generate BASE64_ENCODED_CREDENTIALS:",
+			"base64_desc": "Replace YOUR_API_KEY and YOUR_API_SECRET with your actual credentials, then run this command to get the base64 string.",
+			"widget_examples": "Additional Widget Examples",
+			"widget_examples_desc": "You can create multiple widgets to display different statistics:",
+			"security_widget": "Security Updates Widget:",
+			"uptodate_widget": "Up-to-Date Hosts Widget:",
+			"recent_widget": "Recent Activity Widget:"
+		},
+		"docker": {
+			"title": "Docker Inventory Collection",
+			"subtitle": "Docker monitoring is now built into the PatchMon Go agent",
+			"discovery_title": "Automatic Docker Discovery",
+			"discovery_desc": "The PatchMon Go agent automatically discovers Docker when it's available on your host and collects comprehensive inventory information:",
+			"feature_containers": "Containers",
+			"feature_containers_desc": "Running and stopped containers with status, images, ports, and labels",
+			"feature_images": "Images",
+			"feature_images_desc": "All Docker images with repository, tags, sizes, and sources",
+			"feature_volumes": "Volumes",
+			"feature_volumes_desc": "Named and anonymous volumes with drivers, mountpoints, and usage",
+			"feature_networks": "Networks",
+			"feature_networks_desc": "Docker networks with drivers, IPAM configuration, and connected containers",
+			"feature_realtime": "Real-time Updates",
+			"feature_realtime_desc": "Container status changes are pushed instantly via WebSocket",
+			"how_it_works": "How It Works",
+			"step1": "Install the PatchMon Go agent on your host (see the Hosts page for installation instructions)",
+			"step2": "The agent automatically detects if Docker is installed and running on the host",
+			"step3": "During each collection cycle, the agent gathers Docker inventory data and sends it to the PatchMon server",
+			"step4_prefix": "View your complete Docker inventory (containers, images, volumes, networks) in the",
+			"step4_link": "Docker page",
+			"step5": "Container status changes are pushed to the server in real-time via WebSocket connection",
+			"no_config_title": "No Additional Configuration Required",
+			"no_config_desc": "Once the Go agent is installed and Docker is running on your host, Docker inventory collection happens automatically. No separate Docker agent or cron jobs needed.",
+			"requirements": "Requirements:",
+			"req_agent": "PatchMon Go agent must be installed and running",
+			"req_docker": "Docker daemon must be installed and running",
+			"req_socket_prefix": "Agent must have access to the Docker socket (",
+			"req_socket_suffix": ")",
+			"req_root": "Typically requires running the agent as root or with Docker group permissions"
+		},
+		"checkmk": {
+			"title": "Checkmk integration",
+			"subtitle": "Export hosts as CSV for import into Checkmk",
+			"desc_prefix": "Export your PatchMon host list in the",
+			"desc_link": "Checkmk CSV import format",
+			"desc_suffix": ". Use the file in Checkmk under Setup > Hosts > Import hosts via CSV file.",
+			"fields_desc_full": "Full set of Checkmk import attributes (Host name, Alias, Monitored on site, IPv4, IPv6, SNMP community, Tag: Criticality, Tag: Networking Segment, Tag: Checkmk agent / API integrations, Tag: Piggyback, Tag: SNMP, Tag: IP address family). Empty columns can be filled in Checkmk or in the CSV before import.",
+			"fields_desc_basic": "Columns: hostname, IPv4 address, alias, and Checkmk agent tag (cmk-agent). Hostnames are limited to 240 characters per Checkmk.",
+			"additional_fields": "Add additional fields",
+			"additional_fields_desc": "When enabled, the CSV includes all attributes from the Checkmk import docs (section 6.1). PatchMon only fills hostname, alias, IPv4, and agent; other columns are empty for you to edit in Checkmk or before re-import.",
+			"no_hosts": "No hosts to export.",
+			"no_permission": "You do not have permission to view hosts.",
+			"export_failed": "Export failed."
+		},
+		"create_modal": {
+			"title_gethomepage": "Create GetHomepage API Key",
+			"title_proxmox": "Create Proxmox Token",
+			"title_direct": "Create Direct Enrollment Token",
+			"title_scoped": "Create Scoped Credential",
+			"title_default": "Create Token",
+			"token_name": "Token Name *",
+			"token_name_placeholder_gethomepage": "e.g., GetHomepage Widget",
+			"token_name_placeholder_proxmox": "e.g., Proxmox Production",
+			"token_name_placeholder_direct": "e.g., Direct Enrollment Token",
+			"token_name_placeholder_scoped": "e.g., Ansible Inventory",
+			"token_name_placeholder_default": "e.g., Token Name",
+			"max_hosts": "Max Hosts Per Day",
+			"max_hosts_help": "Maximum number of hosts that can be enrolled per day using this token",
+			"default_group": "Default Host Group (Optional)",
+			"no_default_group": "No default group",
+			"default_group_help": "Auto-enrolled hosts will be assigned to this group",
+			"scopes": "Scopes *",
+			"host_permissions": "Host Permissions",
+			"scope_get": "- Read host data",
+			"scope_put": "- Replace host data",
+			"scope_patch": "- Update host data",
+			"scope_update": "- Modify host data",
+			"scope_delete": "- Delete hosts",
+			"scopes_help": "Select the permissions this API credential should have",
+			"allowed_ips": "Allowed IP Addresses (Optional)",
+			"allowed_ips_placeholder": "e.g., 192.168.1.100, 10.0.0.50",
+			"allowed_ips_help": "Comma-separated list of IP addresses allowed to use this token",
+			"expires": "Expiration Date (Optional)",
+			"submit": "Create Token",
+			"cancel": "Cancel"
+		},
+		"success_modal": {
+			"title_gethomepage": "API Key Created Successfully",
+			"title_scoped": "API Credential Created Successfully",
+			"title_direct": "Direct Enrollment Token Created Successfully",
+			"title_default": "Token Created Successfully",
+			"important_label": "Important:",
+			"important": "Save these credentials - the secret won't be shown again.",
+			"token_name": "Token Name",
+			"token_key": "Token Key",
+			"token_secret": "Token Secret",
+			"copy_key": "Copy Key",
+			"copy_secret": "Copy Secret",
+			"toggle_visibility": "Toggle visibility",
+			"granted_scopes": "Granted Scopes",
+			"usage_examples": "Usage Examples",
+			"basic_curl": "Basic cURL request:",
+			"filter_by_group": "Filter by host group:",
+			"copy_curl": "Copy cURL command",
+			"replace_tip": "💡 Replace \"Production\" with your host group name or UUID",
+			"proxmox_command": "Proxmox Auto-Enrollment Command",
+			"proxmox_command_desc": "Run this command on your Proxmox host to automatically discover and enroll all running LXC containers:",
+			"direct_command": "Direct Host Enrollment Command",
+			"direct_command_desc": "Run this command on individual hosts to enroll them directly:",
+			"force_install": "Force install (bypass broken packages)",
+			"force_install_help": "Enable this if hosts have broken packages (CloudPanel, WHM, etc.) that block apt-get operations",
+			"copied": "Copied",
+			"copy": "Copy",
+			"direct_tip_label": "Tip:",
+			"direct_tip": "Specify a custom name:",
+			"base64_creds": "Base64 Encoded Credentials",
+			"copy_base64": "Copy Base64",
+			"gethomepage_config": "GetHomepage Configuration",
+			"copy_config": "Copy Config",
+			"paste_tip": "💡 Paste into your GetHomepage",
+			"saved_credentials": "I've Saved the Credentials"
+		},
+		"edit_modal": {
+			"title": "Edit Token",
+			"token_name": "Token Name",
+			"token_name_placeholder": "e.g., my-pve",
+			"token_name_help": "Update the token name for better organization",
+			"max_hosts": "Max Hosts Per Day",
+			"max_hosts_help": "Maximum number of hosts that can be enrolled per day with this token",
+			"default_group": "Default Host Group (Optional)",
+			"no_default_group": "No default group",
+			"default_group_help": "Auto-enrolled hosts will be assigned to this group",
+			"scopes": "Scopes",
+			"host_permissions": "Host Permissions",
+			"scope_get": "- Read host data",
+			"scope_put": "- Replace host data",
+			"scope_patch": "- Update host data",
+			"scope_update": "- Modify host data",
+			"scope_delete": "- Delete hosts",
+			"scopes_help": "Update the permissions for this API credential",
+			"allowed_ips": "Allowed IP Addresses (Optional)",
+			"allowed_ips_placeholder": "e.g., 192.168.1.100, 10.0.0.50",
+			"allowed_ips_help": "Comma-separated list of IP addresses allowed to use this token",
+			"expires": "Expiration Date (Optional)",
+			"submit": "Update Credential",
+			"cancel": "Cancel"
+		},
+		"toasts": {
+			"create_failed": "Failed to create token",
+			"deleted": "Token \"{{name}}\" deleted",
+			"delete_failed": "Failed to delete token",
+			"update_failed": "Failed to update token",
+			"toggle_failed": "Failed to toggle token",
+			"copy_failed": "Failed to copy to clipboard. Please copy manually."
+		},
+		"confirm": {
+			"delete_title": "Delete token",
+			"delete_message": "Are you sure you want to delete the token \"{{name}}\"?",
+			"delete_confirm": "Delete token"
+		}
+	}
+}

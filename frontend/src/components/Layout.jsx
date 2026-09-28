@@ -26,6 +26,7 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaLinkedin, FaYoutube } from "react-icons/fa";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { getRequiredTier } from "../constants/tiers";
@@ -53,6 +54,7 @@ import UpgradeNotificationIcon from "./UpgradeNotificationIcon";
 // red offline once WS status has loaded, and falls back to a neutral total
 // while it is still in flight so the badge never disappears between paints.
 const HostsNavBadge = ({ total, connected }) => {
+	const { t } = useTranslation("nav");
 	if (!(total > 0)) return null;
 
 	if (connected === undefined || connected === null) {
@@ -75,7 +77,7 @@ const HostsNavBadge = ({ total, connected }) => {
 			{online > 0 && (
 				<span
 					className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-					title={`${online} host${online === 1 ? "" : "s"} connected`}
+					title={t("hosts_connected", { count: online })}
 				>
 					{online}
 				</span>
@@ -83,7 +85,7 @@ const HostsNavBadge = ({ total, connected }) => {
 			{offline > 0 && (
 				<span
 					className="inline-flex items-center justify-center px-1.5 py-0.5 text-xs rounded bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-					title={`${offline} host${offline === 1 ? "" : "s"} offline`}
+					title={t("hosts_offline", { count: offline })}
 				>
 					{offline}
 				</span>
@@ -122,6 +124,7 @@ const usesFullWidthSearch = (pathname) =>
 	FULL_WIDTH_SEARCH_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
 const Layout = ({ children }) => {
+	const { t } = useTranslation("nav");
 	// When used as a layout route, render Outlet; otherwise render children (backwards compat)
 	const content = children ?? <Outlet />;
 	const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -269,7 +272,7 @@ const Layout = ({ children }) => {
 
 		// Dashboard - only show if user can view dashboard
 		if (canViewDashboard()) {
-			nav.push({ name: "Dashboard", href: "/", icon: LayoutDashboard });
+			nav.push({ name: t("dashboard"), href: "/", icon: LayoutDashboard });
 		}
 
 		// Assets section
@@ -277,9 +280,9 @@ const Layout = ({ children }) => {
 			const assetItems = [];
 
 			if (canViewHosts()) {
-				assetItems.push({ name: "Hosts", href: "/hosts", icon: Server });
+				assetItems.push({ name: t("hosts"), href: "/hosts", icon: Server });
 				assetItems.push({
-					name: "Repos",
+					name: t("repos"),
 					href: "/repositories",
 					icon: GitBranch,
 				});
@@ -287,7 +290,7 @@ const Layout = ({ children }) => {
 
 			if (canViewPackages()) {
 				assetItems.push({
-					name: "Packages",
+					name: t("packages"),
 					href: "/packages",
 					icon: Package,
 				});
@@ -295,7 +298,7 @@ const Layout = ({ children }) => {
 
 			if (assetItems.length > 0) {
 				nav.push({
-					section: "ASSETS",
+					section: t("section_assets"),
 					items: assetItems,
 				});
 			}
@@ -313,10 +316,10 @@ const Layout = ({ children }) => {
 				const patchingLocked = !hasModule("patching");
 				const policiesLocked = !hasModule("patching_policies");
 				const patchingChildren = [
-					{ name: "Overview", href: "/patching?tab=overview" },
-					{ name: "Runs & History", href: "/patching?tab=runs" },
+					{ name: t("overview"), href: "/patching?tab=overview" },
+					{ name: t("runs_history"), href: "/patching?tab=runs" },
 					{
-						name: "Policies",
+						name: t("policies"),
 						href: "/patching?tab=policies",
 						lockedModule: policiesLocked ? "patching_policies" : null,
 						lockedTier: policiesLocked
@@ -325,7 +328,7 @@ const Layout = ({ children }) => {
 					},
 				];
 				opsItems.push({
-					name: "Patching",
+					name: t("patching"),
 					href: "/patching",
 					icon: Wrench,
 					lockedModule: patchingLocked ? "patching" : null,
@@ -338,17 +341,17 @@ const Layout = ({ children }) => {
 			if (canViewReports()) {
 				const complianceLocked = !hasModule("compliance");
 				opsItems.push({
-					name: "Compliance",
+					name: t("compliance"),
 					href: "/compliance",
 					icon: Shield,
 					lockedModule: complianceLocked ? "compliance" : null,
 					lockedTier: complianceLocked ? getRequiredTier("compliance") : null,
 					children: [
-						{ name: "Overview", href: "/compliance?tab=overview" },
-						{ name: "Hosts", href: "/compliance?tab=hosts" },
-						{ name: "Scan Results", href: "/compliance?tab=scan-results" },
-						{ name: "History", href: "/compliance?tab=history" },
-						{ name: "Settings", href: "/compliance?tab=settings" },
+						{ name: t("overview"), href: "/compliance?tab=overview" },
+						{ name: t("hosts"), href: "/compliance?tab=hosts" },
+						{ name: t("scan_results"), href: "/compliance?tab=scan-results" },
+						{ name: t("history"), href: "/compliance?tab=history" },
+						{ name: t("settings"), href: "/compliance?tab=settings" },
 					],
 				});
 			}
@@ -358,23 +361,23 @@ const Layout = ({ children }) => {
 				// which require the alerts_advanced module (Plus tier).
 				const alertLifecycleLocked = !hasModule("alerts_advanced");
 				const reportingChildren = [
-					{ name: "Overview", href: "/reporting?tab=overview" },
+					{ name: t("overview"), href: "/reporting?tab=overview" },
 					{ name: "Alerts", href: "/reporting?tab=alerts" },
 					{
-						name: "Alert Lifecycle",
+						name: t("alert_lifecycle"),
 						href: "/reporting?tab=alert-settings",
 						lockedModule: alertLifecycleLocked ? "alerts_advanced" : null,
 						lockedTier: alertLifecycleLocked
 							? getRequiredTier("alerts_advanced")
 							: null,
 					},
-					{ name: "Destinations", href: "/reporting?tab=destinations" },
-					{ name: "Event Rules", href: "/reporting?tab=rules" },
-					{ name: "Scheduled Reports", href: "/reporting?tab=reports" },
-					{ name: "Delivery Log", href: "/reporting?tab=log" },
+					{ name: t("destinations"), href: "/reporting?tab=destinations" },
+					{ name: t("event_rules"), href: "/reporting?tab=rules" },
+					{ name: t("scheduled_reports"), href: "/reporting?tab=reports" },
+					{ name: t("delivery_log"), href: "/reporting?tab=log" },
 				];
 				opsItems.push({
-					name: "Reporting",
+					name: t("reporting"),
 					href: "/reporting",
 					icon: AlertTriangle,
 					children: reportingChildren,
@@ -385,26 +388,26 @@ const Layout = ({ children }) => {
 			if (canViewReports()) {
 				const dockerLocked = !hasModule("docker");
 				opsItems.push({
-					name: "Docker",
+					name: t("docker"),
 					href: "/docker",
 					icon: Container,
 					beta: !dockerLocked,
 					lockedModule: dockerLocked ? "docker" : null,
 					lockedTier: dockerLocked ? getRequiredTier("docker") : null,
 					children: [
-						{ name: "Stacks", href: "/docker?tab=stacks" },
-						{ name: "Containers", href: "/docker?tab=containers" },
-						{ name: "Images", href: "/docker?tab=images" },
-						{ name: "Volumes", href: "/docker?tab=volumes" },
-						{ name: "Networks", href: "/docker?tab=networks" },
-						{ name: "Hosts", href: "/docker?tab=hosts" },
+						{ name: t("stacks"), href: "/docker?tab=stacks" },
+						{ name: t("containers"), href: "/docker?tab=containers" },
+						{ name: t("images"), href: "/docker?tab=images" },
+						{ name: t("volumes"), href: "/docker?tab=volumes" },
+						{ name: t("networks"), href: "/docker?tab=networks" },
+						{ name: t("hosts"), href: "/docker?tab=hosts" },
 					],
 				});
 			}
 
 			if (opsItems.length > 0) {
 				nav.push({
-					section: "OPERATIONS",
+					section: t("section_operations"),
 					items: opsItems,
 				});
 			}
@@ -419,7 +422,7 @@ const Layout = ({ children }) => {
 			// Metrics and Server Version are.
 			if (publicSettings?.admin_mode !== true) {
 				systemItems.push({
-					name: "Automation",
+					name: t("automation"),
 					href: "/automation",
 					icon: RefreshCw,
 				});
@@ -430,7 +433,7 @@ const Layout = ({ children }) => {
 			// installs (admin_mode === false) this item stays hidden entirely.
 			if (canManageBilling) {
 				systemItems.push({
-					name: "Billing",
+					name: t("billing"),
 					href: "/billing",
 					icon: CreditCard,
 				});
@@ -444,7 +447,7 @@ const Layout = ({ children }) => {
 				canExportData()
 			) {
 				systemItems.push({
-					name: "Settings",
+					name: t("settings"),
 					href: "/settings/users",
 					icon: Settings,
 					showUpgradeIcon: updateAvailable,
@@ -467,7 +470,7 @@ const Layout = ({ children }) => {
 					external: true,
 				}));
 			systemItems.push({
-				name: "Links",
+				name: t("links"),
 				href: "#links",
 				icon: BookOpen,
 				children: linkChildren,
@@ -475,7 +478,7 @@ const Layout = ({ children }) => {
 
 			if (systemItems.length > 0) {
 				nav.push({
-					section: "SYSTEM",
+					section: t("section_system"),
 					items: systemItems,
 				});
 			}
@@ -547,7 +550,7 @@ const Layout = ({ children }) => {
 		if (path === "/settings") return "Settings";
 		if (path === "/options") return "PatchMon Options";
 		if (path === "/audit-log") return "Audit Log";
-		if (path === "/settings/profile") return "My Profile";
+		if (path === "/settings/profile") return t("my_profile");
 		if (path.startsWith("/hosts/")) return "Host Details";
 		if (path.startsWith("/packages/")) return "Package Details";
 		if (path.startsWith("/settings/")) return "Settings";
@@ -722,7 +725,7 @@ const Layout = ({ children }) => {
 						type="button"
 						className="fixed inset-0 bg-secondary-600 bg-opacity-75 cursor-default"
 						onClick={() => setSidebarOpen(false)}
-						aria-label="Close sidebar"
+						aria-label={t("close_sidebar")}
 					/>
 					<div
 						className="relative flex w-full max-w-[280px] flex-col bg-white dark:border-r dark:border-white/10 pb-4 pt-5 shadow-xl"
@@ -737,7 +740,7 @@ const Layout = ({ children }) => {
 								type="button"
 								className="ml-1 flex h-11 w-11 min-w-[44px] min-h-[44px] items-center justify-center rounded-full bg-secondary-600/90 hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white transition-colors"
 								onClick={() => setSidebarOpen(false)}
-								aria-label="Close sidebar"
+								aria-label={t("close_sidebar")}
 							>
 								<X className="h-6 w-6 text-white" />
 							</button>
@@ -822,7 +825,7 @@ const Layout = ({ children }) => {
 																			handleAddHost();
 																		}}
 																		className="ml-auto flex items-center justify-center w-5 h-5 rounded-full border-2 border-current opacity-60 hover:opacity-100 transition-all duration-200 self-center"
-																		title="Add Host"
+																		title={t("add_host")}
 																	>
 																		<Plus className="h-3 w-3" />
 																	</button>
@@ -1283,7 +1286,7 @@ const Layout = ({ children }) => {
 																						handleAddHost();
 																					}}
 																					className="ml-auto flex items-center justify-center w-5 h-5 rounded-full border-2 border-current opacity-60 hover:opacity-100 transition-all duration-200 self-center"
-																					title="Add Host"
+																					title={t("add_host")}
 																				>
 																					<Plus className="h-3 w-3" />
 																				</button>
@@ -1538,7 +1541,7 @@ const Layout = ({ children }) => {
 											type="button"
 											onClick={handleLogout}
 											className="ml-2 p-2 text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-md transition-colors"
-											title="Sign out"
+											title={t("sign_out")}
 										>
 											<LogOut className="h-4 w-4" />
 										</button>
@@ -1555,7 +1558,7 @@ const Layout = ({ children }) => {
 													onClick={() => refreshAll()}
 													disabled={isRefreshing}
 													className="p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded flex-shrink-0 disabled:opacity-50"
-													title="Refresh all data"
+													title={t("refresh_all")}
 												>
 													<RefreshCw
 														className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
@@ -1574,7 +1577,7 @@ const Layout = ({ children }) => {
 												? "bg-primary-50 dark:bg-primary-600 text-primary-700 dark:text-white"
 												: "text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-700"
 										}`}
-										title={`My Profile (${user?.username})`}
+										title={`${t("my_profile")} (${user?.username})`}
 									>
 										{isRenderableAvatarSrc(user?.avatar_url) ? (
 											<img
@@ -1590,7 +1593,7 @@ const Layout = ({ children }) => {
 										type="button"
 										onClick={handleLogout}
 										className="flex items-center justify-center w-full p-2 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded-md transition-colors"
-										title="Sign out"
+										title={t("sign_out")}
 									>
 										<LogOut className="h-4 w-4" />
 									</button>
@@ -1602,7 +1605,7 @@ const Layout = ({ children }) => {
 												onClick={() => refreshAll()}
 												disabled={isRefreshing}
 												className="p-1 hover:bg-secondary-100 dark:hover:bg-secondary-700 rounded disabled:opacity-50"
-												title={`Refresh all data - Updated: ${formatRelativeTimeShort(stats.lastUpdated)}`}
+												title={`${t("refresh_all")} - Updated: ${formatRelativeTimeShort(stats.lastUpdated)}`}
 											>
 												<RefreshCw
 													className={`h-3 w-3 ${isRefreshing ? "animate-spin" : ""}`}
@@ -1640,7 +1643,7 @@ const Layout = ({ children }) => {
 							type="button"
 							className="-m-2.5 p-2.5 text-secondary-700 dark:text-white lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center"
 							onClick={() => setSidebarOpen(true)}
-							aria-label="Open menu"
+							aria-label={t("open_menu")}
 						>
 							<Menu className="h-6 w-6" />
 						</button>
@@ -1681,7 +1684,7 @@ const Layout = ({ children }) => {
 											backdropFilter: "var(--button-blur, none)",
 											WebkitBackdropFilter: "var(--button-blur, none)",
 										}}
-										aria-label="External links"
+										aria-label={t("external_links")}
 										aria-expanded={mobileLinksOpen}
 									>
 										<Globe className="h-5 w-5" />
@@ -1698,7 +1701,7 @@ const Layout = ({ children }) => {
 														setMobileLinksOpen(false);
 													}
 												}}
-												aria-label="Close mobile menu"
+												aria-label={t("close_mobile_menu")}
 											/>
 											<div className="absolute right-0 mt-2 w-64 rounded-lg border border-secondary-200 dark:border-secondary-600 bg-white dark:bg-secondary-800 shadow-lg z-50 max-h-[80vh] overflow-y-auto">
 												<div className="p-2 space-y-1">
@@ -1773,7 +1776,7 @@ const Layout = ({ children }) => {
 											backdropFilter: "var(--button-blur, none)",
 											WebkitBackdropFilter: "var(--button-blur, none)",
 										}}
-										title="Donate a coffee"
+										title={t("donate_coffee")}
 									>
 										<BuyMeACoffeeIcon className="h-5 w-5 text-yellow-500 flex-shrink-0" />
 									</button>

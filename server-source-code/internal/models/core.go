@@ -20,6 +20,7 @@ type User struct {
 	LastName               *string    `db:"last_name"`
 	ThemePreference        *string    `db:"theme_preference"`
 	ColorTheme             *string    `db:"color_theme"`
+	Locale                 *string    `db:"locale"`
 	UIPreferences          JSON       `db:"ui_preferences"`
 	OidcSub                *string    `db:"oidc_sub"`
 	OidcProvider           *string    `db:"oidc_provider"`

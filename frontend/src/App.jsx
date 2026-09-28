@@ -1,8 +1,10 @@
 import { lazy, Suspense } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet, Route, Routes } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FirstTimeWizard from "./components/FirstTimeWizard";
 import Layout from "./components/Layout";
+import LocaleSync from "./components/LocaleSync";
 import LogoProvider from "./components/LogoProvider";
 import ModuleGate from "./components/ModuleGate";
 import PageTransition from "./components/PageTransition";
@@ -13,6 +15,7 @@ import { isAuthPhase } from "./constants/authPhases";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ColorThemeProvider } from "./contexts/ColorThemeContext";
 import { ConfirmProvider } from "./contexts/ConfirmContext";
+import { LocaleProvider } from "./contexts/LocaleContext";
 import { SettingsProvider } from "./contexts/SettingsContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -73,14 +76,19 @@ const OidcSettings = lazy(() => import("./pages/settings/OidcSettings"));
 const Billing = lazy(() => import("./pages/Billing"));
 
 // Full-screen loading fallback (for initial app load / auth check)
-const LoadingFallback = () => (
-	<div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800 flex items-center justify-center">
-		<div className="text-center">
-			<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-			<p className="text-secondary-600 dark:text-white">Loading...</p>
+const LoadingFallback = () => {
+	const { t } = useTranslation();
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-secondary-900 dark:to-secondary-800 flex items-center justify-center">
+			<div className="text-center">
+				<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+				<p className="text-secondary-600 dark:text-white">
+					{t("loading.generic")}
+				</p>
+			</div>
 		</div>
-	</div>
-);
+	);
+};
 
 // Minimal in-content loading fallback (keeps sidebar visible during page transitions)
 const PageLoadingFallback = () => (
@@ -90,6 +98,7 @@ const PageLoadingFallback = () => (
 );
 
 function AppRoutes() {
+	const { t } = useTranslation();
 	const {
 		needsFirstTimeSetup,
 		setupCheckError,
@@ -113,7 +122,7 @@ function AppRoutes() {
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
 					<p className="text-secondary-600 dark:text-white">
-						Checking system status...
+						{t("loading.checking_status")}
 					</p>
 				</div>
 			</div>
@@ -549,23 +558,26 @@ function AppRoutes() {
 function App() {
 	return (
 		<ErrorBoundary>
-			<AuthProvider>
-				<ThemeProvider>
-					<SettingsProvider>
-						<ColorThemeProvider>
-							<ToastProvider>
-								<ConfirmProvider>
-									<UpdateNotificationProvider>
-										<LogoProvider>
-											<AppRoutes />
-										</LogoProvider>
-									</UpdateNotificationProvider>
-								</ConfirmProvider>
-							</ToastProvider>
-						</ColorThemeProvider>
-					</SettingsProvider>
-				</ThemeProvider>
-			</AuthProvider>
+			<LocaleProvider>
+				<AuthProvider>
+					<LocaleSync />
+					<ThemeProvider>
+						<SettingsProvider>
+							<ColorThemeProvider>
+								<ToastProvider>
+									<ConfirmProvider>
+										<UpdateNotificationProvider>
+											<LogoProvider>
+												<AppRoutes />
+											</LogoProvider>
+										</UpdateNotificationProvider>
+									</ConfirmProvider>
+								</ToastProvider>
+							</ColorThemeProvider>
+						</SettingsProvider>
+					</ThemeProvider>
+				</AuthProvider>
+			</LocaleProvider>
 		</ErrorBoundary>
 	);
 }

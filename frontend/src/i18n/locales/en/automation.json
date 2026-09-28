@@ -1,0 +1,56 @@
+{
+	"title": "Automation Management",
+	"subtitle": "Monitor and manage automated server operations, agent communications, and patch deployments",
+	"tabs": {
+		"overview": "Overview"
+	},
+	"aria": {
+		"tabs": "Tabs"
+	},
+	"stats": {
+		"scheduled_tasks": "Scheduled Tasks",
+		"running_tasks": "Running Tasks",
+		"failed_tasks": "Failed Tasks",
+		"total_task_runs": "Total Task Runs"
+	},
+	"loading": "Loading automations...",
+	"actions": {
+		"run_now": "Run Now",
+		"manual": "Manual"
+	},
+	"labels": {
+		"frequency": "Frequency:",
+		"last_run": "Last Run:",
+		"next_run": "Next Run:"
+	},
+	"columns": {
+		"run": "Run",
+		"task": "Task",
+		"frequency": "Frequency",
+		"last_run": "Last Run",
+		"next_run": "Next Run",
+		"status": "Status"
+	},
+	"status": {
+		"success": "Success",
+		"failed": "Failed",
+		"running": "Running",
+		"retrying": "Retrying",
+		"archived": "Archived",
+		"skipped_disabled": "Skipped (Disabled)",
+		"never_run": "Never run"
+	},
+	"schedule": {
+		"manual_trigger": "Manual trigger only",
+		"agent_driven": "Agent-driven (automatic)",
+		"unknown": "Unknown"
+	},
+	"toasts": {
+		"no_trigger": "No manual trigger available for {{jobType}}",
+		"triggered": "Job triggered successfully",
+		"triggered_job_id": "{{message}} - Job ID: {{jobId}}",
+		"triggered_queued_one": "{{message}} - {{count}} job queued",
+		"triggered_queued_other": "{{message}} - {{count}} jobs queued",
+		"trigger_failed": "Failed to trigger job: {{error}}"
+	}
+}

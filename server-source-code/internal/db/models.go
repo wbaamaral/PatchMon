@@ -709,6 +709,7 @@ type User struct {
 	LastName               *string          `json:"last_name"`
 	ThemePreference        *string          `json:"theme_preference"`
 	ColorTheme             *string          `json:"color_theme"`
+	Locale                 *string          `json:"locale"`
 	UiPreferences          []byte           `json:"ui_preferences"`
 	OidcSub                *string          `json:"oidc_sub"`
 	OidcProvider           *string          `json:"oidc_provider"`

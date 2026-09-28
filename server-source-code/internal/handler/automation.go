@@ -34,9 +34,9 @@ func (h *AutomationHandler) WithConfig(cfg *config.Config) *AutomationHandler {
 
 // adminModeGuard returns true (and writes a 403) when AdminMode is active.
 // Queue totals are process-wide, so they are not shown per context.
-func (h *AutomationHandler) adminModeGuard(w http.ResponseWriter) bool {
+func (h *AutomationHandler) adminModeGuard(w http.ResponseWriter, r *http.Request) bool {
 	if h.cfg != nil && h.cfg.AdminMode {
-		Error(w, http.StatusForbidden, "Automation is not available in managed mode")
+		ErrorKey(w, r, http.StatusForbidden, "error.automation_not_available")
 		return true
 	}
 	return false
@@ -207,7 +207,7 @@ func (h *AutomationHandler) getQueueLastRunInfo(queueName string) (lastRun strin
 
 // Overview handles GET /automation/overview.
 func (h *AutomationHandler) Overview(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	queues := []string{
@@ -300,7 +300,7 @@ func (h *AutomationHandler) Overview(w http.ResponseWriter, r *http.Request) {
 
 // Stats handles GET /automation/stats.
 func (h *AutomationHandler) Stats(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	queues := []string{
@@ -332,7 +332,7 @@ func (h *AutomationHandler) Stats(w http.ResponseWriter, r *http.Request) {
 
 // Jobs handles GET /automation/jobs/:queueName.
 func (h *AutomationHandler) Jobs(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	queueName := chi.URLParam(r, "queueName")
@@ -357,7 +357,7 @@ func (h *AutomationHandler) Jobs(w http.ResponseWriter, r *http.Request) {
 		queue.QueueSSGUpdateCheck:        true,
 	}
 	if !validQueues[queueName] {
-		Error(w, http.StatusBadRequest, "Invalid queue name")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_queue_name")
 		return
 	}
 
@@ -368,7 +368,7 @@ func (h *AutomationHandler) Jobs(w http.ResponseWriter, r *http.Request) {
 
 	tasks, err := h.inspector.ListCompletedTasks(queueName, asynq.PageSize(limit))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch jobs")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_jobs")
 		return
 	}
 
@@ -406,7 +406,7 @@ func (h *AutomationHandler) Trigger(w http.ResponseWriter, r *http.Request) {
 	jobType := chi.URLParam(r, "jobType")
 
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 
@@ -514,12 +514,12 @@ func (h *AutomationHandler) Trigger(w http.ResponseWriter, r *http.Request) {
 			info, err = h.queueClient.Enqueue(t)
 		}
 	default:
-		Error(w, http.StatusBadRequest, "Invalid job type")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_job_type")
 		return
 	}
 
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to trigger job: "+err.Error())
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_trigger_job", "detail", err.Error())
 		return
 	}
 
@@ -540,17 +540,17 @@ func (h *AutomationHandler) Trigger(w http.ResponseWriter, r *http.Request) {
 // ComplianceScanCleanup handles POST /compliance/scans/cleanup (manual trigger).
 func (h *AutomationHandler) ComplianceScanCleanup(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	t, err := queue.NewComplianceScanCleanupTask(hostFromRequest(r))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_task")
 		return
 	}
 	info, err := h.queueClient.Enqueue(t)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to trigger compliance scan cleanup")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_trigger_compliance_cleanup")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{

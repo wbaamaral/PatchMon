@@ -44,6 +44,7 @@ import React, {
 	useRef,
 	useState,
 } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Link,
 	useLocation,
@@ -89,34 +90,41 @@ import PatchingRunOutput from "./hostdetail/PatchingRunOutput";
  * Format a memory size (in GiB from the agent) for display.
  * Shows 2 decimal places with the GiB unit label.
  */
-const format_memory_gib = (value) => {
+const format_memory_gib = (value, t) => {
 	if (value == null) return null;
 	const num = Number(value);
 	if (Number.isNaN(num)) return null;
-	return `${num.toFixed(2)} GiB`;
+	return t("detail.system.memory_gib", { value: num.toFixed(2) });
 };
 
 /**
  * Sentence explaining that disabling compliance leaves the scanning tools on
  * the host. Only shown when the agent has reported them as present.
  */
-const compliance_tools_retained_text = (tools) => {
+const compliance_tools_retained_text = (tools, t) => {
 	const list = tools.join(" and ");
 	return tools.length > 1
-		? `${list} remain installed on this host. Disabling only stops scanning, so remove them manually if you want them gone.`
-		: `${list} remains installed on this host. Disabling only stops scanning, so remove it manually if you want it gone.`;
+		? t("detail.compliance_integration.tools_retained_other", { list })
+		: t("detail.compliance_integration.tools_retained_one", { list });
 };
 
 // Ordered steps for compliance scanner installation (match agent step ids)
 const INSTALL_CHECKLIST_STEPS = [
-	{ id: "detect_os", label: "Detect operating system" },
-	{ id: "install_openscap", label: "Install OpenSCAP packages" },
-	{ id: "verify_openscap", label: "Verify installation and SSG content" },
-	{ id: "docker_bench", label: "Docker Bench (optional)" },
-	{ id: "complete", label: "Complete" },
+	{ id: "detect_os", labelKey: "detail.compliance_tab.step_detect_os" },
+	{
+		id: "install_openscap",
+		labelKey: "detail.compliance_tab.step_install_openscap",
+	},
+	{
+		id: "verify_openscap",
+		labelKey: "detail.compliance_tab.step_verify_openscap",
+	},
+	{ id: "docker_bench", labelKey: "detail.compliance_tab.step_docker_bench" },
+	{ id: "complete", labelKey: "detail.compliance_tab.step_complete" },
 ];
 
 const HostDetail = () => {
+	const { t } = useTranslation("hosts");
 	const { hostId } = useParams();
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -148,7 +156,11 @@ const HostDetail = () => {
 	const historyLimit = 10;
 	const [notes, setNotes] = useState("");
 	const [notesMessage, setNotesMessage] = useState({ text: "", type: "" });
-	const [updateMessage, setUpdateMessage] = useState({ text: "", jobId: "" });
+	const [updateMessage, setUpdateMessage] = useState({
+		text: "",
+		jobId: "",
+		isError: false,
+	});
 	const [reportMessage, setReportMessage] = useState({ text: "", jobId: "" });
 	const [integrationRefreshMessage, setIntegrationRefreshMessage] = useState({
 		text: "",
@@ -433,10 +445,10 @@ const HostDetail = () => {
 			.toLowerCase()
 			.includes("freebsd");
 	const patchAllTitle = !wsStatus?.connected
-		? "Agent must be connected to patch"
+		? t("detail.header.patch_all_title_disconnected")
 		: isFreeBSDHost
-			? "Run FreeBSD base-system and pkg updates on this host"
-			: "Run system package updates on this host";
+			? t("detail.header.patch_all_title_freebsd")
+			: t("detail.header.patch_all_title");
 
 	const deleteHostMutation = useMutation({
 		mutationFn: (hostId) => adminHostsAPI.delete(hostId),
@@ -513,16 +525,20 @@ const HostDetail = () => {
 			// Show success message with job ID
 			if (data?.jobId) {
 				setUpdateMessage({
-					text: "Update queued successfully",
+					text: t("detail.toasts.update_queued"),
 					jobId: data.jobId,
+					isError: false,
 				});
 				// Clear message after 5 seconds
-				safeSetTimeout(() => setUpdateMessage({ text: "", jobId: "" }), 5000);
+				safeSetTimeout(
+					() => setUpdateMessage({ text: "", jobId: "", isError: false }),
+					5000,
+				);
 			}
 		},
 		onError: (error) => {
 			const errorMsg =
-				error.response?.data?.error || "Failed to send update command";
+				error.response?.data?.error || t("detail.toasts.update_failed");
 			const details = error.response?.data?.details;
 			setUpdateMessage({
 				text: details ? `${errorMsg}: ${details}` : errorMsg,
@@ -547,11 +563,7 @@ const HostDetail = () => {
 		if (mode === "approval") {
 			// "Submit for approval": the runs are now sitting pending in
 			// Runs & History for a second approver. Nothing more to do here.
-			toast.success(
-				runs.length === 1
-					? "Submitted 1 run for approval"
-					: `Submitted ${runs.length} runs for approval`,
-			);
+			toast.success(t("detail.toasts.submitted_run", { count: runs.length }));
 			return;
 		}
 		const immediate = runs.filter((r) => r.immediate);
@@ -561,8 +573,8 @@ const HostDetail = () => {
 		}
 		toast.success(
 			runs.length > 0
-				? "Patch queued. View progress in Patching."
-				: "Patch queued",
+				? t("detail.toasts.patch_queued_progress")
+				: t("detail.toasts.patch_queued"),
 		);
 	};
 
@@ -575,7 +587,7 @@ const HostDetail = () => {
 			// Show success message with job ID
 			if (data?.jobId) {
 				setReportMessage({
-					text: "Report fetch queued successfully",
+					text: t("detail.toasts.report_queued"),
 					jobId: data.jobId,
 				});
 				// Clear message after 5 seconds
@@ -584,7 +596,7 @@ const HostDetail = () => {
 		},
 		onError: (error) => {
 			setReportMessage({
-				text: error.response?.data?.error || "Failed to fetch report",
+				text: error.response?.data?.error || t("detail.toasts.report_failed"),
 				jobId: "",
 			});
 			safeSetTimeout(() => setReportMessage({ text: "", jobId: "" }), 5000);
@@ -597,7 +609,7 @@ const HostDetail = () => {
 			adminHostsAPI.refreshIntegrationStatus(hostId).then((res) => res.data),
 		onSuccess: () => {
 			setIntegrationRefreshMessage({
-				text: "Integration status refresh requested",
+				text: t("detail.toasts.integration_refresh_requested"),
 				isError: false,
 			});
 			// Refetch integrations data after a short delay to allow agent to respond
@@ -615,7 +627,8 @@ const HostDetail = () => {
 		onError: (error) => {
 			setIntegrationRefreshMessage({
 				text:
-					error.response?.data?.error || "Failed to refresh integration status",
+					error.response?.data?.error ||
+					t("detail.toasts.integration_refresh_failed"),
 				isError: true,
 			});
 			safeSetTimeout(
@@ -631,7 +644,7 @@ const HostDetail = () => {
 			adminHostsAPI.refreshDocker(hostId).then((res) => res.data),
 		onSuccess: () => {
 			setDockerRefreshMessage({
-				text: "Docker refresh requested - data will update shortly",
+				text: t("detail.toasts.docker_refresh_requested"),
 				isError: false,
 			});
 			// Refetch Docker data after a short delay to allow agent to respond
@@ -646,7 +659,9 @@ const HostDetail = () => {
 		},
 		onError: (error) => {
 			setDockerRefreshMessage({
-				text: error.response?.data?.error || "Failed to refresh Docker data",
+				text:
+					error.response?.data?.error ||
+					t("detail.toasts.docker_refresh_failed"),
 				isError: true,
 			});
 			safeSetTimeout(
@@ -703,13 +718,13 @@ const HostDetail = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["host", hostId] });
 			queryClient.invalidateQueries({ queryKey: ["hosts"] });
-			setNotesMessage({ text: "Notes saved successfully!", type: "success" });
+			setNotesMessage({ text: t("detail.notes.saved"), type: "success" });
 			// Clear message after 3 seconds
 			safeSetTimeout(() => setNotesMessage({ text: "", type: "" }), 3000);
 		},
 		onError: (error) => {
 			setNotesMessage({
-				text: error.response?.data?.error || "Failed to save notes",
+				text: error.response?.data?.error || t("detail.notes.save_failed"),
 				type: "error",
 			});
 			// Clear message after 5 seconds for errors
@@ -980,23 +995,26 @@ const HostDetail = () => {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["host", hostId] });
 			setUpdateMessage({
-				text: "Host agent down alerts setting updated successfully",
+				text: t("detail.reporting.updated"),
 				jobId: "",
+				isError: false,
 			});
 			safeSetTimeout(() => {
 				if (isMountedRef.current) {
-					setUpdateMessage({ text: "", jobId: "" });
+					setUpdateMessage({ text: "", jobId: "", isError: false });
 				}
 			}, 3000);
 		},
 		onError: (error) => {
 			setUpdateMessage({
-				text: error.response?.data?.error || "Failed to update setting",
+				text:
+					error.response?.data?.error || t("detail.reporting.update_failed"),
 				jobId: "",
+				isError: true,
 			});
 			safeSetTimeout(() => {
 				if (isMountedRef.current) {
-					setUpdateMessage({ text: "", jobId: "" });
+					setUpdateMessage({ text: "", jobId: "", isError: false });
 				}
 			}, 5000);
 		},
@@ -1080,9 +1098,7 @@ const HostDetail = () => {
 				queryKey: ["host-integrations", hostId],
 			});
 			refetchIntegrations();
-			toast.success(
-				"Configuration applied. Agent will update config.yml and restart.",
-			);
+			toast.success(t("detail.apply_config.applied_toast"));
 		},
 		onError: (error) => {
 			refetchIntegrations();
@@ -1092,8 +1108,8 @@ const HostDetail = () => {
 				error.message;
 			toast.error(
 				msg.includes("not connected")
-					? "Agent must be connected to apply configuration"
-					: `Failed to apply: ${msg}`,
+					? t("detail.apply_config.failed_not_connected")
+					: t("detail.apply_config.failed_toast", { message: msg }),
 			);
 		},
 	});
@@ -1135,9 +1151,9 @@ const HostDetail = () => {
 				installedComplianceTools.length > 0
 			) {
 				toast.warning(
-					`Compliance scanning disabled. ${compliance_tools_retained_text(
-						installedComplianceTools,
-					)}`,
+					t("detail.compliance_integration.tools_retained_toast", {
+						detail: compliance_tools_retained_text(installedComplianceTools, t),
+					}),
 					10000,
 				);
 			}
@@ -1159,13 +1175,15 @@ const HostDetail = () => {
 			setComplianceInstallJob({
 				status: "waiting",
 				progress: 0,
-				message: "Install job queued…",
+				message: t("detail.compliance_tab.install_queued"),
 				error: null,
 			});
 		},
 		onError: (error) => {
 			setIntegrationRefreshMessage({
-				text: error.response?.data?.error || "Failed to start install",
+				text:
+					error.response?.data?.error ||
+					t("detail.compliance_tab.install_start_failed"),
 				isError: true,
 			});
 			safeSetTimeout(() => {
@@ -1182,7 +1200,9 @@ const HostDetail = () => {
 	const triggerComplianceScanMutation = useMutation({
 		mutationFn: (options = {}) => {
 			if (!effectiveHostId) {
-				return Promise.reject(new Error("Host ID not available"));
+				return Promise.reject(
+					new Error(t("detail.compliance_tab.host_id_unavailable")),
+				);
 			}
 			return complianceAPI.triggerScan(effectiveHostId, {
 				profile_type: options.profileType ?? "all",
@@ -1192,9 +1212,11 @@ const HostDetail = () => {
 		onSuccess: (response) => {
 			const body = response?.data;
 			const job_id = body?.jobId || body?.job_id || "";
-			const msg = body?.message || "Scan triggered";
+			const msg = body?.message || t("detail.compliance_tab.scan_triggered");
 			setComplianceScanFeedback({
-				text: job_id ? `${msg} - Job ID: ${job_id}` : msg,
+				text: job_id
+					? t("detail.compliance_tab.scan_job", { msg, id: job_id })
+					: msg,
 				isError: false,
 			});
 			safeSetTimeout(() => {
@@ -1206,7 +1228,8 @@ const HostDetail = () => {
 		},
 		onError: (error) => {
 			setComplianceScanFeedback({
-				text: error.response?.data?.error || "Failed to start scan",
+				text:
+					error.response?.data?.error || t("detail.compliance_tab.scan_failed"),
 				isError: true,
 			});
 			safeSetTimeout(() => {
@@ -1253,7 +1276,9 @@ const HostDetail = () => {
 			await deleteHostMutation.mutateAsync(hostId);
 		} catch (error) {
 			console.error("Failed to delete host:", error);
-			toast.error(error.response?.data?.error || "Failed to delete host");
+			toast.error(
+				error.response?.data?.error || t("detail.toasts.delete_failed"),
+			);
 		}
 	};
 
@@ -1284,17 +1309,17 @@ const HostDetail = () => {
 						<AlertTriangle className="h-5 w-5 text-danger-400" />
 						<div className="ml-3">
 							<h3 className="text-sm font-medium text-danger-800">
-								Error loading host
+								{t("detail.error.load_host")}
 							</h3>
 							<p className="text-sm text-danger-700 mt-1">
-								{error.message || "Failed to load host details"}
+								{error.message || t("detail.error.load_host_message")}
 							</p>
 							<button
 								type="button"
 								onClick={() => refetch()}
 								className="mt-2 btn-danger text-xs"
 							>
-								Try again
+								{t("detail.error.try_again")}
 							</button>
 						</div>
 					</div>
@@ -1320,10 +1345,10 @@ const HostDetail = () => {
 				<div className="card p-8 text-center">
 					<Server className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 					<h3 className="text-lg font-medium text-secondary-900 dark:text-white mb-2">
-						Host Not Found
+						{t("detail.error.not_found_title")}
 					</h3>
 					<p className="text-secondary-600 dark:text-white">
-						The requested host could not be found.
+						{t("detail.error.not_found_message")}
 					</p>
 				</div>
 			</div>
@@ -1371,10 +1396,10 @@ const HostDetail = () => {
 								<Link
 									to={`/patching/runs/${host.awaiting_post_patch_report_run_id}`}
 									className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-									title="Patches were applied — awaiting a fresh inventory report from the agent"
+									title={t("detail.header.awaiting_report_title")}
 								>
 									<RefreshCw className="h-3 w-3 animate-spin" />
-									Awaiting inventory report
+									{t("detail.header.awaiting_report")}
 								</Link>
 							)}
 						</div>
@@ -1383,7 +1408,9 @@ const HostDetail = () => {
 							<div className="flex items-center gap-4 text-sm text-secondary-600 dark:text-white">
 								<div className="flex items-center gap-1">
 									<Clock className="h-3.5 w-3.5" />
-									<span className="text-xs font-medium">Uptime:</span>
+									<span className="text-xs font-medium">
+										{t("detail.header.uptime_label")}
+									</span>
 									<span className="text-xs">{displayUptime}</span>
 								</div>
 							</div>
@@ -1399,12 +1426,14 @@ const HostDetail = () => {
 							className="btn-outline flex items-center gap-2 text-sm whitespace-nowrap border-warning-300 dark:border-warning-600 text-warning-700 dark:text-warning-300 hover:bg-warning-50 dark:hover:bg-warning-900/20"
 							title={
 								!wsStatus?.connected
-									? "Agent must be connected to apply changes"
-									: "Apply pending configuration to agent"
+									? t("detail.header.apply_title_disconnected")
+									: t("detail.header.apply_title")
 							}
 						>
 							<Send className="h-4 w-4" />
-							<span className="hidden sm:inline">Apply</span>
+							<span className="hidden sm:inline">
+								{t("detail.header.apply")}
+							</span>
 						</button>
 					)}
 					<div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
@@ -1415,8 +1444,8 @@ const HostDetail = () => {
 							className="btn-outline flex items-center gap-2 text-sm whitespace-nowrap"
 							title={
 								!wsStatus?.connected
-									? "Agent is not connected"
-									: "Fetch package data from agent"
+									? t("detail.header.fetch_report_title_disconnected")
+									: t("detail.header.fetch_report_title")
 							}
 						>
 							<Download
@@ -1424,8 +1453,12 @@ const HostDetail = () => {
 									fetchReportMutation.isPending ? "animate-spin" : ""
 								}`}
 							/>
-							<span className="hidden sm:inline">Fetch Report</span>
-							<span className="sm:hidden">Fetch</span>
+							<span className="hidden sm:inline">
+								{t("detail.header.fetch_report")}
+							</span>
+							<span className="sm:hidden">
+								{t("detail.header.fetch_report_short")}
+							</span>
 						</button>
 						{canManageHosts() && !isWindowsHost && (
 							<button
@@ -1436,8 +1469,12 @@ const HostDetail = () => {
 								title={patchAllTitle}
 							>
 								<Wrench className="h-4 w-4" />
-								<span className="hidden sm:inline">Patch all</span>
-								<span className="sm:hidden">Patch</span>
+								<span className="hidden sm:inline">
+									{t("detail.header.patch_all")}
+								</span>
+								<span className="sm:hidden">
+									{t("detail.header.patch_all_short")}
+								</span>
 							</button>
 						)}
 						{reportMessage.text && (
@@ -1445,7 +1482,7 @@ const HostDetail = () => {
 								{reportMessage.text}
 								{reportMessage.jobId && (
 									<span className="ml-1 font-mono text-secondary-500">
-										(Job #{reportMessage.jobId})
+										{t("detail.header.job_id", { id: reportMessage.jobId })}
 									</span>
 								)}
 							</p>
@@ -1458,11 +1495,13 @@ const HostDetail = () => {
 							className={`btn-outline flex items-center text-sm whitespace-nowrap ${
 								host?.machine_id ? "justify-center p-2" : "gap-2"
 							}`}
-							title="View credentials"
+							title={t("detail.header.view_credentials")}
 						>
 							<Key className="h-4 w-4" />
 							{!host?.machine_id && (
-								<span className="hidden sm:inline">Deploy Agent</span>
+								<span className="hidden sm:inline">
+									{t("detail.header.deploy_agent")}
+								</span>
 							)}
 						</button>
 						<button
@@ -1470,7 +1509,7 @@ const HostDetail = () => {
 							onClick={() => refreshHost()}
 							disabled={isRefreshing}
 							className="btn-outline flex items-center justify-center p-2 text-sm"
-							title="Refresh host data"
+							title={t("detail.header.refresh_host")}
 						>
 							<RefreshCw
 								className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
@@ -1480,7 +1519,7 @@ const HostDetail = () => {
 							type="button"
 							onClick={() => setShowDeleteModal(true)}
 							className="btn-danger flex items-center justify-center p-2 text-sm"
-							title="Delete host"
+							title={t("detail.header.delete_host")}
 						>
 							<Trash2 className="h-4 w-4" />
 						</button>
@@ -1494,13 +1533,13 @@ const HostDetail = () => {
 					type="button"
 					onClick={() => navigate(`/packages?host=${hostId}`)}
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
-					title="View all packages for this host"
+					title={t("detail.stats.total_installed_title")}
 				>
 					<div className="flex items-center">
 						<Package className="h-5 w-5 text-primary-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Total Installed
+								{t("detail.stats.total_installed")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{host.stats.total_packages}
@@ -1513,13 +1552,13 @@ const HostDetail = () => {
 					type="button"
 					onClick={() => navigate(`/packages?host=${hostId}&filter=outdated`)}
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
-					title="View outdated packages for this host"
+					title={t("detail.stats.outdated_packages_title")}
 				>
 					<div className="flex items-center">
 						<Clock className="h-5 w-5 text-warning-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Outdated Packages
+								{t("detail.stats.outdated_packages")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{host.stats.outdated_packages}
@@ -1532,13 +1571,13 @@ const HostDetail = () => {
 					type="button"
 					onClick={() => navigate(`/packages?host=${hostId}&filter=security`)}
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
-					title="View security packages for this host"
+					title={t("detail.stats.security_updates_title")}
 				>
 					<div className="flex items-center">
 						<Shield className="h-5 w-5 text-danger-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Security Updates
+								{t("detail.stats.security_updates")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{host.stats.security_updates}
@@ -1551,13 +1590,13 @@ const HostDetail = () => {
 					type="button"
 					onClick={() => navigate(`/repositories?host=${hostId}`)}
 					className="card p-4 cursor-pointer hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow duration-200 text-left w-full"
-					title="View repositories for this host"
+					title={t("detail.stats.repos_title")}
 				>
 					<div className="flex items-center">
 						<Database className="h-5 w-5 text-blue-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Repos
+								{t("detail.stats.repos")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{isLoadingRepos ? "..." : repositories?.length || 0}
@@ -1575,27 +1614,28 @@ const HostDetail = () => {
 					<div className="card p-4">
 						<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center gap-2">
 							<Server className="h-5 w-5 text-primary-600" />
-							Host Information
+							{t("detail.actions.host_information")}
 						</h3>
 						<div className="space-y-4">
 							<div className="space-y-3">
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Friendly Name
+										{t("detail.fields.friendly_name")}
 									</p>
 									<InlineEdit
 										value={host.friendly_name}
 										onSave={(newName) =>
 											updateFriendlyNameMutation.mutate(newName)
 										}
-										placeholder="Enter friendly name..."
+										placeholder={t("detail.fields.friendly_name_placeholder")}
 										maxLength={100}
 										validate={(value) => {
-											if (!value.trim()) return "Friendly name is required";
+											if (!value.trim())
+												return t("detail.fields.friendly_name_required");
 											if (value.trim().length < 1)
-												return "Friendly name must be at least 1 character";
+												return t("detail.fields.friendly_name_min");
 											if (value.trim().length > 100)
-												return "Friendly name must be less than 100 characters";
+												return t("detail.fields.friendly_name_max");
 											return null;
 										}}
 										className="w-full text-sm"
@@ -1605,7 +1645,7 @@ const HostDetail = () => {
 								{host.hostname && (
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											System Hostname
+											{t("detail.fields.system_hostname")}
 										</p>
 										<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm">
 											{host.hostname}
@@ -1616,7 +1656,7 @@ const HostDetail = () => {
 								{host.machine_id && (
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Machine ID
+											{t("detail.fields.machine_id")}
 										</p>
 										<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm break-all">
 											{host.machine_id}
@@ -1626,7 +1666,7 @@ const HostDetail = () => {
 
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Host Groups
+										{t("detail.fields.host_groups")}
 									</p>
 									{(() => {
 										const groupIds =
@@ -1644,7 +1684,9 @@ const HostDetail = () => {
 													})
 												}
 												options={hostGroups || []}
-												placeholder="Select groups..."
+												placeholder={t(
+													"detail.fields.select_groups_placeholder",
+												)}
 												className="w-full"
 											/>
 										);
@@ -1653,20 +1695,20 @@ const HostDetail = () => {
 
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Integrations
+										{t("detail.tabs.integrations")}
 									</p>
 									<button
 										type="button"
 										onClick={() => handleTabChange("integrations")}
 										className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
 									>
-										Manage in Integrations tab
+										{t("detail.fields.manage_in_integrations")}
 									</button>
 								</div>
 
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Operating System
+										{t("detail.fields.operating_system")}
 									</p>
 									<div className="flex items-center gap-2">
 										<OSIcon osType={host.os_type} className="h-4 w-4" />
@@ -1678,16 +1720,16 @@ const HostDetail = () => {
 
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Agent Version
+										{t("detail.fields.agent_version")}
 									</p>
 									<p className="font-medium text-secondary-900 dark:text-white text-sm">
-										{host.agent_version || "Unknown"}
+										{host.agent_version || t("detail.fields.unknown")}
 									</p>
 								</div>
 
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Agent Auto-update
+										{t("detail.fields.agent_auto_update")}
 									</p>
 									<div className="flex items-center gap-2">
 										<button
@@ -1710,7 +1752,7 @@ const HostDetail = () => {
 										{!settings?.auto_update && host.auto_update && (
 											<span
 												className="text-amber-500 dark:text-amber-400"
-												title="Global auto-updates disabled in Settings > Agent Updates"
+												title={t("detail.fields.auto_update_disabled_warning")}
 											>
 												<AlertTriangle className="h-4 w-4" />
 											</span>
@@ -1720,7 +1762,7 @@ const HostDetail = () => {
 
 								<div>
 									<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-										Force Agent Version Upgrade
+										{t("detail.fields.force_agent_upgrade")}
 									</p>
 									<button
 										type="button"
@@ -1730,8 +1772,8 @@ const HostDetail = () => {
 										}
 										title={
 											!wsStatus?.connected
-												? "Agent is not connected"
-												: "Force agent to update now"
+												? t("detail.fields.update_now_title_disconnected")
+												: t("detail.fields.update_now_title")
 										}
 										className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-md hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									>
@@ -1741,17 +1783,19 @@ const HostDetail = () => {
 											}`}
 										/>
 										{forceAgentUpdateMutation.isPending
-											? "Updating..."
+											? t("detail.fields.updating")
 											: wsStatus?.connected
-												? "Update Now"
-												: "Offline"}
+												? t("detail.fields.update_now")
+												: t("detail.fields.offline")}
 									</button>
 									{updateMessage.text && (
 										<p className="text-xs mt-1.5 text-secondary-600 dark:text-white">
 											{updateMessage.text}
 											{updateMessage.jobId && (
 												<span className="ml-1 font-mono text-secondary-500">
-													(Job #{updateMessage.jobId})
+													{t("detail.header.job_id", {
+														id: updateMessage.jobId,
+													})}
 												</span>
 											)}
 										</p>
@@ -1766,7 +1810,7 @@ const HostDetail = () => {
 						<div className="card p-4">
 							<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center gap-2">
 								<Wifi className="h-5 w-5 text-primary-600" />
-								Network
+								{t("detail.network.title")}
 							</h3>
 							<div className="space-y-4">
 								{host.dns_servers &&
@@ -1774,7 +1818,7 @@ const HostDetail = () => {
 									host.dns_servers.length > 0 && (
 										<div>
 											<p className="text-xs text-secondary-500 dark:text-white mb-2">
-												DNS Servers
+												{t("detail.network.dns_servers")}
 											</p>
 											<div className="space-y-1">
 												{host.dns_servers.map((dns) => (
@@ -1796,7 +1840,7 @@ const HostDetail = () => {
 									host.network_interfaces.length > 0 && (
 										<div>
 											<p className="text-xs text-secondary-500 dark:text-white mb-3">
-												Network Interfaces
+												{t("detail.network.network_interfaces")}
 											</p>
 											<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 												{host.network_interfaces.map((iface) => (
@@ -1823,7 +1867,9 @@ const HostDetail = () => {
 																				: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
 																		}`}
 																	>
-																		{iface.status === "up" ? "UP" : "DOWN"}
+																		{iface.status === "up"
+																			? t("detail.network.status_up")
+																			: t("detail.network.status_down")}
 																	</span>
 																)}
 															</div>
@@ -1843,8 +1889,8 @@ const HostDetail = () => {
 																	className="p-1 rounded hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-colors"
 																	title={
 																		host?.primary_interface === iface.name
-																			? "Clear main interface"
-																			: "Set as main interface"
+																			? t("detail.network.clear_main_interface")
+																			: t("detail.network.set_main_interface")
 																	}
 																>
 																	<Star
@@ -1863,7 +1909,7 @@ const HostDetail = () => {
 															{iface.macAddress && (
 																<div>
 																	<p className="text-secondary-500 dark:text-white mb-0.5">
-																		MAC Address
+																		{t("detail.network.mac_address")}
 																	</p>
 																	<p className="font-mono text-secondary-900 dark:text-white">
 																		{iface.macAddress}
@@ -1873,7 +1919,7 @@ const HostDetail = () => {
 															{iface.mtu && (
 																<div>
 																	<p className="text-secondary-500 dark:text-white mb-0.5">
-																		MTU
+																		{t("detail.network.mtu")}
 																	</p>
 																	<p className="text-secondary-900 dark:text-white">
 																		{iface.mtu}
@@ -1883,12 +1929,16 @@ const HostDetail = () => {
 															{iface.linkSpeed && iface.linkSpeed > 0 && (
 																<div>
 																	<p className="text-secondary-500 dark:text-white mb-0.5">
-																		Link Speed
+																		{t("detail.network.link_speed")}
 																	</p>
 																	<p className="text-secondary-900 dark:text-white">
-																		{iface.linkSpeed} Mbps
+																		{t("detail.network.link_speed_value", {
+																			speed: iface.linkSpeed,
+																		})}
 																		{iface.duplex &&
-																			` (${iface.duplex} duplex)`}
+																			t("detail.network.duplex_suffix", {
+																				duplex: iface.duplex,
+																			})}
 																	</p>
 																</div>
 															)}
@@ -1900,7 +1950,7 @@ const HostDetail = () => {
 															iface.addresses.length > 0 && (
 																<div className="space-y-2 pt-2 border-t border-secondary-200 dark:border-secondary-700">
 																	<p className="text-xs font-medium text-secondary-500 dark:text-white mb-2">
-																		IP Addresses
+																		{t("detail.network.ip_addresses")}
 																	</p>
 																	<div className="space-y-2">
 																		{iface.addresses.map((addr) => (
@@ -1931,7 +1981,7 @@ const HostDetail = () => {
 																				</div>
 																				{addr.gateway && (
 																					<div className="text-xs text-secondary-600 dark:text-white ml-1">
-																						Gateway:{" "}
+																						{t("detail.network.gateway")}{" "}
 																						<span className="font-mono">
 																							{addr.gateway}
 																						</span>
@@ -1955,7 +2005,7 @@ const HostDetail = () => {
 					<div className="card p-4">
 						<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center gap-2">
 							<Terminal className="h-5 w-5 text-primary-600" />
-							System
+							{t("detail.system.title")}
 						</h3>
 						<div className="space-y-4">
 							{/* System Information */}
@@ -1965,13 +2015,13 @@ const HostDetail = () => {
 								<div>
 									<h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 										<Terminal className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-										System Information
+										{t("detail.system.system_information")}
 									</h4>
 									<div className="space-y-3">
 										{host.architecture && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													Architecture
+													{t("detail.system.architecture")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white text-sm">
 													{host.architecture}
@@ -1982,7 +2032,7 @@ const HostDetail = () => {
 										{host.kernel_version && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													Running Kernel
+													{t("detail.system.running_kernel")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm break-all">
 													{host.kernel_version}
@@ -1993,7 +2043,7 @@ const HostDetail = () => {
 										{host.installed_kernel_version && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													Installed Kernel
+													{t("detail.system.installed_kernel")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm break-all">
 													{host.installed_kernel_version}
@@ -2004,7 +2054,7 @@ const HostDetail = () => {
 										{host.selinux_status && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													SELinux Status
+													{t("detail.system.selinux_status")}
 												</p>
 												<span
 													className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
@@ -2040,13 +2090,13 @@ const HostDetail = () => {
 								<div className="pt-4 border-t border-secondary-200 dark:border-secondary-600">
 									<h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 										<Monitor className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-										Resource Information
+										{t("detail.system.resource_information")}
 									</h4>
 									<div className="space-y-3">
 										{displayUptime && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													System Uptime
+													{t("detail.system.system_uptime")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white text-sm">
 													{displayUptime}
@@ -2057,7 +2107,7 @@ const HostDetail = () => {
 										{host.cpu_model && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													CPU Model
+													{t("detail.system.cpu_model")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white text-sm">
 													{host.cpu_model}
@@ -2068,7 +2118,7 @@ const HostDetail = () => {
 										{host.cpu_cores && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													CPU Cores
+													{t("detail.system.cpu_cores")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white text-sm">
 													{host.cpu_cores}
@@ -2079,10 +2129,10 @@ const HostDetail = () => {
 										{host.ram_installed != null && (
 											<div>
 												<p className="text-xs text-secondary-500 dark:text-white">
-													RAM Installed
+													{t("detail.system.ram_installed")}
 												</p>
 												<p className="font-medium text-secondary-900 dark:text-white text-sm">
-													{format_memory_gib(host.ram_installed)}
+													{format_memory_gib(host.ram_installed, t)}
 												</p>
 											</div>
 										)}
@@ -2091,10 +2141,10 @@ const HostDetail = () => {
 											host.swap_size !== null && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														Swap Size
+														{t("detail.system.swap_size")}
 													</p>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
-														{format_memory_gib(host.swap_size)}
+														{format_memory_gib(host.swap_size, t)}
 													</p>
 												</div>
 											)}
@@ -2105,7 +2155,7 @@ const HostDetail = () => {
 											host.load_average.some((load) => load != null) && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														Load Average
+														{t("detail.system.load_average")}
 													</p>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
 														{host.load_average
@@ -2132,7 +2182,7 @@ const HostDetail = () => {
 												<div className="pt-3 border-t border-secondary-200 dark:border-secondary-600">
 													<h5 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 														<HardDrive className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-														Disk Usage
+														{t("detail.system.disk_usage")}
 													</h5>
 													<div className="space-y-3 max-h-80 overflow-y-auto pr-2">
 														{host.disk_details.map((disk, index) => (
@@ -2143,24 +2193,33 @@ const HostDetail = () => {
 																<div className="flex items-center gap-2 mb-2">
 																	<HardDrive className="h-4 w-4 text-secondary-500" />
 																	<span className="font-medium text-secondary-900 dark:text-white text-sm">
-																		{disk.name || `Disk ${index + 1}`}
+																		{disk.name ||
+																			t("detail.system.disk_fallback", {
+																				index: index + 1,
+																			})}
 																	</span>
 																</div>
 																{disk.size && (
 																	<p className="text-xs text-secondary-600 dark:text-white mb-1">
-																		Size: {disk.size}
+																		{t("detail.system.disk_size", {
+																			size: disk.size,
+																		})}
 																	</p>
 																)}
 																{disk.mountpoint && (
 																	<p className="text-xs text-secondary-600 dark:text-white mb-1">
-																		Mount: {disk.mountpoint}
+																		{t("detail.system.disk_mount", {
+																			mount: disk.mountpoint,
+																		})}
 																	</p>
 																)}
 																{disk.usage &&
 																	typeof disk.usage === "number" && (
 																		<div className="mt-2">
 																			<div className="flex justify-between text-xs text-secondary-600 dark:text-white mb-1">
-																				<span>Usage</span>
+																				<span>
+																					{t("detail.system.disk_usage_label")}
+																				</span>
 																				<span>{disk.usage}%</span>
 																			</div>
 																			<div className="w-full bg-secondary-200 dark:bg-secondary-600 rounded-full h-2">
@@ -2202,7 +2261,7 @@ const HostDetail = () => {
 									<div className="text-center py-8">
 										<Terminal className="h-8 w-8 text-secondary-400 mx-auto mb-2" />
 										<p className="text-sm text-secondary-500 dark:text-white">
-											No system information available
+											{t("detail.system.empty")}
 										</p>
 									</div>
 								)}
@@ -2215,7 +2274,7 @@ const HostDetail = () => {
 					{/* Notes Card */}
 					<div className="card p-4">
 						<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
-							Notes
+							{t("detail.notes.title")}
 						</h3>
 						<div className="space-y-4">
 							{notesMessage.text && (
@@ -2251,13 +2310,13 @@ const HostDetail = () => {
 								<textarea
 									value={notes}
 									onChange={(e) => setNotes(e.target.value)}
-									placeholder="Add notes about this host..."
+									placeholder={t("detail.notes.placeholder")}
 									className="w-full h-32 p-3 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
 									maxLength={1000}
 								/>
 								<div className="flex justify-between items-center mt-3">
 									<p className="text-xs text-secondary-500 dark:text-white">
-										{notes.length}/1000
+										{t("detail.notes.char_count", { count: notes.length })}
 									</p>
 									<button
 										type="button"
@@ -2270,7 +2329,9 @@ const HostDetail = () => {
 										disabled={updateNotesMutation.isPending}
 										className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 rounded-md transition-colors"
 									>
-										{updateNotesMutation.isPending ? "Saving..." : "Save Notes"}
+										{updateNotesMutation.isPending
+											? t("detail.notes.saving")
+											: t("detail.notes.save")}
 									</button>
 								</div>
 							</div>
@@ -2280,7 +2341,7 @@ const HostDetail = () => {
 					{/* Integrations Card */}
 					<div className="card p-4">
 						<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
-							Integrations
+							{t("detail.tabs.integrations")}
 						</h3>
 						{isLoadingIntegrations ? (
 							<div className="flex items-center justify-center h-32">
@@ -2294,21 +2355,20 @@ const HostDetail = () => {
 											<div className="flex items-center gap-3 mb-2">
 												<Database className="h-5 w-5 text-primary-600 dark:text-primary-400" />
 												<h4 className="text-sm font-medium text-secondary-900 dark:text-white">
-													Docker
+													{t("detail.tabs.docker")}
 												</h4>
 												{integrationsData?.data?.integrations?.docker ? (
 													<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-														Enabled
+														{t("detail.integrations.enabled")}
 													</span>
 												) : (
 													<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400">
-														Disabled
+														{t("detail.integrations.disabled")}
 													</span>
 												)}
 											</div>
 											<p className="text-xs text-secondary-600 dark:text-white">
-												Monitor Docker containers, images, volumes, and
-												networks.
+												{t("detail.integrations.docker_desc")}
 											</p>
 										</div>
 										<div className="flex-shrink-0">
@@ -2348,8 +2408,7 @@ const HostDetail = () => {
 									</div>
 									{!wsStatus?.connected && (
 										<p className="text-xs text-warning-600 dark:text-warning-400 mt-2">
-											Agent must be connected via WebSocket to toggle
-											integrations
+											{t("detail.integrations.toggle_requires_connection")}
 										</p>
 									)}
 								</div>
@@ -2362,13 +2421,11 @@ const HostDetail = () => {
 						<div className="card p-4">
 							<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4 flex items-center gap-2">
 								<AlertTriangle className="h-5 w-5 text-primary-600" />
-								Reporting
+								{t("detail.tabs.reporting")}
 							</h3>
 							<div className="space-y-4">
 								<p className="text-xs text-secondary-600 dark:text-white">
-									Control whether this host triggers alert entries when it goes
-									offline. When disabled, no alerts will be created for this
-									host even if the global setting is enabled.
+									{t("detail.reporting.desc")}
 								</p>
 
 								{/* Settings - Side by Side on larger mobile, stacked on small */}
@@ -2376,20 +2433,20 @@ const HostDetail = () => {
 									{/* Current Setting */}
 									<div>
 										<label className="text-xs font-medium text-secondary-500 dark:text-white mb-2 block">
-											Current Setting
+											{t("detail.reporting.current_setting")}
 										</label>
 										<div className="text-sm text-secondary-900 dark:text-white">
 											{host?.host_down_alerts_enabled === null ? (
 												<span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-													Inherit from global settings
+													{t("detail.reporting.inherit_from_global")}
 												</span>
 											) : host?.host_down_alerts_enabled === true ? (
 												<span className="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-													Enabled
+													{t("detail.integrations.enabled")}
 												</span>
 											) : (
 												<span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-													Disabled
+													{t("detail.integrations.disabled")}
 												</span>
 											)}
 										</div>
@@ -2399,26 +2456,26 @@ const HostDetail = () => {
 									{hostDownAlertConfig && (
 										<div>
 											<label className="text-xs font-medium text-secondary-500 dark:text-white mb-2 block">
-												Global Setting
+												{t("detail.reporting.global_setting")}
 											</label>
 											<div className="text-sm text-secondary-600 dark:text-white">
 												{settings?.alerts_enabled === false ? (
 													<span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-														Disabled (Master Switch Off)
+														{t("detail.reporting.global_disabled_master")}
 													</span>
 												) : hostDownAlertConfig.is_enabled ? (
 													<span className="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-														Enabled
+														{t("detail.integrations.enabled")}
 													</span>
 												) : (
 													<span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-														Disabled
+														{t("detail.integrations.disabled")}
 													</span>
 												)}
 												{host?.host_down_alerts_enabled === null &&
 													settings?.alerts_enabled !== false && (
 														<span className="ml-2 text-xs text-secondary-500 dark:text-white block mt-1">
-															(currently inherited)
+															{t("detail.reporting.currently_inherited")}
 														</span>
 													)}
 											</div>
@@ -2441,7 +2498,7 @@ const HostDetail = () => {
 												: "bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-white hover:bg-secondary-300 dark:hover:bg-secondary-500"
 										} disabled:opacity-50 disabled:cursor-not-allowed`}
 									>
-										Inherit
+										{t("detail.reporting.inherit")}
 									</button>
 									<button
 										type="button"
@@ -2456,7 +2513,7 @@ const HostDetail = () => {
 												: "bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-white hover:bg-secondary-300 dark:hover:bg-secondary-500"
 										} disabled:opacity-50 disabled:cursor-not-allowed`}
 									>
-										Enable
+										{t("detail.reporting.enable")}
 									</button>
 									<button
 										type="button"
@@ -2471,7 +2528,7 @@ const HostDetail = () => {
 												: "bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-white hover:bg-secondary-300 dark:hover:bg-secondary-500"
 										} disabled:opacity-50 disabled:cursor-not-allowed`}
 									>
-										Disable
+										{t("detail.reporting.disable")}
 									</button>
 								</div>
 
@@ -2479,9 +2536,9 @@ const HostDetail = () => {
 								{updateMessage.text && (
 									<div
 										className={`text-sm ${
-											updateMessage.text.includes("successfully")
-												? "text-green-600 dark:text-green-400"
-												: "text-red-600 dark:text-red-400"
+											updateMessage.isError
+												? "text-red-600 dark:text-red-400"
+												: "text-green-600 dark:text-green-400"
 										}`}
 									>
 										{updateMessage.text}
@@ -2504,7 +2561,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Host Info
+							{t("detail.tabs.host")}
 						</button>
 						<button
 							type="button"
@@ -2515,7 +2572,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Network
+							{t("detail.network.title")}
 						</button>
 						<button
 							type="button"
@@ -2526,7 +2583,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							System
+							{t("detail.system.title")}
 						</button>
 						<button
 							type="button"
@@ -2537,7 +2594,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Agent Activity
+							{t("detail.tabs.activity")}
 						</button>
 						<button
 							type="button"
@@ -2548,7 +2605,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Notes
+							{t("detail.notes.title")}
 						</button>
 						<button
 							type="button"
@@ -2559,7 +2616,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Integrations
+							{t("detail.tabs.integrations")}
 						</button>
 						{settings?.alerts_enabled !== false && (
 							<button
@@ -2571,7 +2628,7 @@ const HostDetail = () => {
 										: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 								}`}
 							>
-								Reporting
+								{t("detail.tabs.reporting")}
 							</button>
 						)}
 						{/* Docker tab — only surfaced when the host has Docker installed.
@@ -2587,7 +2644,7 @@ const HostDetail = () => {
 										: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 								}`}
 							>
-								Docker
+								{t("detail.tabs.docker")}
 								{!hasModule("docker") && (
 									<TierBadge tier={getRequiredTier("docker")} />
 								)}
@@ -2602,7 +2659,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Patching
+							{t("detail.tabs.patching")}
 							{!hasModule("patching") && (
 								<TierBadge tier={getRequiredTier("patching")} />
 							)}
@@ -2619,7 +2676,7 @@ const HostDetail = () => {
 										: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 								}`}
 							>
-								Compliance
+								{t("detail.tabs.compliance")}
 								{!hasModule("compliance") && (
 									<TierBadge tier={getRequiredTier("compliance")} />
 								)}
@@ -2634,7 +2691,7 @@ const HostDetail = () => {
 									: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 							}`}
 						>
-							Terminal
+							{t("detail.tabs.terminal")}
 							{!hasModule("ssh_terminal") && (
 								<TierBadge tier={getRequiredTier("ssh_terminal")} />
 							)}
@@ -2649,7 +2706,7 @@ const HostDetail = () => {
 										: "text-secondary-500 dark:text-white hover:text-secondary-700 dark:hover:text-primary-400"
 								}`}
 							>
-								RDP
+								{t("detail.tabs.rdp")}
 								{!hasModule("rdp") && (
 									<TierBadge tier={getRequiredTier("rdp")} />
 								)}
@@ -2664,21 +2721,22 @@ const HostDetail = () => {
 								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Friendly Name
+											{t("detail.fields.friendly_name")}
 										</p>
 										<InlineEdit
 											value={host.friendly_name}
 											onSave={(newName) =>
 												updateFriendlyNameMutation.mutate(newName)
 											}
-											placeholder="Enter friendly name..."
+											placeholder={t("detail.fields.friendly_name_placeholder")}
 											maxLength={100}
 											validate={(value) => {
-												if (!value.trim()) return "Friendly name is required";
+												if (!value.trim())
+													return t("detail.fields.friendly_name_required");
 												if (value.trim().length < 1)
-													return "Friendly name must be at least 1 character";
+													return t("detail.fields.friendly_name_min");
 												if (value.trim().length > 100)
-													return "Friendly name must be less than 100 characters";
+													return t("detail.fields.friendly_name_max");
 												return null;
 											}}
 											className="w-full text-sm"
@@ -2687,7 +2745,7 @@ const HostDetail = () => {
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5 flex items-center gap-2">
-											IP Address
+											{t("detail.fields.ip_address")}
 											{host?.primary_interface && (
 												<span className="text-xs text-amber-600 dark:text-amber-400">
 													(from {host.primary_interface})
@@ -2703,14 +2761,14 @@ const HostDetail = () => {
 													updateConnectionMutation.mutate({ ip: newIp.trim() });
 												}
 											}}
-											placeholder="No IP set (click to add)"
+											placeholder={t("detail.fields.no_ip_placeholder")}
 											disabled={!!host?.primary_interface}
 											validate={(value) => {
 												if (
 													value.trim() &&
 													!/^(\d{1,3}\.){3}\d{1,3}$/.test(value.trim())
 												) {
-													return "Invalid IP address format";
+													return t("detail.fields.invalid_ip");
 												}
 												return null;
 											}}
@@ -2720,7 +2778,7 @@ const HostDetail = () => {
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Hostname
+											{t("detail.fields.hostname")}
 										</p>
 										<InlineEdit
 											value={host.hostname || ""}
@@ -2733,7 +2791,7 @@ const HostDetail = () => {
 													});
 												}
 											}}
-											placeholder="No hostname set (click to add)"
+											placeholder={t("detail.fields.no_hostname_placeholder")}
 											maxLength={255}
 											className="w-full text-sm font-mono"
 										/>
@@ -2742,7 +2800,7 @@ const HostDetail = () => {
 									{host.machine_id && (
 										<div>
 											<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-												Machine ID
+												{t("detail.fields.machine_id")}
 											</p>
 											<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm break-all">
 												{host.machine_id}
@@ -2752,7 +2810,7 @@ const HostDetail = () => {
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Host Groups
+											{t("detail.fields.host_groups")}
 										</p>
 										{/* Extract group IDs from the new many-to-many structure */}
 										{(() => {
@@ -2771,7 +2829,9 @@ const HostDetail = () => {
 														})
 													}
 													options={hostGroups || []}
-													placeholder="Select groups..."
+													placeholder={t(
+														"detail.fields.select_groups_placeholder",
+													)}
 													className="w-full"
 												/>
 											);
@@ -2780,20 +2840,20 @@ const HostDetail = () => {
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Integrations
+											{t("detail.tabs.integrations")}
 										</p>
 										<button
 											type="button"
 											onClick={() => handleTabChange("integrations")}
 											className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
 										>
-											Manage in Integrations tab
+											{t("detail.fields.manage_in_integrations")}
 										</button>
 									</div>
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Operating System
+											{t("detail.fields.operating_system")}
 										</p>
 										<div className="flex items-center gap-2">
 											<OSIcon osType={host.os_type} className="h-4 w-4" />
@@ -2805,16 +2865,16 @@ const HostDetail = () => {
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Agent Version
+											{t("detail.fields.agent_version")}
 										</p>
 										<p className="font-medium text-secondary-900 dark:text-white text-sm">
-											{host.agent_version || "Unknown"}
+											{host.agent_version || t("detail.fields.unknown")}
 										</p>
 									</div>
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Agent Auto-update
+											{t("detail.fields.agent_auto_update")}
 										</p>
 										<div className="flex items-center gap-2">
 											<button
@@ -2837,7 +2897,9 @@ const HostDetail = () => {
 											{!settings?.auto_update && host.auto_update && (
 												<span
 													className="text-amber-500 dark:text-amber-400"
-													title="Global auto-updates disabled in Settings > Agent Updates"
+													title={t(
+														"detail.fields.auto_update_disabled_warning",
+													)}
 												>
 													<AlertTriangle className="h-4 w-4" />
 												</span>
@@ -2847,7 +2909,7 @@ const HostDetail = () => {
 
 									<div>
 										<p className="text-xs text-secondary-500 dark:text-white mb-1.5">
-											Force Agent Version Upgrade
+											{t("detail.fields.force_agent_upgrade")}
 										</p>
 										<button
 											type="button"
@@ -2858,8 +2920,8 @@ const HostDetail = () => {
 											}
 											title={
 												!wsStatus?.connected
-													? "Agent is not connected"
-													: "Force agent to update now"
+													? t("detail.fields.update_now_title_disconnected")
+													: t("detail.fields.update_now_title")
 											}
 											className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-md hover:bg-primary-100 dark:hover:bg-primary-900/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 										>
@@ -2871,17 +2933,19 @@ const HostDetail = () => {
 												}`}
 											/>
 											{forceAgentUpdateMutation.isPending
-												? "Updating..."
+												? t("detail.fields.updating")
 												: wsStatus?.connected
-													? "Update Now"
-													: "Offline"}
+													? t("detail.fields.update_now")
+													: t("detail.fields.offline")}
 										</button>
 										{updateMessage.text && (
 											<p className="text-xs mt-1.5 text-secondary-600 dark:text-white">
 												{updateMessage.text}
 												{updateMessage.jobId && (
 													<span className="ml-1 font-mono text-secondary-500">
-														(Job #{updateMessage.jobId})
+														{t("detail.header.job_id", {
+															id: updateMessage.jobId,
+														})}
 													</span>
 												)}
 											</p>
@@ -2902,7 +2966,7 @@ const HostDetail = () => {
 											<div>
 												<h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 													<Wifi className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-													DNS Servers
+													{t("detail.network.dns_servers")}
 												</h4>
 												<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 													{host.dns_servers.map((dns) => (
@@ -2926,7 +2990,7 @@ const HostDetail = () => {
 											<div>
 												<h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-4 flex items-center gap-2">
 													<Wifi className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-													Network Interfaces
+													{t("detail.network.network_interfaces")}
 												</h4>
 												<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 													{host.network_interfaces.map((iface) => (
@@ -2953,7 +3017,9 @@ const HostDetail = () => {
 																					: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
 																			}`}
 																		>
-																			{iface.status === "up" ? "UP" : "DOWN"}
+																			{iface.status === "up"
+																				? t("detail.network.status_up")
+																				: t("detail.network.status_down")}
 																		</span>
 																	)}
 																</div>
@@ -2973,8 +3039,10 @@ const HostDetail = () => {
 																		className="p-1 rounded hover:bg-secondary-200 dark:hover:bg-secondary-700 transition-colors"
 																		title={
 																			host?.primary_interface === iface.name
-																				? "Clear main interface"
-																				: "Set as main interface"
+																				? t(
+																						"detail.network.clear_main_interface",
+																					)
+																				: t("detail.network.set_main_interface")
 																		}
 																	>
 																		<Star
@@ -2993,7 +3061,7 @@ const HostDetail = () => {
 																{iface.macAddress && (
 																	<div>
 																		<p className="text-secondary-500 dark:text-white mb-0.5">
-																			MAC Address
+																			{t("detail.network.mac_address")}
 																		</p>
 																		<p className="font-mono text-secondary-900 dark:text-white">
 																			{iface.macAddress}
@@ -3003,7 +3071,7 @@ const HostDetail = () => {
 																{iface.mtu && (
 																	<div>
 																		<p className="text-secondary-500 dark:text-white mb-0.5">
-																			MTU
+																			{t("detail.network.mtu")}
 																		</p>
 																		<p className="text-secondary-900 dark:text-white">
 																			{iface.mtu}
@@ -3013,10 +3081,12 @@ const HostDetail = () => {
 																{iface.linkSpeed && iface.linkSpeed > 0 && (
 																	<div>
 																		<p className="text-secondary-500 dark:text-white mb-0.5">
-																			Link Speed
+																			{t("detail.network.link_speed")}
 																		</p>
 																		<p className="text-secondary-900 dark:text-white">
-																			{iface.linkSpeed} Mbps
+																			{t("detail.network.link_speed_value", {
+																				speed: iface.linkSpeed,
+																			})}
 																			{iface.duplex &&
 																				` (${iface.duplex} duplex)`}
 																		</p>
@@ -3030,7 +3100,7 @@ const HostDetail = () => {
 																iface.addresses.length > 0 && (
 																	<div className="space-y-2 pt-3 border-t border-secondary-200 dark:border-secondary-700">
 																		<p className="text-xs font-medium text-secondary-500 dark:text-white mb-2">
-																			IP Addresses
+																			{t("detail.network.ip_addresses")}
 																		</p>
 																		<div className="space-y-2">
 																			{iface.addresses.map((addr) => (
@@ -3061,7 +3131,7 @@ const HostDetail = () => {
 																					</div>
 																					{addr.gateway && (
 																						<div className="text-xs text-secondary-600 dark:text-white ml-1">
-																							Gateway:{" "}
+																							{t("detail.network.gateway")}{" "}
 																							<span className="font-mono">
 																								{addr.gateway}
 																							</span>
@@ -3091,13 +3161,13 @@ const HostDetail = () => {
 									<div>
 										<h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 											<Terminal className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-											System Information
+											{t("detail.system.system_information")}
 										</h4>
 										<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 											{host.architecture && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														Architecture
+														{t("detail.system.architecture")}
 													</p>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
 														{host.architecture}
@@ -3108,7 +3178,7 @@ const HostDetail = () => {
 											{host.kernel_version && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														Running Kernel
+														{t("detail.system.running_kernel")}
 													</p>
 													<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm break-all">
 														{host.kernel_version}
@@ -3119,7 +3189,7 @@ const HostDetail = () => {
 											{host.installed_kernel_version && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														Installed Kernel
+														{t("detail.system.installed_kernel")}
 													</p>
 													<p className="font-medium text-secondary-900 dark:text-white font-mono text-sm break-all">
 														{host.installed_kernel_version}
@@ -3130,7 +3200,7 @@ const HostDetail = () => {
 											{host.selinux_status && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														SELinux Status
+														{t("detail.system.selinux_status")}
 													</p>
 													<span
 														className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
@@ -3149,7 +3219,7 @@ const HostDetail = () => {
 											{host.package_manager && (
 												<div>
 													<p className="text-xs text-secondary-500 dark:text-white">
-														Package Manager
+														{t("detail.fields.package_manager")}
 													</p>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
 														{host.package_manager}
@@ -3177,7 +3247,7 @@ const HostDetail = () => {
 									<div className="pt-4 border-t border-secondary-200 dark:border-secondary-600">
 										<h4 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 											<Monitor className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-											Resource Information
+											{t("detail.system.resource_information")}
 										</h4>
 
 										{/* System Overview */}
@@ -3188,7 +3258,7 @@ const HostDetail = () => {
 													<div className="flex items-center gap-2 mb-2">
 														<Clock className="h-4 w-4 text-primary-600 dark:text-primary-400" />
 														<p className="text-xs text-secondary-500 dark:text-white">
-															System Uptime
+															{t("detail.system.system_uptime")}
 														</p>
 													</div>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
@@ -3203,7 +3273,7 @@ const HostDetail = () => {
 													<div className="flex items-center gap-2 mb-2">
 														<Cpu className="h-4 w-4 text-primary-600 dark:text-primary-400" />
 														<p className="text-xs text-secondary-500 dark:text-white">
-															CPU Model
+															{t("detail.system.cpu_model")}
 														</p>
 													</div>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
@@ -3218,7 +3288,7 @@ const HostDetail = () => {
 													<div className="flex items-center gap-2 mb-2">
 														<Cpu className="h-4 w-4 text-primary-600 dark:text-primary-400" />
 														<p className="text-xs text-secondary-500 dark:text-white">
-															CPU Cores
+															{t("detail.system.cpu_cores")}
 														</p>
 													</div>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
@@ -3233,11 +3303,11 @@ const HostDetail = () => {
 													<div className="flex items-center gap-2 mb-2">
 														<MemoryStick className="h-4 w-4 text-primary-600 dark:text-primary-400" />
 														<p className="text-xs text-secondary-500 dark:text-white">
-															RAM Installed
+															{t("detail.system.ram_installed")}
 														</p>
 													</div>
 													<p className="font-medium text-secondary-900 dark:text-white text-sm">
-														{format_memory_gib(host.ram_installed)}
+														{format_memory_gib(host.ram_installed, t)}
 													</p>
 												</div>
 											)}
@@ -3249,11 +3319,11 @@ const HostDetail = () => {
 														<div className="flex items-center gap-2 mb-2">
 															<MemoryStick className="h-4 w-4 text-primary-600 dark:text-primary-400" />
 															<p className="text-xs text-secondary-500 dark:text-white">
-																Swap Size
+																{t("detail.system.swap_size")}
 															</p>
 														</div>
 														<p className="font-medium text-secondary-900 dark:text-white text-sm">
-															{format_memory_gib(host.swap_size)}
+															{format_memory_gib(host.swap_size, t)}
 														</p>
 													</div>
 												)}
@@ -3267,7 +3337,7 @@ const HostDetail = () => {
 														<div className="flex items-center gap-2 mb-2">
 															<Activity className="h-4 w-4 text-primary-600 dark:text-primary-400" />
 															<p className="text-xs text-secondary-500 dark:text-white">
-																Load Average
+																{t("detail.system.load_average")}
 															</p>
 														</div>
 														<p className="font-medium text-secondary-900 dark:text-white text-sm">
@@ -3297,7 +3367,7 @@ const HostDetail = () => {
 												<div className="pt-4 border-t border-secondary-200 dark:border-secondary-600">
 													<h5 className="text-sm font-medium text-secondary-900 dark:text-white mb-3 flex items-center gap-2">
 														<HardDrive className="h-4 w-4 text-primary-600 dark:text-primary-400" />
-														Disk Usage
+														{t("detail.system.disk_usage")}
 													</h5>
 													<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto pr-2">
 														{host.disk_details.map((disk, index) => (
@@ -3308,24 +3378,33 @@ const HostDetail = () => {
 																<div className="flex items-center gap-2 mb-2">
 																	<HardDrive className="h-4 w-4 text-secondary-500" />
 																	<span className="font-medium text-secondary-900 dark:text-white text-sm">
-																		{disk.name || `Disk ${index + 1}`}
+																		{disk.name ||
+																			t("detail.system.disk_fallback", {
+																				index: index + 1,
+																			})}
 																	</span>
 																</div>
 																{disk.size && (
 																	<p className="text-xs text-secondary-600 dark:text-white mb-1">
-																		Size: {disk.size}
+																		{t("detail.system.disk_size", {
+																			size: disk.size,
+																		})}
 																	</p>
 																)}
 																{disk.mountpoint && (
 																	<p className="text-xs text-secondary-600 dark:text-white mb-1">
-																		Mount: {disk.mountpoint}
+																		{t("detail.system.disk_mount", {
+																			mount: disk.mountpoint,
+																		})}
 																	</p>
 																)}
 																{disk.usage &&
 																	typeof disk.usage === "number" && (
 																		<div className="mt-2">
 																			<div className="flex justify-between text-xs text-secondary-600 dark:text-white mb-1">
-																				<span>Usage</span>
+																				<span>
+																					{t("detail.system.disk_usage_label")}
+																				</span>
 																				<span>{disk.usage}%</span>
 																			</div>
 																			<div className="w-full bg-secondary-200 dark:bg-secondary-600 rounded-full h-2">
@@ -3366,11 +3445,10 @@ const HostDetail = () => {
 										<div className="text-center py-8">
 											<Terminal className="h-8 w-8 text-secondary-400 mx-auto mb-2" />
 											<p className="text-sm text-secondary-500 dark:text-white">
-												No system information available
+												{t("detail.system.empty")}
 											</p>
 											<p className="text-xs text-secondary-400 dark:text-white mt-1">
-												System information will appear once the agent collects
-												data from this host
+												{t("detail.system.empty_hint")}
 											</p>
 										</div>
 									)}
@@ -3387,7 +3465,7 @@ const HostDetail = () => {
 								<div className="text-center py-8">
 									<Wifi className="h-8 w-8 text-secondary-400 mx-auto mb-2" />
 									<p className="text-sm text-secondary-500 dark:text-white">
-										No network information available
+										{t("detail.network.empty")}
 									</p>
 								</div>
 							)}
@@ -3429,7 +3507,7 @@ const HostDetail = () => {
 							<div className="space-y-4">
 								<div className="flex items-center justify-between">
 									<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-										Host Notes
+										{t("detail.notes.host_notes")}
 									</h3>
 								</div>
 
@@ -3467,18 +3545,17 @@ const HostDetail = () => {
 									<textarea
 										value={notes}
 										onChange={(e) => setNotes(e.target.value)}
-										placeholder="Add notes about this host... (e.g., purpose, special configurations, maintenance notes)"
+										placeholder={t("detail.notes.placeholder_full")}
 										className="w-full h-32 p-3 border border-secondary-200 dark:border-secondary-600 rounded-lg bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
 										maxLength={1000}
 									/>
 									<div className="flex justify-between items-center mt-3">
 										<p className="text-xs text-secondary-500 dark:text-white">
-											Use this space to add important information about this
-											host for your team
+											{t("detail.notes.hint")}
 										</p>
 										<div className="flex items-center gap-2">
 											<span className="text-xs text-secondary-400 dark:text-white">
-												{notes.length}/1000
+												{t("detail.notes.char_count", { count: notes.length })}
 											</span>
 											<button
 												type="button"
@@ -3492,8 +3569,8 @@ const HostDetail = () => {
 												className="px-3 py-1.5 text-xs font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 rounded-md transition-colors"
 											>
 												{updateNotesMutation.isPending
-													? "Saving..."
-													: "Save Notes"}
+													? t("detail.notes.saving")
+													: t("detail.notes.save")}
 											</button>
 										</div>
 									</div>
@@ -3524,8 +3601,10 @@ const HostDetail = () => {
 										}
 										title={
 											wsStatus?.connected
-												? "Refresh integration status from agent"
-												: "Agent is not connected"
+												? t("detail.integrations.refresh_status_title")
+												: t(
+														"detail.integrations.refresh_status_title_disconnected",
+													)
 										}
 										className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-secondary-100 dark:bg-secondary-700 hover:bg-secondary-200 dark:hover:bg-secondary-600 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									>
@@ -3533,8 +3612,8 @@ const HostDetail = () => {
 											className={`h-4 w-4 ${refreshIntegrationStatusMutation.isPending ? "animate-spin" : ""}`}
 										/>
 										{refreshIntegrationStatusMutation.isPending
-											? "Refreshing..."
-											: "Refresh Status"}
+											? t("detail.integrations.refreshing")
+											: t("detail.integrations.refresh_status")}
 									</button>
 								</div>
 								{isLoadingIntegrations ? (
@@ -3547,13 +3626,13 @@ const HostDetail = () => {
 										{integrationsData?.pending_config_exists && (
 											<div className="rounded-lg border border-warning-300 dark:border-warning-600 bg-warning-50 dark:bg-warning-900/20 p-4">
 												<p className="text-sm font-medium text-warning-800 dark:text-warning-200">
-													Pending configuration changes - use the Apply button
-													at the top to send to agent
+													{t("detail.integrations.apply_pending_hint")}
 												</p>
 												{!wsStatus?.connected && (
 													<p className="text-xs text-warning-600 dark:text-warning-400 mt-2">
-														Agent must be connected to apply pending
-														configuration changes
+														{t(
+															"detail.integrations.apply_pending_requires_connection",
+														)}
 													</p>
 												)}
 											</div>
@@ -3566,22 +3645,20 @@ const HostDetail = () => {
 														<div className="flex items-center gap-3 mb-2">
 															<Database className="h-5 w-5 text-primary-600 dark:text-primary-400" />
 															<h4 className="text-sm font-medium text-secondary-900 dark:text-white">
-																Docker
+																{t("detail.tabs.docker")}
 															</h4>
 															{integrationsData?.data?.integrations?.docker ? (
 																<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-																	Enabled
+																	{t("detail.integrations.enabled")}
 																</span>
 															) : (
 																<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400">
-																	Disabled
+																	{t("detail.integrations.disabled")}
 																</span>
 															)}
 														</div>
 														<p className="text-xs text-secondary-600 dark:text-white">
-															Monitor Docker containers, images, volumes, and
-															networks. Collects real-time container status
-															events.
+															{t("detail.integrations.docker_desc_full")}
 														</p>
 													</div>
 													<div className="flex-shrink-0">
@@ -3598,8 +3675,8 @@ const HostDetail = () => {
 															disabled={toggleIntegrationMutation.isPending}
 															title={
 																integrationsData?.data?.integrations?.docker
-																	? "Disable Docker integration"
-																	: "Enable Docker integration"
+																	? t("detail.integrations.disable_docker")
+																	: t("detail.integrations.enable_docker")
 															}
 															className={`relative inline-flex h-5 w-9 items-center rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 ${
 																integrationsData?.data?.integrations?.docker
@@ -3624,13 +3701,14 @@ const HostDetail = () => {
 												{!wsStatus?.connected &&
 													integrationsData?.pending_config_exists && (
 														<p className="text-xs text-warning-600 dark:text-warning-400 mt-2">
-															Agent must be connected to apply pending
-															configuration changes
+															{t(
+																"detail.integrations.apply_pending_requires_connection",
+															)}
 														</p>
 													)}
 												{toggleIntegrationMutation.isPending && (
 													<p className="text-xs text-secondary-600 dark:text-white mt-2">
-														Updating integration...
+														{t("detail.integrations.updating_integration")}
 													</p>
 												)}
 											</div>
@@ -3642,23 +3720,21 @@ const HostDetail = () => {
 														<div className="flex items-center gap-3 mb-2">
 															<Shield className="h-5 w-5 text-primary-600 dark:text-primary-400" />
 															<h4 className="text-sm font-medium text-secondary-900 dark:text-white">
-																Compliance Scanning
+																{t("detail.compliance_integration.title")}
 															</h4>
 															{integrationsData?.data?.integrations
 																?.compliance ? (
 																<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-																	Enabled
+																	{t("detail.integrations.enabled")}
 																</span>
 															) : (
 																<span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-400">
-																	Disabled
+																	{t("detail.integrations.disabled")}
 																</span>
 															)}
 														</div>
 														<p className="text-xs text-secondary-600 dark:text-white mb-2">
-															Run CIS benchmark compliance scans using OpenSCAP.
-															Provides security posture assessment and
-															remediation recommendations.
+															{t("detail.compliance_integration.desc")}
 														</p>
 
 														{/* Setup Status Display - hide when compliance is off or status is "disabled" */}
@@ -3673,7 +3749,9 @@ const HostDetail = () => {
 																			<div className="flex items-center gap-2">
 																				<Loader2 className="h-4 w-4 animate-spin text-primary-600 dark:text-primary-400" />
 																				<span className="text-sm font-medium text-primary-700 dark:text-primary-300">
-																					Installing Compliance Tools
+																					{t(
+																						"detail.compliance_integration.installing_tools",
+																					)}
 																				</span>
 																			</div>
 																			{complianceSetupStatus.status
@@ -3728,7 +3806,9 @@ const HostDetail = () => {
 																					<p className="text-xs text-secondary-600 dark:text-white">
 																						{complianceSetupStatus.status
 																							.message ||
-																							"Installing OpenSCAP packages and security content..."}
+																							t(
+																								"detail.compliance_integration.installing_default",
+																							)}
 																					</p>
 																				</>
 																			)}
@@ -3742,7 +3822,9 @@ const HostDetail = () => {
 																			<div className="flex items-center gap-2">
 																				<RefreshCw className="h-4 w-4 animate-spin text-warning-600 dark:text-warning-400" />
 																				<span className="text-sm font-medium text-warning-700 dark:text-warning-300">
-																					Removing Compliance Tools
+																					{t(
+																						"detail.compliance_integration.removing_tools",
+																					)}
 																				</span>
 																			</div>
 																			<div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-1.5">
@@ -3753,7 +3835,9 @@ const HostDetail = () => {
 																			</div>
 																			<p className="text-xs text-secondary-600 dark:text-white">
 																				{complianceSetupStatus.status.message ||
-																					"Removing OpenSCAP packages..."}
+																					t(
+																						"detail.compliance_integration.removing_default",
+																					)}
 																			</p>
 																		</div>
 																	)}
@@ -3764,7 +3848,9 @@ const HostDetail = () => {
 																		<div className="flex items-center gap-2">
 																			<CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
 																			<span className="text-sm font-medium text-green-700 dark:text-green-300">
-																				Compliance Tools Ready
+																				{t(
+																					"detail.compliance_integration.tools_ready",
+																				)}
 																			</span>
 																			{complianceSetupStatus.status
 																				.components && (
@@ -3798,12 +3884,16 @@ const HostDetail = () => {
 																			<div className="flex items-center gap-2">
 																				<AlertTriangle className="h-4 w-4 text-warning-600 dark:text-warning-400" />
 																				<span className="text-sm font-medium text-warning-700 dark:text-warning-300">
-																					Partial Installation
+																					{t(
+																						"detail.compliance_integration.partial_install",
+																					)}
 																				</span>
 																			</div>
 																			<p className="text-xs text-secondary-600 dark:text-white">
 																				{complianceSetupStatus.status.message ||
-																					"Some components failed to install. Install OpenSCAP (and optionally Docker) on this host. See the Compliance Installation guide in the documentation."}
+																					t(
+																						"detail.compliance_integration.partial_default",
+																					)}
 																			</p>
 																			{complianceSetupStatus.status
 																				.components && (
@@ -3845,13 +3935,17 @@ const HostDetail = () => {
 																			<div className="flex items-center gap-2">
 																				<AlertCircle className="h-4 w-4 text-danger-600 dark:text-danger-400" />
 																				<span className="text-sm font-medium text-danger-700 dark:text-danger-300">
-																					Installation Failed
+																					{t(
+																						"detail.compliance_integration.install_failed",
+																					)}
 																				</span>
 																			</div>
 																			<p className="text-xs text-danger-600 dark:text-danger-400">
 																				{complianceSetupStatus?.status
 																					?.message ||
-																					"Setup failed - check agent logs"}
+																					t(
+																						"detail.compliance_integration.error_default",
+																					)}
 																			</p>
 																		</div>
 																	)}
@@ -3870,19 +3964,36 @@ const HostDetail = () => {
 																		) && (
 																			<div className="space-y-2">
 																				<p className="text-sm text-secondary-700 dark:text-white">
-																					Install OpenSCAP (and optionally
-																					Docker for Docker Bench) on this host.
-																					Verify with{" "}
+																					{t(
+																						"detail.compliance_integration.missing_hint_a",
+																					)}{" "}
 																					<code className="text-xs bg-secondary-200 dark:bg-secondary-700 px-1 rounded">
 																						oscap --version
 																					</code>{" "}
-																					and that SCAP content is present.
+																					{t(
+																						"detail.compliance_integration.missing_hint_b",
+																					)}
 																				</p>
 																				<p className="text-xs text-secondary-500 dark:text-white">
-																					See the Compliance{" "}
-																					<strong>Getting started</strong> or{" "}
-																					<strong>Installation</strong> guide in
-																					the documentation.
+																					{t(
+																						"detail.compliance_integration.docs_hint_a",
+																					)}{" "}
+																					<strong>
+																						{t(
+																							"detail.compliance_integration.docs_hint_b",
+																						)}
+																					</strong>{" "}
+																					{t(
+																						"detail.compliance_integration.docs_hint_c",
+																					)}{" "}
+																					<strong>
+																						{t(
+																							"detail.compliance_integration.docs_hint_d",
+																						)}
+																					</strong>{" "}
+																					{t(
+																						"detail.compliance_integration.docs_hint_e",
+																					)}
 																				</p>
 																			</div>
 																		)}
@@ -3894,7 +4005,9 @@ const HostDetail = () => {
 																			<div className="flex items-center gap-2">
 																				<CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
 																				<span className="text-sm font-medium text-green-700 dark:text-green-300">
-																					Compliance Tools Ready
+																					{t(
+																						"detail.compliance_integration.tools_ready",
+																					)}
 																				</span>
 																			</div>
 																		)}
@@ -3934,8 +4047,12 @@ const HostDetail = () => {
 																		disabled={isDisabled}
 																		title={
 																			isDisabled
-																				? "Agent is not connected or operation in progress"
-																				: "Disable compliance scanning"
+																				? t(
+																						"detail.compliance_integration.mode_disabled_title_busy",
+																					)
+																				: t(
+																						"detail.compliance_integration.mode_disabled_title",
+																					)
 																		}
 																		className={`w-full px-2 py-1 text-xs font-medium rounded transition-colors ${
 																			currentMode === "disabled"
@@ -3947,7 +4064,7 @@ const HostDetail = () => {
 																				: "cursor-pointer"
 																		}`}
 																	>
-																		Disabled
+																		{t("detail.integrations.disabled")}
 																	</button>
 																	<button
 																		type="button"
@@ -3959,8 +4076,12 @@ const HostDetail = () => {
 																		disabled={isDisabled}
 																		title={
 																			isDisabled
-																				? "Agent is not connected or operation in progress"
-																				: "Enable compliance scanning (on-demand only - runs when triggered from UI)"
+																				? t(
+																						"detail.compliance_integration.mode_disabled_title_busy",
+																					)
+																				: t(
+																						"detail.compliance_integration.mode_on_demand_title",
+																					)
 																		}
 																		className={`w-full px-2 py-1 text-xs font-medium rounded transition-colors ${
 																			currentMode === "on-demand"
@@ -3972,7 +4093,9 @@ const HostDetail = () => {
 																				: "cursor-pointer"
 																		}`}
 																	>
-																		On-Demand
+																		{t(
+																			"detail.compliance_integration.mode_on_demand",
+																		)}
 																	</button>
 																	<button
 																		type="button"
@@ -3984,8 +4107,12 @@ const HostDetail = () => {
 																		disabled={isDisabled}
 																		title={
 																			isDisabled
-																				? "Agent is not connected or operation in progress"
-																				: "Enable compliance scanning with automatic scheduled scans"
+																				? t(
+																						"detail.compliance_integration.mode_disabled_title_busy",
+																					)
+																				: t(
+																						"detail.compliance_integration.mode_enabled_title",
+																					)
 																		}
 																		className={`w-full px-2 py-1 text-xs font-medium rounded transition-colors ${
 																			currentMode === "enabled"
@@ -3997,7 +4124,7 @@ const HostDetail = () => {
 																				: "cursor-pointer"
 																		}`}
 																	>
-																		Enabled
+																		{t("detail.integrations.enabled")}
 																	</button>
 																</div>
 															);
@@ -4006,8 +4133,9 @@ const HostDetail = () => {
 												</div>
 												{!wsStatus?.connected && (
 													<p className="text-xs text-warning-600 dark:text-warning-400 mt-2">
-														Agent must be connected via WebSocket to change
-														compliance settings
+														{t(
+															"detail.compliance_integration.mode_requires_connection",
+														)}
 													</p>
 												)}
 												{/* Mode description */}
@@ -4023,12 +4151,15 @@ const HostDetail = () => {
 																: "enabled"
 															: "disabled");
 													const modeDescriptions = {
-														disabled:
-															"Compliance scanning is disabled. No scans will run.",
-														"on-demand":
-															"Compliance scans only run when manually triggered from the UI, not during scheduled reports.",
-														enabled:
-															"Compliance scanning is enabled with automatic scheduled scans during regular reports.",
+														disabled: t(
+															"detail.compliance_integration.mode_desc_disabled",
+														),
+														"on-demand": t(
+															"detail.compliance_integration.mode_desc_on_demand",
+														),
+														enabled: t(
+															"detail.compliance_integration.mode_desc_enabled",
+														),
 													};
 													return (
 														<>
@@ -4043,6 +4174,7 @@ const HostDetail = () => {
 																		<p className="text-xs text-warning-800 dark:text-warning-200">
 																			{compliance_tools_retained_text(
 																				installedComplianceTools,
+																				t,
 																			)}
 																		</p>
 																	</div>
@@ -4055,11 +4187,13 @@ const HostDetail = () => {
 												{integrationsData?.data?.integrations?.compliance && (
 													<div className="mt-3 pt-3 border-t border-secondary-200 dark:border-secondary-700 space-y-2">
 														<p className="text-xs font-medium text-secondary-600 dark:text-white">
-															Scanner Types
+															{t("detail.compliance_integration.scanner_types")}
 														</p>
 														<label className="flex items-center justify-between gap-2 cursor-pointer">
 															<span className="text-xs text-secondary-700 dark:text-white">
-																OpenSCAP (CIS Benchmarks)
+																{t(
+																	"detail.compliance_integration.openscap_label",
+																)}
 															</span>
 															<input
 																type="checkbox"
@@ -4083,12 +4217,14 @@ const HostDetail = () => {
 														<label className="flex items-center justify-between gap-2 cursor-pointer">
 															<div className="flex flex-col">
 																<span className="text-xs text-secondary-700 dark:text-white">
-																	Docker Bench
+																	{t(
+																		"detail.compliance_integration.docker_bench_label",
+																	)}
 																</span>
 																{!integrationsData?.data?.integrations
 																	?.docker && (
 																	<span className="text-[10px] text-secondary-400">
-																		Docker integration not enabled
+																		t("detail.compliance_integration.docker_bench_requires_docker")
 																	</span>
 																)}
 															</div>
@@ -4137,7 +4273,7 @@ const HostDetail = () => {
 									<div className="text-center py-8">
 										<Database className="h-12 w-12 text-gray-400 mx-auto mb-4" />
 										<p className="text-gray-500 dark:text-gray-400">
-											No Docker data available
+											{t("detail.docker_tab.empty")}
 										</p>
 									</div>
 								) : (
@@ -4165,7 +4301,7 @@ const HostDetail = () => {
 																	: "text-secondary-500 dark:text-white hover:bg-secondary-100 dark:hover:bg-secondary-700"
 															}`}
 														>
-															Stacks
+															{t("detail.docker_tab.stacks")}
 															<span className="px-1.5 py-0.5 text-xs rounded bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400">
 																{stackCount}
 															</span>
@@ -4179,7 +4315,7 @@ const HostDetail = () => {
 																	: "text-secondary-500 dark:text-white hover:bg-secondary-100 dark:hover:bg-secondary-700"
 															}`}
 														>
-															Containers
+															{t("detail.docker_tab.containers")}
 															<span className="px-1.5 py-0.5 text-xs rounded bg-secondary-200 dark:bg-secondary-600">
 																{dockerData.containers?.length || 0}
 															</span>
@@ -4193,7 +4329,7 @@ const HostDetail = () => {
 																	: "text-secondary-500 dark:text-white hover:bg-secondary-100 dark:hover:bg-secondary-700"
 															}`}
 														>
-															Images
+															{t("detail.docker_tab.images")}
 															<span className="px-1.5 py-0.5 text-xs rounded bg-secondary-200 dark:bg-secondary-600">
 																{dockerData.images?.length || 0}
 															</span>
@@ -4207,7 +4343,7 @@ const HostDetail = () => {
 																	: "text-secondary-500 dark:text-white hover:bg-secondary-100 dark:hover:bg-secondary-700"
 															}`}
 														>
-															Volumes
+															{t("detail.docker_tab.volumes")}
 															<span className="px-1.5 py-0.5 text-xs rounded bg-secondary-200 dark:bg-secondary-600">
 																{dockerData.volumes?.length || 0}
 															</span>
@@ -4221,7 +4357,7 @@ const HostDetail = () => {
 																	: "text-secondary-500 dark:text-white hover:bg-secondary-100 dark:hover:bg-secondary-700"
 															}`}
 														>
-															Networks
+															{t("detail.docker_tab.networks")}
 															<span className="px-1.5 py-0.5 text-xs rounded bg-secondary-200 dark:bg-secondary-600">
 																{dockerData.networks?.length || 0}
 															</span>
@@ -4239,12 +4375,12 @@ const HostDetail = () => {
 															onClick={() => refreshDockerMutation.mutate()}
 															disabled={refreshDockerMutation.isPending}
 															className="flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded border border-primary-200 dark:border-primary-800 transition-colors disabled:opacity-50"
-															title="Re-sync Docker data from agent"
+															title={t("detail.docker_tab.resync_title")}
 														>
 															<RefreshCw
 																className={`h-3.5 w-3.5 ${refreshDockerMutation.isPending ? "animate-spin" : ""}`}
 															/>
-															Re-sync
+															{t("detail.docker_tab.resync")}
 														</button>
 													</div>
 												</div>
@@ -4281,11 +4417,10 @@ const HostDetail = () => {
 															<div className="text-center py-8">
 																<Server className="h-12 w-12 text-secondary-400 mx-auto mb-3" />
 																<p className="text-secondary-500 dark:text-white">
-																	No Docker Compose stacks found
+																	{t("detail.docker_tab.no_stacks")}
 																</p>
 																<p className="text-xs text-secondary-400 mt-1">
-																	Containers started with docker-compose will
-																	appear here
+																	{t("detail.docker_tab.no_stacks_hint")}
 																</p>
 															</div>
 														);
@@ -4323,7 +4458,13 @@ const HostDetail = () => {
 																							: "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400"
 																					}`}
 																				>
-																					{runningCount}/{totalCount} running
+																					{t(
+																						"detail.docker_tab.running_count",
+																						{
+																							running: runningCount,
+																							total: totalCount,
+																						},
+																					)}
 																				</span>
 																			</div>
 																		</div>
@@ -4380,8 +4521,10 @@ const HostDetail = () => {
 															{standaloneContainers.length > 0 && (
 																<div className="mt-4 pt-4 border-t border-secondary-200 dark:border-secondary-600">
 																	<h4 className="text-sm font-medium text-secondary-600 dark:text-white mb-3">
-																		Standalone Containers (
-																		{standaloneContainers.length})
+																		{t(
+																			"detail.docker_tab.standalone_containers",
+																			{ count: standaloneContainers.length },
+																		)}
 																	</h4>
 																	<div className="space-y-2">
 																		{standaloneContainers.map((container) => (
@@ -4425,7 +4568,7 @@ const HostDetail = () => {
 											<div className="space-y-2">
 												{dockerData.containers?.length === 0 ? (
 													<p className="text-secondary-500 dark:text-white text-center py-4">
-														No containers found
+														{t("detail.docker_tab.no_containers")}
 													</p>
 												) : (
 													<div className="overflow-x-auto">
@@ -4437,7 +4580,7 @@ const HostDetail = () => {
 																	<th className="pb-2 font-medium">Image</th>
 																	<th className="pb-2 font-medium">Ports</th>
 																	<th className="pb-2 font-medium text-right">
-																		Uptime
+																		{t("detail.docker_tab.uptime")}
 																	</th>
 																</tr>
 															</thead>
@@ -4538,7 +4681,7 @@ const HostDetail = () => {
 											<div className="space-y-2">
 												{dockerData.images?.length === 0 ? (
 													<p className="text-secondary-500 dark:text-white text-center py-4">
-														No images found
+														{t("detail.docker_tab.no_images")}
 													</p>
 												) : (
 													<div className="overflow-x-auto">
@@ -4546,12 +4689,12 @@ const HostDetail = () => {
 															<thead>
 																<tr className="text-left text-xs text-secondary-500 dark:text-white border-b border-secondary-200 dark:border-secondary-600">
 																	<th className="pb-2 font-medium">
-																		Repository
+																		{t("detail.docker_tab.repository")}
 																	</th>
 																	<th className="pb-2 font-medium">Tag</th>
 																	<th className="pb-2 font-medium">ID</th>
 																	<th className="pb-2 font-medium text-right">
-																		Size
+																		{t("detail.docker_tab.size")}
 																	</th>
 																</tr>
 															</thead>
@@ -4569,7 +4712,8 @@ const HostDetail = () => {
 																				to={`/docker/images/${image.id}`}
 																				className="text-primary-600 dark:text-primary-400 hover:text-primary-900 dark:hover:text-primary-300"
 																			>
-																				{image.repository || "<none>"}
+																				{image.repository ||
+																					t("detail.docker_tab.none_image")}
 																			</Link>
 																		</td>
 																		<td className="py-2">
@@ -4597,7 +4741,7 @@ const HostDetail = () => {
 											<div className="space-y-2">
 												{dockerData.volumes?.length === 0 ? (
 													<p className="text-secondary-500 dark:text-white text-center py-4">
-														No volumes found
+														{t("detail.docker_tab.no_volumes")}
 													</p>
 												) : (
 													<div className="overflow-x-auto">
@@ -4607,7 +4751,7 @@ const HostDetail = () => {
 																	<th className="pb-2 font-medium">Name</th>
 																	<th className="pb-2 font-medium">Driver</th>
 																	<th className="pb-2 font-medium">
-																		Mount Point
+																		{t("detail.docker_tab.mount_point")}
 																	</th>
 																</tr>
 															</thead>
@@ -4653,7 +4797,7 @@ const HostDetail = () => {
 											<div className="space-y-2">
 												{dockerData.networks?.length === 0 ? (
 													<p className="text-secondary-500 dark:text-white text-center py-4">
-														No networks found
+														{t("detail.docker_tab.no_networks")}
 													</p>
 												) : (
 													<div className="overflow-x-auto">
@@ -4715,7 +4859,7 @@ const HostDetail = () => {
 							<div className="space-y-4">
 								<div className="flex flex-wrap items-center gap-3 mb-4">
 									<span className="text-sm text-secondary-600 dark:text-secondary-400">
-										Status:
+										{t("detail.patching.status_label")}
 									</span>
 									<select
 										value={patchingRunsStatusFilter}
@@ -4725,15 +4869,27 @@ const HostDetail = () => {
 										}}
 										className="rounded-md border border-secondary-300 dark:border-secondary-600 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white text-sm px-3 py-2"
 									>
-										<option value="">All</option>
-										<option value="queued">Queued</option>
-										<option value="running">Running</option>
-										<option value="completed">Completed</option>
-										<option value="failed">Failed</option>
-										<option value="cancelled">Cancelled</option>
-										<option value="timed_out">Timed out</option>
+										<option value="">{t("detail.patching.status_all")}</option>
+										<option value="queued">
+											{t("detail.patching.status_queued")}
+										</option>
+										<option value="running">
+											{t("detail.patching.status_running")}
+										</option>
+										<option value="completed">
+											{t("detail.patching.status_completed")}
+										</option>
+										<option value="failed">
+											{t("detail.patching.status_failed")}
+										</option>
+										<option value="cancelled">
+											{t("detail.patching.status_cancelled")}
+										</option>
+										<option value="timed_out">
+											{t("detail.patching.status_timed_out")}
+										</option>
 										<option value="agent_disconnected">
-											Agent disconnected
+											{t("detail.patching.status_agent_disconnected")}
 										</option>
 									</select>
 								</div>
@@ -4742,7 +4898,7 @@ const HostDetail = () => {
 									<div className="text-center py-8">
 										<Package className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 										<p className="text-secondary-500 dark:text-white">
-											No patch runs for this host yet
+											{t("detail.patching.empty")}
 										</p>
 									</div>
 								)}
@@ -4753,7 +4909,7 @@ const HostDetail = () => {
 												<thead className="bg-secondary-50 dark:bg-secondary-700">
 													<tr>
 														<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-															Type
+															{t("detail.patching.col_type")}
 														</th>
 														<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
 															<button
@@ -4766,7 +4922,7 @@ const HostDetail = () => {
 																}}
 																className="flex items-center gap-1 hover:text-secondary-700 dark:hover:text-secondary-200"
 															>
-																Status
+																{t("detail.patching.col_status")}
 																{patchingRunsSortField === "status" ? (
 																	patchingRunsSortDir === "asc" ? (
 																		<ArrowUp className="h-4 w-4" />
@@ -4789,7 +4945,7 @@ const HostDetail = () => {
 																}}
 																className="flex items-center gap-1 hover:text-secondary-700 dark:hover:text-secondary-200"
 															>
-																Started
+																{t("detail.patching.col_started")}
 																{patchingRunsSortField === "started_at" ? (
 																	patchingRunsSortDir === "asc" ? (
 																		<ArrowUp className="h-4 w-4" />
@@ -4812,7 +4968,7 @@ const HostDetail = () => {
 																}}
 																className="flex items-center gap-1 hover:text-secondary-700 dark:hover:text-secondary-200"
 															>
-																Completed
+																{t("detail.patching.col_completed")}
 																{patchingRunsSortField === "completed_at" ? (
 																	patchingRunsSortDir === "asc" ? (
 																		<ArrowUp className="h-4 w-4" />
@@ -4825,7 +4981,7 @@ const HostDetail = () => {
 															</button>
 														</th>
 														<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-															Actions
+															{t("detail.patching.col_actions")}
 														</th>
 													</tr>
 												</thead>
@@ -4862,8 +5018,8 @@ const HostDetail = () => {
 																		className="text-primary-600 dark:text-primary-400 hover:underline text-sm"
 																	>
 																		{patchingExpandedRunId === run.id
-																			? "Hide output"
-																			: "View output"}
+																			? t("detail.patching.hide_output")
+																			: t("detail.patching.view_output")}
 																	</button>
 																</td>
 															</tr>
@@ -4887,7 +5043,7 @@ const HostDetail = () => {
 												<div className="flex items-center gap-4">
 													<div className="flex items-center gap-2">
 														<span className="text-sm text-secondary-700 dark:text-white">
-															Rows per page:
+															{t("detail.patching.rows_per_page")}
 														</span>
 														<select
 															value={patchingRunsPageSize}
@@ -4903,16 +5059,18 @@ const HostDetail = () => {
 														</select>
 													</div>
 													<span className="text-sm text-secondary-700 dark:text-white">
-														{Math.min(
-															(patchingRunsPage - 1) * patchingRunsPageSize + 1,
-															patchingRunsData?.pagination?.total ?? 0,
-														)}
-														–
-														{Math.min(
-															patchingRunsPage * patchingRunsPageSize,
-															patchingRunsData?.pagination?.total ?? 0,
-														)}{" "}
-														of {patchingRunsData?.pagination?.total ?? 0}
+														{t("detail.patching.range", {
+															start: Math.min(
+																(patchingRunsPage - 1) * patchingRunsPageSize +
+																	1,
+																patchingRunsData?.pagination?.total ?? 0,
+															),
+															end: Math.min(
+																patchingRunsPage * patchingRunsPageSize,
+																patchingRunsData?.pagination?.total ?? 0,
+															),
+															total: patchingRunsData?.pagination?.total ?? 0,
+														})}
 													</span>
 												</div>
 												<div className="flex items-center gap-2">
@@ -4927,8 +5085,10 @@ const HostDetail = () => {
 														<ChevronLeft className="h-4 w-4" />
 													</button>
 													<span className="text-sm text-secondary-700 dark:text-white">
-														Page {patchingRunsPage} of{" "}
-														{patchingRunsData?.pagination?.pages || 1}
+														{t("detail.patching.page_of", {
+															page: patchingRunsPage,
+															pages: patchingRunsData?.pagination?.pages || 1,
+														})}
 													</span>
 													<button
 														type="button"
@@ -4964,7 +5124,7 @@ const HostDetail = () => {
 							<div className="space-y-6">
 								<div className="flex items-center justify-between">
 									<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-										Security Compliance
+										{t("detail.compliance_tab.title")}
 									</h3>
 								</div>
 
@@ -4978,13 +5138,13 @@ const HostDetail = () => {
 												scanResultsFilters: { status: "pass", host_id: hostId },
 											}}
 											className="card p-4 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors"
-											title="View passing rules for this host"
+											title={t("detail.compliance_tab.passed_title")}
 										>
 											<div className="flex items-center">
 												<CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
 												<div>
 													<p className="text-sm text-secondary-500 dark:text-white">
-														Passed
+														{t("detail.compliance_tab.passed")}
 													</p>
 													<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 														{complianceLatest.passed ?? " -"}
@@ -4999,13 +5159,13 @@ const HostDetail = () => {
 												scanResultsFilters: { status: "fail", host_id: hostId },
 											}}
 											className="card p-4 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors"
-											title="View failing rules for this host"
+											title={t("detail.compliance_tab.failed_title")}
 										>
 											<div className="flex items-center">
 												<AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
 												<div>
 													<p className="text-sm text-secondary-500 dark:text-white">
-														Failed
+														{t("detail.compliance_tab.failed")}
 													</p>
 													<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 														{complianceLatest.failed ?? " -"}
@@ -5023,13 +5183,13 @@ const HostDetail = () => {
 												},
 											}}
 											className="card p-4 hover:bg-secondary-50 dark:hover:bg-secondary-700/50 transition-colors"
-											title="View skipped/N/A rules for this host"
+											title={t("detail.compliance_tab.skipped_title")}
 										>
 											<div className="flex items-center">
 												<MinusCircle className="h-5 w-5 text-secondary-600 dark:text-white mr-2" />
 												<div>
 													<p className="text-sm text-secondary-500 dark:text-white">
-														Skipped
+														{t("detail.compliance_tab.skipped")}
 													</p>
 													<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 														{(complianceLatest.skipped ?? 0) +
@@ -5043,7 +5203,7 @@ const HostDetail = () => {
 												<Calendar className="h-5 w-5 text-primary-600 dark:text-primary-400 mr-2" />
 												<div>
 													<p className="text-sm text-secondary-500 dark:text-white">
-														Last Scan
+														{t("detail.compliance_tab.last_scan")}
 													</p>
 													<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 														{complianceLatest.completed_at
@@ -5065,7 +5225,7 @@ const HostDetail = () => {
 												<div className="flex items-center gap-2 mb-3">
 													<Shield className="h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0" />
 													<span className="text-sm font-medium text-secondary-900 dark:text-white">
-														Compliance scanner
+														{t("detail.compliance_tab.scanner")}
 													</span>
 													{(() => {
 														const isJobActive =
@@ -5078,22 +5238,26 @@ const HostDetail = () => {
 															scannerStatus === "ready" ||
 															scannerStatus === "partial"
 														) {
-															label = "Ready";
+															label = t("detail.compliance_tab.status_ready");
 															colorClass =
 																"bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
 														} else if (
 															scannerStatus === "installing" ||
 															isJobActive
 														) {
-															label = "Installing…";
+															label = t(
+																"detail.compliance_tab.status_installing",
+															);
 															colorClass =
 																"bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
 														} else if (scannerStatus === "error") {
-															label = "Error";
+															label = t("detail.compliance_tab.status_error");
 															colorClass =
 																"bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
 														} else {
-															label = "Not installed";
+															label = t(
+																"detail.compliance_tab.status_not_installed",
+															);
 															colorClass =
 																"bg-secondary-100 text-secondary-700 dark:bg-secondary-600 dark:text-secondary-200";
 														}
@@ -5107,7 +5271,7 @@ const HostDetail = () => {
 													})()}
 													{complianceSetupStatus?.source === "cached" && (
 														<span className="text-xs text-secondary-500 dark:text-white italic">
-															(cached)
+															{t("detail.compliance_tab.cached")}
 														</span>
 													)}
 												</div>
@@ -5116,7 +5280,7 @@ const HostDetail = () => {
 														?.openscap_version && (
 														<div className="flex gap-2">
 															<span className="text-secondary-500 dark:text-white font-medium shrink-0">
-																OpenSCAP
+																{t("detail.compliance_tab.openscap")}
 															</span>
 															<span className="text-secondary-900 dark:text-white font-mono">
 																{
@@ -5132,7 +5296,7 @@ const HostDetail = () => {
 															?.ssg_version) && (
 														<div className="flex gap-2">
 															<span className="text-secondary-500 dark:text-white font-medium shrink-0">
-																SSG content
+																{t("detail.compliance_tab.ssg_content")}
 															</span>
 															<span className="text-secondary-900 dark:text-white font-mono">
 																{complianceSetupStatus.status.scanner_info
@@ -5147,7 +5311,7 @@ const HostDetail = () => {
 														?.content_file && (
 														<div className="flex gap-2">
 															<span className="text-secondary-500 dark:text-white font-medium shrink-0">
-																Content file on server
+																{t("detail.compliance_tab.content_file")}
 															</span>
 															<span className="text-secondary-900 dark:text-white font-mono text-xs break-all min-w-0">
 																{
@@ -5163,8 +5327,7 @@ const HostDetail = () => {
 													!complianceSetupStatus?.status?.scanner_info
 														?.content_file && (
 														<p className="text-xs text-secondary-500 dark:text-white mt-1">
-															No version or path data yet. Use Refresh status or
-															Install scanner.
+															{t("detail.compliance_tab.no_scanner_info")}
 														</p>
 													)}
 												{(complianceSetupStatus?.status?.scanner_info
@@ -5177,7 +5340,9 @@ const HostDetail = () => {
 															<p className="text-xs text-amber-600 dark:text-amber-400">
 																{complianceSetupStatus.status.scanner_info
 																	.ssg_upgrade_message ||
-																	"SSG upgrade recommended"}
+																	t(
+																		"detail.compliance_tab.ssg_upgrade_recommended",
+																	)}
 															</p>
 														)}
 														{(complianceSetupStatus.status.scanner_info
@@ -5187,7 +5352,7 @@ const HostDetail = () => {
 															<p className="text-xs text-amber-600 dark:text-amber-400">
 																{complianceSetupStatus.status.scanner_info
 																	.mismatch_warning ||
-																	"Content mismatch with OS"}
+																	t("detail.compliance_tab.content_mismatch")}
 															</p>
 														)}
 													</div>
@@ -5205,7 +5370,7 @@ const HostDetail = () => {
 														]
 															.filter(Boolean)
 															.join(", ")}{" "}
-														available
+														{t("detail.compliance_tab.available_suffix")}
 													</p>
 												)}
 											</div>
@@ -5231,10 +5396,12 @@ const HostDetail = () => {
 																.catch(() => {});
 														}}
 														className="btn-outline inline-flex items-center gap-2 text-sm"
-														title="Ask agent to report current scanner status"
+														title={t(
+															"detail.compliance_tab.refresh_status_title",
+														)}
 													>
 														<RefreshCw className="h-4 w-4" />
-														Refresh status
+														{t("detail.compliance_tab.refresh_status")}
 													</button>
 													{/* "partial" means some scanner failed to install, which is
 													    precisely when this button is needed. Excluding it here left
@@ -5256,11 +5423,13 @@ const HostDetail = () => {
 																className="btn-primary inline-flex items-center gap-2 text-sm"
 															>
 																{installComplianceScannerMutation.isPending
-																	? "Starting…"
+																	? t("detail.compliance_tab.starting")
 																	: complianceSetupStatus?.status?.status ===
 																			"partial"
-																		? "Retry install"
-																		: "Install scanner"}
+																		? t("detail.compliance_tab.retry_install")
+																		: t(
+																				"detail.compliance_tab.install_scanner",
+																			)}
 															</button>
 														) : (
 															<button
@@ -5276,7 +5445,7 @@ const HostDetail = () => {
 																}}
 																className="btn-outline inline-flex items-center gap-2 text-sm"
 															>
-																Cancel
+																{t("detail.apply_config.cancel")}
 															</button>
 														))}
 													<Link
@@ -5284,7 +5453,7 @@ const HostDetail = () => {
 														className="btn-outline inline-flex items-center gap-2 text-sm"
 													>
 														<ExternalLink className="h-4 w-4" />
-														View Full Details
+														{t("detail.compliance_tab.view_full_details")}
 													</Link>
 												</div>
 												{/* Profile + Run scan: compact row, fixed-width dropdown */}
@@ -5293,7 +5462,7 @@ const HostDetail = () => {
 														htmlFor="compliance-profile-select"
 														className="text-sm text-secondary-500 dark:text-white whitespace-nowrap shrink-0"
 													>
-														Profile:
+														{t("detail.compliance_tab.profile_label")}
 													</label>
 													<select
 														id="compliance-profile-select"
@@ -5302,7 +5471,9 @@ const HostDetail = () => {
 															setComplianceProfileId(e.target.value)
 														}
 														className="px-2 py-1.5 bg-secondary-700 dark:bg-secondary-800 border border-secondary-600 rounded-lg text-white text-sm min-w-0 max-w-[180px] shrink"
-														title="Select profile for next scan"
+														title={t(
+															"detail.compliance_tab.profile_select_title",
+														)}
 													>
 														<option value="all">All Profiles</option>
 														{(complianceSetupStatus?.status?.scanner_info
@@ -5312,14 +5483,18 @@ const HostDetail = () => {
 															: [
 																	{
 																		id: "level1_server",
-																		name: "CIS Level 1 Server",
+																		name: t(
+																			"detail.compliance_tab.profile_level1",
+																		),
 																		type: "openscap",
 																		xccdf_id:
 																			"xccdf_org.ssgproject.content_profile_cis_level1_server",
 																	},
 																	{
 																		id: "level2_server",
-																		name: "CIS Level 2 Server",
+																		name: t(
+																			"detail.compliance_tab.profile_level2",
+																		),
 																		type: "openscap",
 																		xccdf_id:
 																			"xccdf_org.ssgproject.content_profile_cis_level2_server",
@@ -5404,18 +5579,22 @@ const HostDetail = () => {
 																"ready" &&
 															complianceSetupStatus?.status?.status !==
 																"partial"
-																? "Install scanner first"
+																? t(
+																		"detail.compliance_tab.install_scanner_first",
+																	)
 																: wsStatus?.connected
-																	? "Start compliance scan on this host"
-																	: "Queue scan to run when agent is back online (max 1 per host)"
+																	? t("detail.compliance_tab.scan_title_online")
+																	: t(
+																			"detail.compliance_tab.scan_title_offline",
+																		)
 														}
 													>
 														<Play className="h-4 w-4" />
 														{triggerComplianceScanMutation.isPending
-															? "Starting…"
+															? t("detail.compliance_tab.starting")
 															: wsStatus?.connected
-																? "Run scan now"
-																: "Queue scan for when agent is online"}
+																? t("detail.compliance_tab.run_scan_now")
+																: t("detail.compliance_tab.queue_scan")}
 													</button>
 												</div>
 											</div>
@@ -5443,25 +5622,25 @@ const HostDetail = () => {
 													/>
 												</div>
 												<p className="text-xs font-medium text-secondary-600 dark:text-white mt-2 mb-1.5">
-													Installation progress
+													{t("detail.compliance_tab.installation_progress")}
 												</p>
 												{(() => {
 													const events =
 														complianceInstallJob.install_events || [];
 													const steps = INSTALL_CHECKLIST_STEPS.map(
-														({ id, label }) => {
+														({ id, labelKey }) => {
 															const evt = events
 																.filter((e) => e.step === id)
 																.pop();
 															const stepStatus = evt?.status || "pending";
 															return {
 																id,
-																label,
+																label: t(labelKey),
 																status: stepStatus,
 																message:
 																	evt?.message ??
 																	(stepStatus === "pending"
-																		? "Waiting…"
+																		? t("detail.compliance_tab.step_waiting")
 																		: null),
 															};
 														},
@@ -5517,12 +5696,13 @@ const HostDetail = () => {
 										)}
 										{complianceInstallJob?.status === "completed" && (
 											<p className="text-xs text-green-600 dark:text-green-400 mt-2">
-												Install completed. Refreshing status…
+												{t("detail.compliance_tab.install_completed")}
 											</p>
 										)}
 										{complianceInstallJob?.status === "failed" && (
 											<p className="text-xs text-red-600 dark:text-red-400 mt-2">
-												{complianceInstallJob.error || "Install failed."}
+												{complianceInstallJob.error ||
+													t("detail.compliance_tab.install_failed")}
 											</p>
 										)}
 									</div>
@@ -5532,8 +5712,7 @@ const HostDetail = () => {
 								{!integrationsData?.data?.integrations?.compliance && (
 									<div className="card p-4">
 										<p className="text-sm text-secondary-500 dark:text-white mb-2">
-											Compliance is not enabled for this host. Enable it in the
-											Integrations tab.
+											{t("detail.compliance_tab.not_enabled_hint")}
 										</p>
 										{installedComplianceTools.length > 0 && (
 											<div className="mb-3 flex items-start gap-2 rounded-lg border border-warning-300 dark:border-warning-600 bg-warning-50 dark:bg-warning-900/20 p-3">
@@ -5550,7 +5729,7 @@ const HostDetail = () => {
 											className="btn-primary inline-flex items-center gap-2"
 										>
 											<Shield className="h-4 w-4" />
-											View Full Compliance Details
+											{t("detail.compliance_tab.view_full_compliance")}
 											<ExternalLink className="h-3.5 w-3.5" />
 										</Link>
 									</div>
@@ -5565,13 +5744,11 @@ const HostDetail = () => {
 									<div className="flex items-center gap-3 mb-3">
 										<AlertTriangle className="h-5 w-5 text-primary-600 dark:text-primary-400" />
 										<h4 className="text-sm font-medium text-secondary-900 dark:text-white">
-											Host Agent Down Alerts
+											{t("detail.reporting.host_agent_down_alerts")}
 										</h4>
 									</div>
 									<p className="text-xs text-secondary-600 dark:text-white mb-4">
-										Control whether this host triggers alert entries when it
-										goes offline. When disabled, no alerts will be created for
-										this host even if the global setting is enabled.
+										{t("detail.reporting.desc")}
 									</p>
 
 									{/* Settings and Buttons - Side by Side */}
@@ -5579,20 +5756,20 @@ const HostDetail = () => {
 										{/* Current Setting */}
 										<div>
 											<label className="text-xs font-medium text-secondary-500 dark:text-white mb-2 block">
-												Current Setting
+												{t("detail.reporting.current_setting")}
 											</label>
 											<div className="text-sm text-secondary-900 dark:text-white">
 												{host?.host_down_alerts_enabled === null ? (
 													<span className="inline-flex items-center px-2 py-1 rounded bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-														Inherit from global settings
+														{t("detail.reporting.inherit_from_global")}
 													</span>
 												) : host?.host_down_alerts_enabled === true ? (
 													<span className="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-														Enabled
+														{t("detail.integrations.enabled")}
 													</span>
 												) : (
 													<span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-														Disabled
+														{t("detail.integrations.disabled")}
 													</span>
 												)}
 											</div>
@@ -5602,26 +5779,26 @@ const HostDetail = () => {
 										{hostDownAlertConfig && (
 											<div>
 												<label className="text-xs font-medium text-secondary-500 dark:text-white mb-2 block">
-													Global Setting
+													{t("detail.reporting.global_setting")}
 												</label>
 												<div className="text-sm text-secondary-600 dark:text-white">
 													{settings?.alerts_enabled === false ? (
 														<span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-															Disabled (Master Switch Off)
+															{t("detail.reporting.global_disabled_master")}
 														</span>
 													) : hostDownAlertConfig.is_enabled ? (
 														<span className="inline-flex items-center px-2 py-1 rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-															Enabled
+															{t("detail.integrations.enabled")}
 														</span>
 													) : (
 														<span className="inline-flex items-center px-2 py-1 rounded bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-															Disabled
+															{t("detail.integrations.disabled")}
 														</span>
 													)}
 													{host?.host_down_alerts_enabled === null &&
 														settings?.alerts_enabled !== false && (
 															<span className="ml-2 text-xs text-secondary-500 dark:text-white">
-																(currently inherited)
+																{t("detail.reporting.currently_inherited")}
 															</span>
 														)}
 												</div>
@@ -5644,7 +5821,7 @@ const HostDetail = () => {
 													: "bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-white hover:bg-secondary-300 dark:hover:bg-secondary-500"
 											} disabled:opacity-50 disabled:cursor-not-allowed`}
 										>
-											Inherit
+											{t("detail.reporting.inherit")}
 										</button>
 										<button
 											type="button"
@@ -5659,7 +5836,7 @@ const HostDetail = () => {
 													: "bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-white hover:bg-secondary-300 dark:hover:bg-secondary-500"
 											} disabled:opacity-50 disabled:cursor-not-allowed`}
 										>
-											Enable
+											{t("detail.reporting.enable")}
 										</button>
 										<button
 											type="button"
@@ -5674,7 +5851,7 @@ const HostDetail = () => {
 													: "bg-secondary-200 dark:bg-secondary-600 text-secondary-700 dark:text-white hover:bg-secondary-300 dark:hover:bg-secondary-500"
 											} disabled:opacity-50 disabled:cursor-not-allowed`}
 										>
-											Disable
+											{t("detail.reporting.disable")}
 										</button>
 									</div>
 
@@ -5682,9 +5859,9 @@ const HostDetail = () => {
 									{updateMessage.text && (
 										<div
 											className={`mt-3 text-sm ${
-												updateMessage.text.includes("successfully")
-													? "text-green-600 dark:text-green-400"
-													: "text-red-600 dark:text-red-400"
+												updateMessage.isError
+													? "text-red-600 dark:text-red-400"
+													: "text-green-600 dark:text-green-400"
 											}`}
 										>
 											{updateMessage.text}
@@ -5748,11 +5925,12 @@ const HostDetail = () => {
 								</div>
 								<div className="flex-1 min-w-0">
 									<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-										Apply Pending Configuration
+										{t("detail.apply_config.title")}
 									</h3>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">
-										The following changes will be applied to the agent on{" "}
-										<strong>{host?.friendly_name || host?.hostname}</strong>:
+										{t("detail.apply_config.intro_prefix")}{" "}
+										<strong>{host?.friendly_name || host?.hostname}</strong>
+										{t("detail.apply_config.intro_suffix")}
 									</p>
 									<ul className="mt-3 space-y-1.5 text-sm text-secondary-700 dark:text-secondary-300">
 										{(() => {
@@ -5783,33 +5961,43 @@ const HostDetail = () => {
 													const val = pending[key];
 													const label =
 														key === "docker_enabled"
-															? "Docker monitoring"
+															? t("detail.apply_config.item_docker")
 															: key === "compliance_enabled"
-																? "Compliance scanning"
+																? t("detail.apply_config.item_compliance")
 																: key === "compliance_mode"
-																	? "Compliance mode"
+																	? t(
+																			"detail.apply_config.item_compliance_mode",
+																		)
 																	: key === "compliance_on_demand_only"
-																		? "Compliance schedule"
+																		? t(
+																				"detail.apply_config.item_compliance_schedule",
+																			)
 																		: key === "compliance_openscap_enabled"
-																			? "OpenSCAP"
+																			? t("detail.apply_config.item_openscap")
 																			: key ===
 																					"compliance_docker_bench_enabled"
-																				? "Docker Bench"
+																				? t(
+																						"detail.apply_config.item_docker_bench",
+																					)
 																				: key;
 													let displayVal;
 													if (key === "compliance_mode") {
 														displayVal =
 															val === "disabled"
-																? "Disabled"
+																? t("detail.apply_config.value_disabled")
 																: val === "on-demand"
-																	? "On-demand"
+																	? t("detail.apply_config.value_on_demand")
 																	: val === "enabled"
-																		? "Scheduled"
+																		? t("detail.apply_config.value_scheduled")
 																		: String(val);
 													} else if (key === "compliance_on_demand_only") {
-														displayVal = val ? "On-demand only" : "Scheduled";
+														displayVal = val
+															? t("detail.apply_config.value_on_demand_only")
+															: t("detail.apply_config.value_scheduled");
 													} else if (typeof val === "boolean") {
-														displayVal = val ? "Enabled" : "Disabled";
+														displayVal = val
+															? t("detail.apply_config.value_enabled")
+															: t("detail.apply_config.value_disabled");
 													} else {
 														displayVal = String(val);
 													}
@@ -5826,9 +6014,11 @@ const HostDetail = () => {
 										})()}
 									</ul>
 									<p className="mt-4 text-sm text-secondary-600 dark:text-white border-t border-secondary-200 dark:border-secondary-600 pt-4">
-										When applied, the agent&apos;s <strong>config.yml</strong>{" "}
-										will be updated and the{" "}
-										<strong>service will restart</strong> on the host.
+										{t("detail.apply_config.footer_a")}{" "}
+										<strong>{t("detail.apply_config.footer_b")}</strong>{" "}
+										{t("detail.apply_config.footer_c")}{" "}
+										<strong>{t("detail.apply_config.footer_d")}</strong>{" "}
+										{t("detail.apply_config.footer_e")}
 									</p>
 								</div>
 							</div>
@@ -5839,7 +6029,7 @@ const HostDetail = () => {
 								onClick={() => setShowApplyConfigModal(false)}
 								className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-600 border border-secondary-300 dark:border-secondary-500 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-500 transition-colors"
 							>
-								Cancel
+								{t("detail.apply_config.cancel")}
 							</button>
 							<button
 								type="button"
@@ -5856,12 +6046,12 @@ const HostDetail = () => {
 								{applyPendingConfigMutation.isPending ? (
 									<>
 										<Loader2 className="h-4 w-4 animate-spin" />
-										Applying...
+										{t("detail.apply_config.applying")}
 									</>
 								) : (
 									<>
 										<Send className="h-4 w-4" />
-										Apply
+										{t("detail.apply_config.apply")}
 									</>
 								)}
 							</button>
@@ -5881,16 +6071,19 @@ const HostDetail = () => {
 								</div>
 								<div className="flex-1">
 									<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-										Global Auto-Updates Disabled
+										{t("detail.auto_update_dialog.title")}
 									</h3>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">
-										The master auto-update setting is currently{" "}
-										<strong>disabled</strong> in Settings &gt; Agent Updates.
+										{t("detail.auto_update_dialog.body_disabled_a")}{" "}
+										<strong>
+											{t("detail.auto_update_dialog.body_disabled_b")}
+										</strong>{" "}
+										{t("detail.auto_update_dialog.body_disabled_c")}
 									</p>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">
-										Enabling auto-update for{" "}
+										{t("detail.auto_update_dialog.body_host_a")}{" "}
 										<strong>{host?.friendly_name || host?.hostname}</strong>{" "}
-										won't take effect until global auto-updates are enabled.
+										{t("detail.auto_update_dialog.body_host_b")}
 									</p>
 								</div>
 							</div>
@@ -5901,14 +6094,14 @@ const HostDetail = () => {
 								onClick={() => setAutoUpdateDialog(false)}
 								className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-600 border border-secondary-300 dark:border-secondary-500 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-500 transition-colors"
 							>
-								Cancel
+								{t("detail.auto_update_dialog.cancel")}
 							</button>
 							<button
 								type="button"
 								onClick={handleEnableHostOnly}
 								className="px-4 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-600 border border-secondary-300 dark:border-secondary-500 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-500 transition-colors"
 							>
-								Enable Host Only
+								{t("detail.auto_update_dialog.enable_host_only")}
 							</button>
 							<button
 								type="button"
@@ -5917,8 +6110,8 @@ const HostDetail = () => {
 								className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{enableGlobalAutoUpdateMutation.isPending
-									? "Enabling..."
-									: "Enable Both"}
+									? t("detail.auto_update_dialog.enabling")
+									: t("detail.auto_update_dialog.enable_both")}
 							</button>
 						</div>
 					</div>

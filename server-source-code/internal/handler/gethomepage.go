@@ -22,7 +22,7 @@ func NewGetHomepageHandler(dashboard *store.DashboardStore) *GetHomepageHandler 
 func (h *GetHomepageHandler) Stats(w http.ResponseWriter, r *http.Request) {
 	stats, err := h.dashboard.GetHomepageStats(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch statistics")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_statistics")
 		return
 	}
 	JSON(w, http.StatusOK, stats)

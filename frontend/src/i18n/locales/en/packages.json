@@ -1,0 +1,198 @@
+{
+	"status": {
+		"up_to_date": "Up to Date",
+		"update_available": "Update Available",
+		"security_update_available": "Security Update Available",
+		"security_update": "Security Update",
+		"security": "Security",
+		"update": "Update",
+		"reboot_required": "Reboot Required",
+		"required": "Required",
+		"no": "No"
+	},
+	"labels": {
+		"unknown": "Unknown",
+		"never": "Never",
+		"not_available": "N/A",
+		"version": "Version:",
+		"repo": "Repo:",
+		"status": "Status:",
+		"latest": "Latest:",
+		"repos": "Repos:",
+		"on": "On:",
+		"host_word_one": "host",
+		"host_word_other": "hosts"
+	},
+	"actions": {
+		"refresh": "Refresh",
+		"refreshing": "Refreshing...",
+		"refresh_title": "Refresh packages and statistics data",
+		"try_again": "Try again",
+		"close": "Close",
+		"close_modal": "Close modal",
+		"columns": "Columns",
+		"clear_filter": "Clear filter",
+		"clear_selection": "Clear selection",
+		"view_description": "View description",
+		"show_all_hosts_title": "Show packages across every host",
+		"patch_all": "Patch all",
+		"patch_all_title": "Run system package updates on this host",
+		"patch_selected": "Patch selected ({{count}})",
+		"windows_patching": "Patching managed via Windows Update",
+		"windows_patching_title": "Windows patching is managed through Windows Update or WinGet on the host",
+		"select_host": "Select host",
+		"deselect_host": "Deselect host",
+		"select_all_page": "Select all on page",
+		"deselect_all_page": "Deselect all on page",
+		"select_all_patchable": "Select all patchable hosts on this page",
+		"deselect_all_patchable": "Deselect all patchable hosts on this page",
+		"no_patchable_title": "No patchable hosts on this page",
+		"patch": "Patch",
+		"queuing": "Queuing…",
+		"view_run": "View run",
+		"back": "Back",
+		"back_to_packages": "Back to Packages"
+	},
+	"toasts": {
+		"submitted_runs_one": "Submitted 1 run for approval",
+		"submitted_runs_other": "Submitted {{count}} runs for approval",
+		"patch_all_queued": "Patch all queued. View progress in Patching.",
+		"patch_queued": "Patch queued. View progress in Patching."
+	},
+	"pagination": {
+		"rows_per_page": "Rows per page:",
+		"range": "{{start}}-{{end}} of {{total}}",
+		"page_of": "Page {{current}} of {{total}}",
+		"previous": "Previous",
+		"next": "Next"
+	},
+	"list": {
+		"title": {
+			"all_hosts": "Packages on all Hosts",
+			"host_scoped_named": "Packages for {{name}} Host",
+			"host_scoped_default": "Packages for this Host"
+		},
+		"subtitle": {
+			"all": "Manage package updates and security patches",
+			"host_scoped": "Every figure below counts this host only"
+		},
+		"cards": {
+			"packages": "Packages",
+			"packages_title": "Click to show all packages",
+			"packages_title_host": "Click to show all of this host's packages",
+			"installations": "Installations",
+			"outdated_packages": "Outdated Packages",
+			"outdated_title": "Click to filter packages that need updates",
+			"outdated_title_host": "Click to filter this host's packages that need updates",
+			"security_packages": "Security Packages",
+			"security_title": "Click to filter packages with security updates",
+			"security_title_host": "Click to filter this host's packages with security updates",
+			"outdated_hosts": "Outdated Hosts",
+			"outdated_hosts_title": "Click to view hosts that need updates"
+		},
+		"filters": {
+			"all_categories": "All Categories",
+			"all_packages": "All Packages",
+			"packages_needing_updates": "Packages Needing Updates",
+			"security_updates_only": "Security Updates Only",
+			"regular_updates_only": "Regular Updates Only",
+			"all_hosts": "All Hosts"
+		},
+		"search_placeholder": "Search packages...",
+		"columns": {
+			"name": "Package",
+			"package_hosts": "Installed On",
+			"status": "Status",
+			"latest_version": "Latest Version",
+			"source_repos": "Source Repos"
+		},
+		"columns_modal": {
+			"title": "Customize Columns",
+			"reset": "Reset to Default",
+			"done": "Done"
+		},
+		"selection": {
+			"selected_one": "{{count}} package selected",
+			"selected_other": "{{count}} packages selected"
+		},
+		"labels": {
+			"category": "Category: {{name}}",
+			"hosts_fraction": "{{updated}}/{{total}} hosts",
+			"hosts_count_one": "{{count}} host",
+			"hosts_count_other": "{{count}} hosts",
+			"hosts_need_updates": "{{updated}} of {{total}} hosts need updates",
+			"installed_on_one": "Installed on {{count}} host",
+			"installed_on_other": "Installed on {{count}} hosts"
+		},
+		"empty": {
+			"no_packages": "No packages found",
+			"no_match": "No packages match your filters",
+			"no_packages_hint": "Packages will appear here once hosts start reporting their installed packages"
+		},
+		"errors": {
+			"loading_packages": "Error loading packages",
+			"load_packages": "Failed to load packages"
+		},
+		"actions": {
+			"patch_selected_on_host_one": "Patch {{count}} selected package on {{host}}",
+			"patch_selected_on_host_other": "Patch {{count}} selected packages on {{host}}",
+			"patch_selected_on_chosen_one": "Patch {{count}} selected package on chosen hosts",
+			"patch_selected_on_chosen_other": "Patch {{count}} selected packages on chosen hosts",
+			"this_host": "this host"
+		}
+	},
+	"detail": {
+		"cards": {
+			"latest_version": "Latest Version",
+			"updated": "Updated",
+			"hosts_with_package": "Hosts with Package",
+			"up_to_date": "Up to Date"
+		},
+		"sections": {
+			"source_repositories": "Source Repositories",
+			"description": "Description",
+			"description_tooltip": "The description was pulled directly from the host package manager."
+		},
+		"tabs": {
+			"aria_label": "Tabs",
+			"hosts": "Hosts",
+			"activity": "Activity"
+		},
+		"search_placeholder": "Search hosts...",
+		"filters": {
+			"only_pending": "Only pending update"
+		},
+		"table": {
+			"host": "Host",
+			"current_version": "Current Version",
+			"status": "Status",
+			"source_repo": "Source Repo",
+			"last_updated": "Last Updated",
+			"reboot_required": "Reboot Required",
+			"actions": "Actions"
+		},
+		"empty": {
+			"package_not_found": "Package not found",
+			"no_description": "No description available.",
+			"no_hosts_match": "No hosts match your search",
+			"all_up_to_date": "All hosts are up to date for this package",
+			"no_hosts_have_package": "No hosts have this package installed",
+			"no_activity": "No upgrade activity for this package yet",
+			"no_activity_hint": "Completed patch runs will appear here"
+		},
+		"errors": {
+			"loading_package": "Error loading package",
+			"load_package": "Failed to load package details",
+			"loading_hosts": "Error loading hosts",
+			"load_hosts": "Failed to load hosts"
+		},
+		"actions": {
+			"patch_selected_title_one": "Patch {{count}} selected host with {{package}}",
+			"patch_selected_title_other": "Patch {{count}} selected hosts with {{package}}",
+			"reboot_required_title": "Reboot required"
+		},
+		"activity": {
+			"upgraded_on_host": "Upgraded on host:"
+		}
+	}
+}

@@ -69,7 +69,7 @@ func (h *WSStatusHandler) ServeStatusBulk(w http.ResponseWriter, r *http.Request
 	apiIds := []string{}
 	seen := make(map[string]struct{})
 	if len(apiIdsParam) > maxWSStatusQueryLength {
-		Error(w, http.StatusBadRequest, "apiIds query is too large")
+		ErrorKey(w, r, http.StatusBadRequest, "error.api_ids_query_too_large")
 		return
 	}
 	if apiIdsParam != "" {
@@ -79,7 +79,7 @@ func (h *WSStatusHandler) ServeStatusBulk(w http.ResponseWriter, r *http.Request
 					continue
 				}
 				if len(apiIds) >= maxWSStatusAPIIDs {
-					Error(w, http.StatusBadRequest, "too many apiIds requested")
+					ErrorKey(w, r, http.StatusBadRequest, "error.too_many_api_ids")
 					return
 				}
 				seen[trimmed] = struct{}{}
@@ -144,7 +144,7 @@ func (h *WSStatusHandler) authorizedBulkStatus(w http.ResponseWriter, r *http.Re
 	statusMap := h.registry.GetBulk(apiIDs)
 	allowed, err := h.hosts.ListExistingApiIDs(r.Context(), apiIDs)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "failed to load host status")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_host_status")
 		return nil
 	}
 	for apiID := range statusMap {

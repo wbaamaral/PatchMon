@@ -9,6 +9,7 @@ import {
 	X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import AgentActivityTable from "../../components/host/AgentActivityTable";
 import QueueStatCards from "../../components/host/QueueStatCards";
@@ -21,60 +22,108 @@ const PAGE_SIZE = 50;
 const PARAM_KEYS = ["direction", "type", "status", "since", "q", "page"];
 
 const DIRECTION_OPTIONS = [
-	{ value: "", label: "All directions" },
-	{ value: "in", label: "Inbound (reports)" },
-	{ value: "out", label: "Outbound (jobs)" },
+	{ value: "", labelKey: "agent_activity.direction_all" },
+	{ value: "in", labelKey: "agent_activity.direction_in" },
+	{ value: "out", labelKey: "agent_activity.direction_out" },
 ];
 
 const TIME_RANGE_OPTIONS = [
-	{ value: "24h", label: "Last 24 hours" },
-	{ value: "7d", label: "Last 7 days" },
-	{ value: "30d", label: "Last 30 days" },
-	{ value: "all", label: "All time" },
+	{ value: "24h", labelKey: "agent_activity.time_24h" },
+	{ value: "7d", labelKey: "agent_activity.time_7d" },
+	{ value: "30d", labelKey: "agent_activity.time_30d" },
+	{ value: "all", labelKey: "agent_activity.time_all" },
 ];
 
 const REPORT_TYPE_OPTIONS = [
-	{ value: "ping", label: "Ping" },
-	{ value: "full", label: "Full" },
-	{ value: "partial", label: "Partial" },
-	{ value: "docker", label: "Docker" },
-	{ value: "compliance", label: "Compliance" },
+	{ value: "ping", labelKey: "agent_activity.type_ping" },
+	{ value: "full", labelKey: "agent_activity.type_full" },
+	{ value: "partial", labelKey: "agent_activity.type_partial" },
+	{ value: "docker", labelKey: "agent_activity.type_docker" },
+	{ value: "compliance", labelKey: "agent_activity.type_compliance" },
 ];
 
 const COMMON_JOB_OPTIONS = [
-	{ value: "report_now", label: "Report Now" },
-	{ value: "refresh_integration_status", label: "Refresh Integration Status" },
-	{ value: "docker_inventory_refresh", label: "Docker Inventory Refresh" },
-	{ value: "update_agent", label: "Agent Update" },
-	{ value: "run_scan", label: "Compliance Scan" },
-	{ value: "install_compliance_tools", label: "Install Compliance Scanner" },
-	{ value: "ssg_upgrade", label: "SSG Content Upgrade" },
-	{ value: "run_patch", label: "Run Patch" },
-	{ value: "scheduled_reports_dispatch", label: "Scheduled Reports Dispatch" },
-	{ value: "scheduled_report_run", label: "Scheduled Report Run" },
-	{ value: "update-threshold-monitor", label: "Update Threshold Monitor" },
-	{ value: "host-status-monitor", label: "Host Status Monitor" },
-	{ value: "metrics-send", label: "Metrics Send" },
-	{ value: "agent-reports-cleanup", label: "Agent Reports Cleanup" },
-	{ value: "patch-run-cleanup", label: "Patch Run Cleanup" },
-	{ value: "compliance-scan-cleanup", label: "Compliance Scan Cleanup" },
-	{ value: "ssg-update-check", label: "SSG Update Check" },
-	{ value: "version-update-check", label: "Version Update Check" },
-	{ value: "system-statistics", label: "System Statistics" },
-	{ value: "docker-inventory-cleanup", label: "Docker Inventory Cleanup" },
-	{ value: "orphaned-package-cleanup", label: "Orphaned Package Cleanup" },
-	{ value: "orphaned-repo-cleanup", label: "Orphaned Repo Cleanup" },
-	{ value: "session-cleanup", label: "Session Cleanup" },
+	{ value: "report_now", labelKey: "agent_activity.job_report_now" },
+	{
+		value: "refresh_integration_status",
+		labelKey: "agent_activity.job_refresh_integration_status",
+	},
+	{
+		value: "docker_inventory_refresh",
+		labelKey: "agent_activity.job_docker_inventory_refresh",
+	},
+	{ value: "update_agent", labelKey: "agent_activity.job_update_agent" },
+	{ value: "run_scan", labelKey: "agent_activity.job_run_scan" },
+	{
+		value: "install_compliance_tools",
+		labelKey: "agent_activity.job_install_compliance_tools",
+	},
+	{ value: "ssg_upgrade", labelKey: "agent_activity.job_ssg_upgrade" },
+	{ value: "run_patch", labelKey: "agent_activity.job_run_patch" },
+	{
+		value: "scheduled_reports_dispatch",
+		labelKey: "agent_activity.job_scheduled_reports_dispatch",
+	},
+	{
+		value: "scheduled_report_run",
+		labelKey: "agent_activity.job_scheduled_report_run",
+	},
+	{
+		value: "update-threshold-monitor",
+		labelKey: "agent_activity.job_update_threshold_monitor",
+	},
+	{
+		value: "host-status-monitor",
+		labelKey: "agent_activity.job_host_status_monitor",
+	},
+	{ value: "metrics-send", labelKey: "agent_activity.job_metrics_send" },
+	{
+		value: "agent-reports-cleanup",
+		labelKey: "agent_activity.job_agent_reports_cleanup",
+	},
+	{
+		value: "patch-run-cleanup",
+		labelKey: "agent_activity.job_patch_run_cleanup",
+	},
+	{
+		value: "compliance-scan-cleanup",
+		labelKey: "agent_activity.job_compliance_scan_cleanup",
+	},
+	{
+		value: "ssg-update-check",
+		labelKey: "agent_activity.job_ssg_update_check",
+	},
+	{
+		value: "version-update-check",
+		labelKey: "agent_activity.job_version_update_check",
+	},
+	{
+		value: "system-statistics",
+		labelKey: "agent_activity.job_system_statistics",
+	},
+	{
+		value: "docker-inventory-cleanup",
+		labelKey: "agent_activity.job_docker_inventory_cleanup",
+	},
+	{
+		value: "orphaned-package-cleanup",
+		labelKey: "agent_activity.job_orphaned_package_cleanup",
+	},
+	{
+		value: "orphaned-repo-cleanup",
+		labelKey: "agent_activity.job_orphaned_repo_cleanup",
+	},
+	{ value: "session-cleanup", labelKey: "agent_activity.job_session_cleanup" },
 ];
 
 const STATUS_OPTIONS = [
-	{ value: "success", label: "Success" },
-	{ value: "completed", label: "Completed" },
-	{ value: "active", label: "Active" },
-	{ value: "waiting", label: "Waiting" },
-	{ value: "delayed", label: "Delayed" },
-	{ value: "failed", label: "Failed" },
-	{ value: "error", label: "Error" },
+	{ value: "success", labelKey: "agent_activity.status_success" },
+	{ value: "completed", labelKey: "agent_activity.status_completed" },
+	{ value: "active", labelKey: "agent_activity.status_active" },
+	{ value: "waiting", labelKey: "agent_activity.status_waiting" },
+	{ value: "delayed", labelKey: "agent_activity.status_delayed" },
+	{ value: "failed", labelKey: "agent_activity.status_failed" },
+	{ value: "error", labelKey: "agent_activity.status_error" },
 ];
 
 const DEFAULT_TIME_RANGE = "7d";
@@ -102,6 +151,7 @@ const parseList = (value) =>
 
 // Multiselect rendered as toggleable chips. Cheap, accessible, no extra deps.
 const ChipMultiSelect = ({ label, options, values, onChange }) => {
+	const { t } = useTranslation("hosts");
 	const toggle = (value) => {
 		if (values.includes(value)) {
 			onChange(values.filter((v) => v !== value));
@@ -128,7 +178,7 @@ const ChipMultiSelect = ({ label, options, values, onChange }) => {
 									: "bg-white border-secondary-300 text-secondary-600 hover:border-primary-400 dark:bg-secondary-800 dark:border-secondary-600 dark:text-secondary-200"
 							}`}
 						>
-							{opt.label}
+							{t(opt.labelKey)}
 						</button>
 					);
 				})}
@@ -138,6 +188,7 @@ const ChipMultiSelect = ({ label, options, values, onChange }) => {
 };
 
 const AgentActivityTab = ({ hostId }) => {
+	const { t } = useTranslation("hosts");
 	const [searchParams, setSearchParams] = useSearchParams();
 
 	// Read filter values straight off the URL — single source of truth so deep
@@ -316,7 +367,7 @@ const AgentActivityTab = ({ hostId }) => {
 							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400 dark:text-white" />
 							<input
 								type="text"
-								placeholder="Search errors and output..."
+								placeholder={t("agent_activity.search_placeholder")}
 								value={searchTerm}
 								onChange={(e) => setSearchTerm(e.target.value)}
 								className="pl-10 pr-4 py-2 w-full border border-secondary-300 dark:border-secondary-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400 min-h-[44px] sm:min-h-0"
@@ -334,7 +385,7 @@ const AgentActivityTab = ({ hostId }) => {
 							}`}
 						>
 							{showFilters ? <X className="h-4 w-4 flex-shrink-0" /> : null}
-							<span>Filters</span>
+							<span>{t("agent_activity.filters")}</span>
 							{hasActiveFilters && !showFilters && (
 								<span className="inline-flex items-center justify-center px-1.5 py-0.5 rounded bg-primary-600 text-white text-[10px] font-semibold">
 									{
@@ -354,12 +405,14 @@ const AgentActivityTab = ({ hostId }) => {
 							onClick={() => refetch()}
 							disabled={isFetching}
 							className="btn-outline flex items-center gap-2 px-3 py-2 min-h-[44px] text-xs sm:text-sm"
-							title="Refresh activity"
+							title={t("agent_activity.refresh_title")}
 						>
 							<RefreshCw
 								className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
 							/>
-							<span className="hidden sm:inline">Refresh</span>
+							<span className="hidden sm:inline">
+								{t("agent_activity.refresh")}
+							</span>
 						</button>
 					</div>
 				</div>
@@ -369,7 +422,7 @@ const AgentActivityTab = ({ hostId }) => {
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 							<div>
 								<span className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1">
-									Direction
+									{t("agent_activity.direction_label")}
 								</span>
 								<select
 									value={direction}
@@ -378,14 +431,14 @@ const AgentActivityTab = ({ hostId }) => {
 								>
 									{DIRECTION_OPTIONS.map((opt) => (
 										<option key={opt.value} value={opt.value}>
-											{opt.label}
+											{t(opt.labelKey)}
 										</option>
 									))}
 								</select>
 							</div>
 							<div>
 								<span className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1">
-									Time range
+									{t("agent_activity.time_range_label")}
 								</span>
 								<select
 									value={timeRange}
@@ -394,7 +447,7 @@ const AgentActivityTab = ({ hostId }) => {
 								>
 									{TIME_RANGE_OPTIONS.map((opt) => (
 										<option key={opt.value} value={opt.value}>
-											{opt.label}
+											{t(opt.labelKey)}
 										</option>
 									))}
 								</select>
@@ -406,18 +459,18 @@ const AgentActivityTab = ({ hostId }) => {
 									disabled={!hasActiveFilters}
 									className="btn-outline w-full min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
 								>
-									Clear filters
+									{t("agent_activity.clear_filters")}
 								</button>
 							</div>
 						</div>
 						<ChipMultiSelect
-							label="Type"
+							label={t("agent_activity.type_label")}
 							options={typeOptions}
 							values={typeFilter}
 							onChange={setTypeFilter}
 						/>
 						<ChipMultiSelect
-							label="Status"
+							label={t("agent_activity.status_label")}
 							options={STATUS_OPTIONS}
 							values={statusFilter}
 							onChange={setStatusFilter}
@@ -431,19 +484,19 @@ const AgentActivityTab = ({ hostId }) => {
 							<AlertTriangle className="h-5 w-5 text-danger-500 dark:text-danger-400 flex-shrink-0" />
 							<div className="ml-3">
 								<h3 className="text-sm font-medium text-danger-800 dark:text-danger-200">
-									Failed to load agent activity
+									{t("agent_activity.load_failed")}
 								</h3>
 								<p className="text-sm text-danger-700 dark:text-danger-300 mt-1">
 									{error?.response?.data?.error ||
 										error?.message ||
-										"Unknown error"}
+										t("agent_activity.unknown_error")}
 								</p>
 								<button
 									type="button"
 									onClick={() => refetch()}
 									className="mt-2 btn-danger text-xs"
 								>
-									Try again
+									{t("agent_activity.try_again")}
 								</button>
 							</div>
 						</div>
@@ -456,12 +509,12 @@ const AgentActivityTab = ({ hostId }) => {
 					<div className="text-center py-8">
 						<Server className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 						<p className="text-secondary-500 dark:text-white">
-							No activity to show
+							{t("agent_activity.empty")}
 						</p>
 						<p className="text-sm text-secondary-400 dark:text-white mt-2">
 							{hasActiveFilters
-								? "Try adjusting your search terms or filters"
-								: "The agent has not reported in this time range yet"}
+								? t("agent_activity.empty_filtered")
+								: t("agent_activity.empty_hint")}
 						</p>
 					</div>
 				) : (
@@ -469,7 +522,9 @@ const AgentActivityTab = ({ hostId }) => {
 						<AgentActivityTable items={items} />
 						<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t border-secondary-200 dark:border-secondary-600">
 							<p className="text-sm text-secondary-700 dark:text-white">
-								{total > 0 ? `${start}-${end} of ${total}` : "0 of 0"}
+								{total > 0
+									? t("agent_activity.range", { start, end, total })
+									: t("agent_activity.range_empty")}
 							</p>
 							<div className="flex items-center gap-2">
 								<button
@@ -477,19 +532,19 @@ const AgentActivityTab = ({ hostId }) => {
 									onClick={() => setPage(page - 1)}
 									disabled={page === 1 || isFetching}
 									className="p-2 rounded hover:bg-secondary-100 dark:hover:bg-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px] flex items-center justify-center"
-									title="Previous page"
+									title={t("agent_activity.previous_page")}
 								>
 									<ChevronLeft className="h-4 w-4" />
 								</button>
 								<span className="text-sm text-secondary-700 dark:text-white whitespace-nowrap">
-									Page {page} of {totalPages}
+									{t("agent_activity.page_of", { page, pages: totalPages })}
 								</span>
 								<button
 									type="button"
 									onClick={() => setPage(page + 1)}
 									disabled={page >= totalPages || isFetching}
 									className="p-2 rounded hover:bg-secondary-100 dark:hover:bg-secondary-600 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px] flex items-center justify-center"
-									title="Next page"
+									title={t("agent_activity.next_page")}
 								>
 									<ChevronRight className="h-4 w-4" />
 								</button>

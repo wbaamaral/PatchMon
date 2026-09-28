@@ -110,25 +110,25 @@ func AutoSubscribeIfHosted(adminMode bool, users *store.UsersStore, log *slog.Lo
 // Public endpoint - no auth required (used during first-time setup).
 func (h *MarketingHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		Error(w, http.StatusMethodNotAllowed, "Method not allowed")
+		ErrorKey(w, r, http.StatusMethodNotAllowed, "error.method_not_allowed")
 		return
 	}
 
 	var req SubscribeRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
 	name := strings.TrimSpace(req.Name)
 	email := strings.TrimSpace(req.Email)
 	if name == "" || email == "" {
-		Error(w, http.StatusBadRequest, "Name and email are required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.name_and_email_required")
 		return
 	}
 
 	if err := SubscribeToList(r.Context(), name, email); err != nil {
-		Error(w, http.StatusBadGateway, "Failed to reach marketing service")
+		ErrorKey(w, r, http.StatusBadGateway, "error.marketing_unreachable")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "Subscribed successfully"})

@@ -25,6 +25,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Link,
 	useLocation,
@@ -53,20 +54,28 @@ import { adminHostsAPI, formatDate, hostGroupsAPI } from "../utils/api";
 import { patchingAPI } from "../utils/patchingApi";
 import { hasExtraDependencies } from "../utils/patchRun";
 
-const PATCHING_TABS = [
-	{ id: "overview", label: "Overview", icon: LayoutDashboard },
-	{ id: "runs", label: "Runs & History", icon: History },
-	{ id: "policies", label: "Policies", icon: Shield },
-];
+const usePatchingTabs = () => {
+	const { t } = useTranslation("patching");
+	return [
+		{ id: "overview", label: t("tabs.overview"), icon: LayoutDashboard },
+		{ id: "runs", label: t("tabs.runs"), icon: History },
+		{ id: "policies", label: t("tabs.policies"), icon: Shield },
+	];
+};
 
-const ValidatedBadge = () => (
-	<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-		<AlertTriangle className="h-3 w-3" />
-		Extra deps
-	</span>
-);
+const ValidatedBadge = () => {
+	const { t } = useTranslation("patching");
+	return (
+		<span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+			<AlertTriangle className="h-3 w-3" />
+			{t("run.extra_deps_short")}
+		</span>
+	);
+};
 
 const Patching = () => {
+	const { t } = useTranslation("patching");
+	const PATCHING_TABS = usePatchingTabs();
 	const [searchParams] = useSearchParams();
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -334,7 +343,7 @@ const Patching = () => {
 	if (error) {
 		return (
 			<div className="p-4 bg-red-900/50 border border-red-700 rounded-lg">
-				<p className="text-red-200">Failed to load patching dashboard</p>
+				<p className="text-red-200">{t("error.load_dashboard")}</p>
 			</div>
 		);
 	}
@@ -357,13 +366,13 @@ const Patching = () => {
 					type="button"
 					onClick={() => navigate("/patching?tab=runs")}
 					className="card p-4 hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow text-left"
-					title="View all runs"
+					title={t("summary.total_runs_title")}
 				>
 					<div className="flex items-center">
 						<ListChecks className="h-5 w-5 text-primary-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Total runs
+								{t("summary.total_runs")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{summary.total_runs ?? 0}
@@ -375,13 +384,13 @@ const Patching = () => {
 					type="button"
 					onClick={() => navigate("/patching?tab=runs&status=active")}
 					className="card p-4 hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow text-left"
-					title="View queued and running runs"
+					title={t("summary.queued_running_title")}
 				>
 					<div className="flex items-center">
 						<Clock className="h-5 w-5 text-blue-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Queued / Running
+								{t("summary.queued_running")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{(summary.queued ?? 0) + (summary.running ?? 0)}
@@ -393,13 +402,13 @@ const Patching = () => {
 					type="button"
 					onClick={() => navigate("/patching?tab=runs&status=completed")}
 					className="card p-4 hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow text-left"
-					title="View completed runs"
+					title={t("summary.completed_title")}
 				>
 					<div className="flex items-center">
 						<CheckCircle className="h-5 w-5 text-green-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Completed
+								{t("summary.completed")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{summary.completed ?? 0}
@@ -411,13 +420,13 @@ const Patching = () => {
 					type="button"
 					onClick={() => navigate("/patching?tab=runs&status=failed")}
 					className="card p-4 hover:shadow-card-hover dark:hover:shadow-card-hover-dark transition-shadow text-left"
-					title="View failed runs"
+					title={t("summary.failed_title")}
 				>
 					<div className="flex items-center">
 						<XCircle className="h-5 w-5 text-red-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Failed
+								{t("summary.failed")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{summary.failed ?? 0}
@@ -434,10 +443,10 @@ const Patching = () => {
 						<Shield className="h-5 w-5 text-secondary-600 mr-2" />
 						<div>
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Patch policies
+								{t("summary.policies")}
 							</p>
 							<p className="text-sm font-medium text-primary-600 dark:text-primary-400">
-								Manage policies
+								{t("summary.manage_policies")}
 							</p>
 						</div>
 					</div>
@@ -448,7 +457,7 @@ const Patching = () => {
 			<div className="border-b border-secondary-200 dark:border-secondary-600 overflow-x-auto scrollbar-hide">
 				<nav
 					className="-mb-px flex space-x-4 sm:space-x-8 px-4"
-					aria-label="Tabs"
+					aria-label={t("tabs.aria_label")}
 				>
 					{PATCHING_TABS.map((tab) => {
 						const Icon = tab.icon;
@@ -561,28 +570,34 @@ const Patching = () => {
 
 /* ───────────────────── Runs & History Tab ───────────────────── */
 
-const STATUS_OPTIONS = [
-	{ value: "", label: "All statuses" },
-	{ value: "active", label: "Active (queued + running)" },
-	{ value: "queued", label: "Queued" },
-	{ value: "pending_validation", label: "Pending validation" },
-	{ value: "pending_approval", label: "Pending approval" },
-	{ value: "validated", label: "Validated (awaiting approval)" },
-	{ value: "approved", label: "Approved" },
-	{ value: "scheduled", label: "Scheduled" },
-	{ value: "running", label: "Running" },
-	{ value: "completed", label: "Completed" },
-	{ value: "failed", label: "Failed" },
-	{ value: "cancelled", label: "Cancelled" },
-	{ value: "timed_out", label: "Timed out" },
-	{ value: "agent_disconnected", label: "Agent disconnected" },
-];
+const _useStatusOptions = () => {
+	const { t } = useTranslation("patching");
+	return [
+		{ value: "", label: t("status.all") },
+		{ value: "active", label: t("status.active") },
+		{ value: "queued", label: t("status.queued") },
+		{ value: "pending_validation", label: t("status.pending_validation") },
+		{ value: "pending_approval", label: t("status.pending_approval") },
+		{ value: "validated", label: t("status.validated") },
+		{ value: "approved", label: t("status.approved") },
+		{ value: "scheduled", label: t("status.scheduled") },
+		{ value: "running", label: t("status.running") },
+		{ value: "completed", label: t("status.completed") },
+		{ value: "failed", label: t("status.failed") },
+		{ value: "cancelled", label: t("status.cancelled") },
+		{ value: "timed_out", label: t("status.timed_out") },
+		{ value: "agent_disconnected", label: t("status.agent_disconnected") },
+	];
+};
 
-const TYPE_OPTIONS = [
-	{ value: "", label: "All types" },
-	{ value: "patch_all", label: "Patch all" },
-	{ value: "patch_package", label: "Patch package" },
-];
+const _useTypeOptions = () => {
+	const { t } = useTranslation("patching");
+	return [
+		{ value: "", label: t("type.all") },
+		{ value: "patch_all", label: t("type.patch_all") },
+		{ value: "patch_package", label: t("type.patch_package") },
+	];
+};
 
 /**
  * Inline row-action buttons shared between mobile cards and desktop rows.
@@ -596,6 +611,7 @@ function RunRowActions({
 	approvingId,
 	size = "sm",
 }) {
+	const { t } = useTranslation("patching");
 	const isMobile = size === "md";
 	const baseBtn = isMobile
 		? "inline-flex items-center justify-center gap-1.5 text-sm px-3 py-2 rounded-md min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -611,26 +627,26 @@ function RunRowActions({
 						onClick={() => onRetry(run.id)}
 						disabled={retryingId === run.id}
 						className={`${baseBtn} border border-secondary-300 dark:border-secondary-600 text-secondary-700 dark:text-secondary-200 hover:bg-secondary-100 dark:hover:bg-secondary-700`}
-						title="Re-queue validation (host may have been offline)"
+						title={t("actions.retry_title")}
 					>
 						<RefreshCw
 							className={`${iconSize} ${retryingId === run.id ? "animate-spin" : ""}`}
 						/>
-						Retry
+						{t("actions.retry")}
 					</button>
 					<button
 						type="button"
 						onClick={() => onApprove(run.id)}
 						disabled={approvingId === run.id}
 						className={`${baseBtn} bg-amber-600 hover:bg-amber-700 text-white`}
-						title="Skip validation and patch immediately"
+						title={t("actions.skip_patch_title")}
 					>
 						{approvingId === run.id ? (
 							<RefreshCw className={`${iconSize} animate-spin`} />
 						) : (
 							<PlayCircle className={iconSize} />
 						)}
-						Skip & Patch
+						{t("actions.skip_patch")}
 					</button>
 				</>
 			)}
@@ -640,14 +656,14 @@ function RunRowActions({
 					onClick={() => onApprove(run.id)}
 					disabled={approvingId === run.id}
 					className={`${baseBtn} bg-primary-600 hover:bg-primary-700 text-white`}
-					title="Approve and queue this run for execution"
+					title={t("actions.approve_title")}
 				>
 					{approvingId === run.id ? (
 						<RefreshCw className={`${iconSize} animate-spin`} />
 					) : (
 						<PlayCircle className={iconSize} />
 					)}
-					Approve
+					{t("actions.approve")}
 				</button>
 			)}
 			{run.status === "validated" && (
@@ -656,7 +672,7 @@ function RunRowActions({
 					onClick={() => onApprove(run.id)}
 					disabled={approvingId === run.id}
 					className={`${baseBtn} bg-primary-600 hover:bg-primary-700 text-white`}
-					title="Approve this validated run to proceed with patching"
+					title={t("actions.approve_validated_title")}
 				>
 					{approvingId === run.id ? (
 						<RefreshCw className={`${iconSize} animate-spin`} />
@@ -732,8 +748,9 @@ function RunsTab({
 						{selectedRunIds.size > 0 && (
 							<>
 								<span className="text-sm text-secondary-600 dark:text-white/80 flex-shrink-0">
-									{selectedRunIds.size} run
-									{selectedRunIds.size !== 1 ? "s" : ""} selected for delete
+									{t("bulk.selected_for_delete", {
+										count: selectedRunIds.size,
+									})}
 								</span>
 								<button
 									type="button"
@@ -743,17 +760,19 @@ function RunsTab({
 								>
 									<Trash2 className="h-4 w-4 flex-shrink-0" />
 									<span className="hidden sm:inline">
-										Delete {selectedRunIds.size} selected
+										{t("bulk.delete_selected", { count: selectedRunIds.size })}
 									</span>
-									<span className="sm:hidden">Delete</span>
+									<span className="sm:hidden">{t("bulk.delete")}</span>
 								</button>
 								<button
 									type="button"
 									onClick={() => setSelectedRunIds(new Set())}
 									className="text-xs sm:text-sm text-secondary-500 hover:text-secondary-700 dark:text-white/70 dark:hover:text-white min-h-[44px] px-2"
 								>
-									<span className="hidden sm:inline">Clear delete</span>
-									<span className="sm:hidden">Clear</span>
+									<span className="hidden sm:inline">
+										{t("bulk.clear_delete")}
+									</span>
+									<span className="sm:hidden">{t("bulk.clear")}</span>
 								</button>
 							</>
 						)}
@@ -766,9 +785,9 @@ function RunsTab({
 						{selectedApproveIds.size > 0 && (
 							<>
 								<span className="text-sm text-secondary-600 dark:text-white/80 flex-shrink-0">
-									{selectedApproveIds.size} run
-									{selectedApproveIds.size !== 1 ? "s" : ""} selected for
-									approve
+									{t("bulk.selected_for_approve", {
+										count: selectedApproveIds.size,
+									})}
 								</span>
 								<button
 									type="button"
@@ -782,11 +801,16 @@ function RunsTab({
 										<CheckCircle className="h-4 w-4 flex-shrink-0" />
 									)}
 									<span className="hidden sm:inline">
-										{bulkApproving ? "Approving…" : "Approve"}{" "}
-										{selectedApproveIds.size} selected
+										{bulkApproving
+											? t("bulk.approving_selected", {
+													count: selectedApproveIds.size,
+												})
+											: t("bulk.approve_selected", {
+													count: selectedApproveIds.size,
+												})}
 									</span>
 									<span className="sm:hidden">
-										{bulkApproving ? "…" : "Approve"}
+										{bulkApproving ? "…" : t("bulk.approve_short")}
 									</span>
 								</button>
 								<button
@@ -795,8 +819,10 @@ function RunsTab({
 									disabled={bulkApproving}
 									className="text-xs sm:text-sm text-secondary-500 hover:text-secondary-700 dark:text-white/70 dark:hover:text-white min-h-[44px] px-2"
 								>
-									<span className="hidden sm:inline">Clear approve</span>
-									<span className="sm:hidden">Clear</span>
+									<span className="hidden sm:inline">
+										{t("bulk.clear_approve")}
+									</span>
+									<span className="sm:hidden">{t("bulk.clear")}</span>
 								</button>
 							</>
 						)}
@@ -824,7 +850,7 @@ function RunsTab({
 						type="button"
 						onClick={() => setBulkApproveResult(null)}
 						className="text-secondary-500 hover:text-secondary-700 dark:text-white/70 dark:hover:text-white"
-						aria-label="Dismiss"
+						aria-label={t("actions.dismiss")}
 					>
 						<X className="h-4 w-4" />
 					</button>
@@ -841,7 +867,7 @@ function RunsTab({
 								htmlFor="patching-runs-filter-status"
 								className="block text-xs font-medium text-secondary-500 dark:text-white/80 mb-1 uppercase tracking-wider"
 							>
-								Status
+								{t("filters.status")}
 							</label>
 							<div className="relative">
 								<select
@@ -867,7 +893,7 @@ function RunsTab({
 								htmlFor="patching-runs-filter-type"
 								className="block text-xs font-medium text-secondary-500 dark:text-white/80 mb-1 uppercase tracking-wider"
 							>
-								Type
+								{t("filters.type")}
 							</label>
 							<div className="relative">
 								<select
@@ -899,7 +925,7 @@ function RunsTab({
 									}}
 									className="btn-outline min-h-[44px] sm:min-h-0 text-sm"
 								>
-									Clear filters
+									{t("filters.clear")}
 								</button>
 							</div>
 						)}
@@ -913,17 +939,17 @@ function RunsTab({
 							<div className="text-center py-8">
 								<Search className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 								<p className="text-secondary-500 dark:text-white">
-									No runs match your filters
+									{t("empty.no_runs_match")}
 								</p>
 								<p className="text-sm text-secondary-400 dark:text-white mt-2">
-									Try adjusting the status or type filter to see more results
+									{t("empty.no_runs_match_hint")}
 								</p>
 							</div>
 						) : (
 							<div className="text-center py-8">
 								<History className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 								<p className="text-secondary-500 dark:text-white">
-									No patch runs yet
+									{t("empty.no_runs")}
 								</p>
 								<p className="text-sm text-secondary-400 dark:text-white mt-2">
 									Patch runs triggered from the Overview tab or from host detail
@@ -973,8 +999,8 @@ function RunsTab({
 														type="button"
 														onClick={() => handleToggleSelect(run.id)}
 														className="min-w-[44px] min-h-[44px] flex items-center justify-center"
-														title="Select for delete"
-														aria-label="Select for delete"
+														title={t("actions.select_for_delete")}
+														aria-label={t("actions.select_for_delete")}
 													>
 														{isSelectedForDelete ? (
 															<CheckSquare className="h-5 w-5 text-danger-600" />
@@ -988,8 +1014,8 @@ function RunsTab({
 														type="button"
 														onClick={() => handleToggleApproveSelect(run.id)}
 														className="min-w-[44px] min-h-[44px] flex items-center justify-center"
-														title="Select for approve"
-														aria-label="Select for approve"
+														title={t("actions.select_for_approve")}
+														aria-label={t("actions.select_for_approve")}
 													>
 														{isSelectedForApprove ? (
 															<CheckSquare className="h-5 w-5 text-primary-600" />
@@ -1009,7 +1035,7 @@ function RunsTab({
 										<div className="grid grid-cols-2 gap-2 text-xs text-secondary-500 dark:text-secondary-400 pt-2 border-t border-secondary-200 dark:border-secondary-600">
 											<div className="min-w-0">
 												<div className="uppercase tracking-wider text-[10px] mb-0.5">
-													Initiated by
+													{t("table.initiated_by")}
 												</div>
 												<div className="flex items-center gap-1 text-secondary-700 dark:text-white truncate">
 													{run.triggered_by_username ? (
@@ -1026,7 +1052,7 @@ function RunsTab({
 											</div>
 											<div className="min-w-0">
 												<div className="uppercase tracking-wider text-[10px] mb-0.5">
-													Started
+													{t("table.started")}
 												</div>
 												<div className="text-secondary-700 dark:text-white truncate">
 													{formatDate(run.created_at)}
@@ -1035,7 +1061,7 @@ function RunsTab({
 											{run.completed_at && (
 												<div className="min-w-0 col-span-2">
 													<div className="uppercase tracking-wider text-[10px] mb-0.5">
-														Completed
+														{t("summary.completed")}
 													</div>
 													<div className="text-secondary-700 dark:text-white truncate">
 														{formatDate(run.completed_at)}
@@ -1073,8 +1099,8 @@ function RunsTab({
 													type="button"
 													onClick={handleToggleSelectAll}
 													className="flex items-center text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
-													title="Select all deletable runs"
-													aria-label="Select all deletable runs"
+													title={t("actions.select_all_deletable")}
+													aria-label={t("actions.select_all_deletable")}
 												>
 													{allDeletableSelected ? (
 														<CheckSquare className="h-4 w-4 text-danger-600" />
@@ -1093,8 +1119,8 @@ function RunsTab({
 													type="button"
 													onClick={handleToggleApproveSelectAll}
 													className="flex items-center text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
-													title="Select all approvable runs"
-													aria-label="Select all approvable runs"
+													title={t("actions.select_all_approvable")}
+													aria-label={t("actions.select_all_approvable")}
 												>
 													{allApprovableSelected ? (
 														<CheckSquare className="h-4 w-4 text-primary-600" />
@@ -1108,43 +1134,43 @@ function RunsTab({
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 										>
-											Host
+											{t("table.host")}
 										</th>
 										<th
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 										>
-											Type
+											{t("table.type")}
 										</th>
 										<th
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider whitespace-nowrap"
 										>
-											Status
+											{t("table.status")}
 										</th>
 										<th
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider whitespace-nowrap"
 										>
-											Initiated by
+											{t("table.initiated_by")}
 										</th>
 										<th
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider whitespace-nowrap"
 										>
-											Started
+											{t("table.started")}
 										</th>
 										<th
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider whitespace-nowrap"
 										>
-											Completed
+											{t("summary.completed")}
 										</th>
 										<th
 											scope="col"
 											className="px-3 sm:px-4 py-2 text-right text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider whitespace-nowrap"
 										>
-											Actions
+											{t("table.actions")}
 										</th>
 									</tr>
 								</thead>
@@ -1176,8 +1202,8 @@ function RunsTab({
 															type="button"
 															onClick={() => handleToggleSelect(run.id)}
 															className="flex items-center text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
-															title="Select for delete"
-															aria-label="Select for delete"
+															title={t("actions.select_for_delete")}
+															aria-label={t("actions.select_for_delete")}
 														>
 															{isSelectedForDelete ? (
 																<CheckSquare className="h-4 w-4 text-danger-600" />
@@ -1193,8 +1219,8 @@ function RunsTab({
 															type="button"
 															onClick={() => handleToggleApproveSelect(run.id)}
 															className="flex items-center text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200"
-															title="Select for approve"
-															aria-label="Select for approve"
+															title={t("actions.select_for_approve")}
+															aria-label={t("actions.select_for_approve")}
 														>
 															{isSelectedForApprove ? (
 																<CheckSquare className="h-4 w-4 text-primary-600" />
@@ -1271,7 +1297,7 @@ function RunsTab({
 									htmlFor="patching-runs-page-size"
 									className="text-sm text-secondary-700 dark:text-white"
 								>
-									Rows per page:
+									{t("pagination.rows_per_page")}
 								</label>
 								<select
 									id="patching-runs-page-size"
@@ -1289,7 +1315,11 @@ function RunsTab({
 								</select>
 							</div>
 							<span className="text-sm text-secondary-700 dark:text-white">
-								{rangeStart}-{rangeEnd} of {totalRuns}
+								{t("pagination.range", {
+									start: rangeStart,
+									end: rangeEnd,
+									total: totalRuns,
+								})}
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
@@ -1298,19 +1328,19 @@ function RunsTab({
 								disabled={runsPage <= 1}
 								onClick={() => setRunsPage((p) => Math.max(1, p - 1))}
 								className="p-1 rounded hover:bg-secondary-100 dark:hover:bg-secondary-600 text-secondary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-								aria-label="Previous page"
+								aria-label={t("pagination.previous")}
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</button>
 							<span className="text-sm text-secondary-700 dark:text-white">
-								Page {runsPage} of {totalPages}
+								{t("pagination.page_of", { page: runsPage, pages: totalPages })}
 							</span>
 							<button
 								type="button"
 								disabled={runsPage >= totalPages}
 								onClick={() => setRunsPage((p) => p + 1)}
 								className="p-1 rounded hover:bg-secondary-100 dark:hover:bg-secondary-600 text-secondary-600 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-								aria-label="Next page"
+								aria-label={t("pagination.next")}
 							>
 								<ChevronRight className="h-4 w-4" />
 							</button>
@@ -1324,13 +1354,17 @@ function RunsTab({
 
 /* ───────────────────── Policies Tab ───────────────────── */
 
-const delay_type_labels = {
-	immediate: "Immediate",
-	delayed: "Delayed",
-	fixed_time: "Fixed time",
+const useDelayTypeLabels = () => {
+	const { t } = useTranslation("patching");
+	return {
+		immediate: t("policies.delay_labels.immediate"),
+		delayed: t("policies.delay_labels.delayed"),
+		fixed_time: t("policies.delay_labels.fixed_time"),
+	};
 };
 
 function PoliciesTab() {
+	const { t } = useTranslation("patching");
 	const queryClient = useQueryClient();
 	const toast = useToast();
 	const confirm = useConfirm();
@@ -1372,7 +1406,7 @@ function PoliciesTab() {
 			queryClient.invalidateQueries({ queryKey: ["patching-policies"] });
 			setShowModal(false);
 			resetForm();
-			toast.success("Policy created");
+			toast.success(t("toasts.policy_created"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1383,7 +1417,7 @@ function PoliciesTab() {
 			queryClient.invalidateQueries({ queryKey: ["patching-policies"] });
 			setShowModal(false);
 			setEditingPolicy(null);
-			toast.success("Policy updated");
+			toast.success(t("toasts.policy_updated"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1392,7 +1426,7 @@ function PoliciesTab() {
 		mutationFn: (id) => patchingAPI.deletePolicy(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["patching-policies"] });
-			toast.success("Policy deleted");
+			toast.success(t("toasts.policy_deleted"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1442,6 +1476,7 @@ function PoliciesTab() {
 		}
 	};
 
+	const delay_type_labels = useDelayTypeLabels();
 	const formatSchedule = (policy) => {
 		const label =
 			delay_type_labels[policy.patch_delay_type] || policy.patch_delay_type;
@@ -1467,7 +1502,7 @@ function PoliciesTab() {
 					className="btn-primary flex items-center gap-2"
 				>
 					<Plus className="h-4 w-4" />
-					Create policy
+					{t("policies.create")}
 				</button>
 			</div>
 
@@ -1476,7 +1511,7 @@ function PoliciesTab() {
 					<div className="p-8 text-center text-secondary-500">Loading...</div>
 				) : policies.length === 0 ? (
 					<div className="p-8 text-center text-secondary-500">
-						No policies yet. Create one to control when patches run.
+						{t("policies.empty")}
 					</div>
 				) : (
 					<div className="overflow-x-auto">
@@ -1487,31 +1522,31 @@ function PoliciesTab() {
 										scope="col"
 										className="px-4 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 									>
-										Name
+										{t("policies.name")}
 									</th>
 									<th
 										scope="col"
 										className="px-4 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 									>
-										Description
+										{t("policies.description")}
 									</th>
 									<th
 										scope="col"
 										className="px-4 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 									>
-										Schedule
+										{t("policies.schedule")}
 									</th>
 									<th
 										scope="col"
 										className="px-4 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 									>
-										Assignments
+										{t("policies.assignments")}
 									</th>
 									<th
 										scope="col"
 										className="px-4 py-3 text-right text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider"
 									>
-										Actions
+										{t("table.actions")}
 									</th>
 								</tr>
 							</thead>
@@ -1552,7 +1587,7 @@ function PoliciesTab() {
 														type="button"
 														onClick={() => openEdit(policy)}
 														className="p-1.5 rounded hover:bg-secondary-100 dark:hover:bg-secondary-700 text-secondary-600 dark:text-secondary-300"
-														title="Edit"
+														title={t("common:buttons.edit")}
 													>
 														<Edit className="h-4 w-4" />
 													</button>
@@ -1569,7 +1604,7 @@ function PoliciesTab() {
 																deleteMutation.mutate(policy.id);
 														}}
 														className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600"
-														title="Delete"
+														title={t("common:buttons.delete")}
 													>
 														<Trash2 className="h-4 w-4" />
 													</button>
@@ -1606,7 +1641,9 @@ function PoliciesTab() {
 					<div className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
 						<div className="flex items-center justify-between p-4 border-b border-secondary-200 dark:border-secondary-600">
 							<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-								{editingPolicy ? "Edit policy" : "Create policy"}
+								{editingPolicy
+									? t("policies.edit_title")
+									: t("policies.create_title")}
 							</h3>
 							<button
 								type="button"
@@ -1619,7 +1656,7 @@ function PoliciesTab() {
 						<form onSubmit={handleSubmit} className="p-4 space-y-4">
 							<div>
 								<label className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
-									Name
+									{t("policies.name")}
 								</label>
 								<input
 									type="text"
@@ -1724,7 +1761,9 @@ function PoliciesTab() {
 										createMutation.isPending || updateMutation.isPending
 									}
 								>
-									{editingPolicy ? "Update" : "Create"}
+									{editingPolicy
+										? t("policies.update")
+										: t("common:buttons.create", { defaultValue: "Create" })}
 								</button>
 							</div>
 						</form>
@@ -1738,6 +1777,7 @@ function PoliciesTab() {
 /* ───────────────── Policy Assignments (inline) ───────────────── */
 
 function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
+	const { t } = useTranslation("patching");
 	const queryClient = useQueryClient();
 	const toast = useToast();
 	const [addTargetType, setAddTargetType] = useState("host");
@@ -1767,7 +1807,7 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 			});
 			setAddTargetId("");
 			onUpdate?.();
-			toast.success("Assignment added");
+			toast.success(t("toasts.assignment_added"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1781,7 +1821,7 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 				queryKey: ["patching-policy", policy.id],
 			});
 			onUpdate?.();
-			toast.success("Assignment removed");
+			toast.success(t("toasts.assignment_removed"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1795,7 +1835,7 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 			});
 			setAddExclusionHostId("");
 			onUpdate?.();
-			toast.success("Exclusion added");
+			toast.success(t("toasts.exclusion_added"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1808,7 +1848,7 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 				queryKey: ["patching-policy", policy.id],
 			});
 			onUpdate?.();
-			toast.success("Exclusion removed");
+			toast.success(t("toasts.exclusion_removed"));
 		},
 		onError: (err) => toast.error(err.response?.data?.error || err.message),
 	});
@@ -1851,12 +1891,10 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 			<div className="space-y-3">
 				<div className="flex items-center gap-2 text-sm font-medium text-secondary-700 dark:text-secondary-300">
 					<Users className="h-4 w-4" />
-					Applied to
+					{t("assignments.applied_to")}
 				</div>
 				{assignments.length === 0 ? (
-					<p className="text-sm text-secondary-500">
-						No assignments. Add a host or host group.
-					</p>
+					<p className="text-sm text-secondary-500">{t("assignments.empty")}</p>
 				) : (
 					<ul className="flex flex-wrap gap-2">
 						{assignments.map((a) => (
@@ -1890,8 +1928,8 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 						}}
 						className="rounded border border-secondary-300 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white text-sm px-2 py-1"
 					>
-						<option value="host">Host</option>
-						<option value="host_group">Host group</option>
+						<option value="host">{t("assignments.host")}</option>
+						<option value="host_group">{t("assignments.host_group")}</option>
 					</select>
 					<select
 						value={addTargetId}
@@ -1899,7 +1937,9 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 						className="rounded border border-secondary-300 dark:border-secondary-600 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white text-sm px-2 py-1 min-w-[160px]"
 					>
 						<option value="">
-							Select {addTargetType === "host" ? "host" : "group"}...
+							{addTargetType === "host"
+								? t("assignments.select_host")
+								: t("assignments.select_group")}
 						</option>
 						{addTargetType === "host"
 							? hosts.map((h) => (
@@ -1919,16 +1959,18 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 						disabled={!addTargetId || addAssignmentMutation.isPending}
 						className="btn-outline text-sm py-1"
 					>
-						Add
+						{t("assignments.add")}
 					</button>
 				</div>
 
 				<div className="flex items-center gap-2 text-sm font-medium text-secondary-700 dark:text-secondary-300 pt-2 border-t border-secondary-200 dark:border-secondary-600">
 					<Clock className="h-4 w-4" />
-					Exclusions (hosts excluded from this policy when applied via group)
+					{t("assignments.exclusions_title")}
 				</div>
 				{exclusions.length === 0 ? (
-					<p className="text-sm text-secondary-500">No exclusions.</p>
+					<p className="text-sm text-secondary-500">
+						{t("assignments.no_exclusions")}
+					</p>
 				) : (
 					<ul className="flex flex-wrap gap-2">
 						{exclusions.map((exc) => (
@@ -1950,15 +1992,15 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 				)}
 				{policyPending ? (
 					<p className="text-sm text-secondary-500 dark:text-secondary-400">
-						Loading assignments...
+						{t("assignments.loading")}
 					</p>
 				) : policyError ? (
 					<p className="text-sm text-danger-600 dark:text-danger-400">
-						Could not load this policy's assignments.
+						{t("assignments.error")}
 					</p>
 				) : assignedGroupIds.size === 0 ? (
 					<p className="text-sm text-secondary-500 dark:text-secondary-400">
-						Assign a host group to this policy before excluding hosts from it.
+						{t("assignments.need_group")}
 					</p>
 				) : (
 					<div className="flex flex-wrap items-center gap-2">
@@ -1987,7 +2029,7 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 							disabled={!addExclusionHostId || addExclusionMutation.isPending}
 							className="btn-outline text-sm py-1 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							Exclude host
+							{t("assignments.exclude_host")}
 						</button>
 					</div>
 				)}

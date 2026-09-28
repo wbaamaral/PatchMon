@@ -54,6 +54,7 @@ func NewRouter(ctx context.Context, cfg *config.Config, db *database.DB, rdb *re
 
 	r.Use(middleware.RequestID())
 	r.Use(middleware.Recovery(log))
+	r.Use(middleware.Locale)
 	if poolCache != nil {
 		r.Use(hostctx.Middleware(ctxRegistry, poolCache, redisCache, db, rdb, cfg.RegistryReloadSecret))
 	} else {

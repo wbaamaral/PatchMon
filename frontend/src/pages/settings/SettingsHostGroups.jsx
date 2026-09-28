@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Edit, Plus, Server, Trash2 } from "lucide-react";
 import { useEffect, useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { hostGroupsAPI } from "../../utils/api";
 
 const SettingsHostGroups = () => {
+	const { t } = useTranslation("settings");
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showEditModal, setShowEditModal] = useState(false);
 	const [selectedGroup, setSelectedGroup] = useState(null);
@@ -106,10 +108,10 @@ const SettingsHostGroups = () => {
 					type="button"
 					onClick={() => setShowCreateModal(true)}
 					className="btn-primary flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end"
-					title="Create host group"
+					title={t("host_groups.actions.create_group_title")}
 				>
 					<Plus className="h-4 w-4" />
-					Create Group
+					{t("host_groups.actions.create_group")}
 				</button>
 			</div>
 
@@ -136,7 +138,7 @@ const SettingsHostGroups = () => {
 											type="button"
 											onClick={() => handleEdit(group)}
 											className="text-secondary-400 hover:text-secondary-600 dark:text-white dark:hover:text-secondary-300 flex-shrink-0"
-											title="Edit group"
+											title={t("host_groups.actions.edit_group_title")}
 										>
 											<Edit className="h-4 w-4" />
 										</button>
@@ -164,11 +166,14 @@ const SettingsHostGroups = () => {
 											type="button"
 											onClick={() => handleHostsClick(group.id)}
 											className="flex items-center text-sm text-secondary-500 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-											title={`View hosts in ${group.name}`}
+											title={t("host_groups.actions.view_hosts_in", {
+												name: group.name,
+											})}
 										>
 											<Server className="h-4 w-4 mr-1" />
-											{group._count?.hosts || 0} host
-											{group._count?.hosts !== 1 ? "s" : ""}
+											{t("host_groups.hosts_count", {
+												count: group._count?.hosts || 0,
+											})}
 										</button>
 									</div>
 								</div>
@@ -181,19 +186,19 @@ const SettingsHostGroups = () => {
 								<thead className="bg-secondary-50 dark:bg-secondary-700">
 									<tr>
 										<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-											Group
+											{t("host_groups.table.group")}
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-											Description
+											{t("host_groups.table.description")}
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-											Color
+											{t("host_groups.table.color")}
 										</th>
 										<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-											Hosts
+											{t("host_groups.table.hosts")}
 										</th>
 										<th className="px-6 py-3 text-right text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-											Actions
+											{t("host_groups.table.actions")}
 										</th>
 									</tr>
 								</thead>
@@ -218,7 +223,7 @@ const SettingsHostGroups = () => {
 												<div className="text-sm text-secondary-500 dark:text-white">
 													{group.description || (
 														<span className="text-secondary-400 italic">
-															No description
+															{t("host_groups.table.no_description")}
 														</span>
 													)}
 												</div>
@@ -239,11 +244,14 @@ const SettingsHostGroups = () => {
 													type="button"
 													onClick={() => handleHostsClick(group.id)}
 													className="flex items-center text-sm text-secondary-500 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-													title={`View hosts in ${group.name}`}
+													title={t("host_groups.actions.view_hosts_in", {
+														name: group.name,
+													})}
 												>
 													<Server className="h-4 w-4 mr-2" />
-													{group._count?.hosts || 0} host
-													{group._count?.hosts !== 1 ? "s" : ""}
+													{t("host_groups.hosts_count", {
+														count: group._count?.hosts || 0,
+													})}
 												</button>
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -251,7 +259,7 @@ const SettingsHostGroups = () => {
 													type="button"
 													onClick={() => handleEdit(group)}
 													className="text-secondary-400 hover:text-secondary-600 dark:text-white dark:hover:text-secondary-300"
-													title="Edit group"
+													title={t("host_groups.actions.edit_group_title")}
 												>
 													<Edit className="h-4 w-4" />
 												</button>
@@ -275,10 +283,10 @@ const SettingsHostGroups = () => {
 								<AlertTriangle className="h-5 w-5 text-danger-400 dark:text-danger-300" />
 								<div className="ml-3">
 									<h3 className="text-sm font-medium text-danger-800 dark:text-danger-200">
-										Error loading host groups
+										{t("host_groups.error.title")}
 									</h3>
 									<p className="text-sm text-danger-700 dark:text-danger-300 mt-1">
-										{error.message || "Failed to load host groups"}
+										{error.message || t("host_groups.error.fallback")}
 									</p>
 								</div>
 							</div>
@@ -288,10 +296,10 @@ const SettingsHostGroups = () => {
 					<div className="p-12 text-center">
 						<Server className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 						<p className="text-secondary-500 dark:text-white">
-							No host groups found
+							{t("host_groups.empty.title")}
 						</p>
 						<p className="text-sm text-secondary-400 dark:text-white mt-2">
-							Click "Create Group" to create the first host group
+							{t("host_groups.empty.subtitle")}
 						</p>
 					</div>
 				)}
@@ -337,6 +345,7 @@ const SettingsHostGroups = () => {
 
 // Create Host Group Modal
 const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
+	const { t } = useTranslation("settings");
 	const nameId = useId();
 	const descriptionId = useId();
 	const colorId = useId();
@@ -362,7 +371,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 			<div className="bg-white dark:bg-secondary-800 rounded-lg p-6 w-full max-w-md">
 				<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
-					Create Host Group
+					{t("host_groups.create_modal.title")}
 				</h3>
 
 				<form onSubmit={handleSubmit} className="space-y-4">
@@ -371,7 +380,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							htmlFor={nameId}
 							className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 						>
-							Name *
+							{t("host_groups.form.name")}
 						</label>
 						<input
 							type="text"
@@ -381,7 +390,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							onChange={handleChange}
 							required
 							className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400"
-							placeholder="e.g., Production Servers"
+							placeholder={t("host_groups.form.name_placeholder")}
 						/>
 					</div>
 
@@ -390,7 +399,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							htmlFor={descriptionId}
 							className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 						>
-							Description
+							{t("host_groups.form.description")}
 						</label>
 						<textarea
 							id={descriptionId}
@@ -399,7 +408,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							onChange={handleChange}
 							rows={3}
 							className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400"
-							placeholder="Optional description for this group"
+							placeholder={t("host_groups.form.description_placeholder")}
 						/>
 					</div>
 
@@ -408,7 +417,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							htmlFor={colorId}
 							className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 						>
-							Color
+							{t("host_groups.form.color")}
 						</label>
 						<div className="flex items-center gap-3">
 							<input
@@ -437,10 +446,12 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							className="btn-outline"
 							disabled={isLoading}
 						>
-							Cancel
+							{t("common.cancel")}
 						</button>
 						<button type="submit" className="btn-primary" disabled={isLoading}>
-							{isLoading ? "Creating..." : "Create Group"}
+							{isLoading
+								? t("host_groups.actions.creating")
+								: t("host_groups.actions.create_group")}
 						</button>
 					</div>
 				</form>
@@ -451,6 +462,7 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 
 // Edit Host Group Modal
 const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
+	const { t } = useTranslation("settings");
 	const editNameId = useId();
 	const editDescriptionId = useId();
 	const editColorId = useId();
@@ -476,7 +488,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 		<div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 			<div className="bg-white dark:bg-secondary-800 rounded-lg p-6 w-full max-w-md">
 				<h3 className="text-lg font-semibold text-secondary-900 dark:text-white mb-4">
-					Edit Host Group
+					{t("host_groups.edit_modal.title")}
 				</h3>
 
 				<form onSubmit={handleSubmit} className="space-y-4">
@@ -485,7 +497,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 							htmlFor={editNameId}
 							className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 						>
-							Name *
+							{t("host_groups.form.name")}
 						</label>
 						<input
 							type="text"
@@ -495,7 +507,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 							onChange={handleChange}
 							required
 							className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400"
-							placeholder="e.g., Production Servers"
+							placeholder={t("host_groups.form.name_placeholder")}
 						/>
 					</div>
 
@@ -504,7 +516,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 							htmlFor={editDescriptionId}
 							className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 						>
-							Description
+							{t("host_groups.form.description")}
 						</label>
 						<textarea
 							id={editDescriptionId}
@@ -513,7 +525,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 							onChange={handleChange}
 							rows={3}
 							className="w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400"
-							placeholder="Optional description for this group"
+							placeholder={t("host_groups.form.description_placeholder")}
 						/>
 					</div>
 
@@ -522,7 +534,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 							htmlFor={editColorId}
 							className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-1"
 						>
-							Color
+							{t("host_groups.form.color")}
 						</label>
 						<div className="flex items-center gap-3">
 							<input
@@ -560,7 +572,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 							disabled={isLoading}
 						>
 							<Trash2 className="h-4 w-4 mr-2" />
-							Delete Group
+							{t("host_groups.actions.delete_group")}
 						</button>
 						<div className="flex gap-3">
 							<button
@@ -569,14 +581,16 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 								className="btn-outline"
 								disabled={isLoading}
 							>
-								Cancel
+								{t("common.cancel")}
 							</button>
 							<button
 								type="submit"
 								className="btn-primary"
 								disabled={isLoading}
 							>
-								{isLoading ? "Updating..." : "Update Group"}
+								{isLoading
+									? t("host_groups.actions.updating")
+									: t("host_groups.actions.update_group")}
 							</button>
 						</div>
 					</div>
@@ -588,6 +602,7 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 
 // Delete Confirmation Modal
 const DeleteHostGroupModal = ({ group, onClose, onConfirm, isLoading }) => {
+	const { t } = useTranslation("settings");
 	// Fetch hosts for this group
 	const { data: hostsData } = useQuery({
 		queryKey: ["hostGroupHosts", group?.id],
@@ -606,31 +621,30 @@ const DeleteHostGroupModal = ({ group, onClose, onConfirm, isLoading }) => {
 					</div>
 					<div>
 						<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-							Delete Host Group
+							{t("host_groups.delete_modal.title")}
 						</h3>
 						<p className="text-sm text-secondary-600 dark:text-white">
-							This action cannot be undone
+							{t("host_groups.delete_modal.cannot_undo")}
 						</p>
 					</div>
 				</div>
 
 				<div className="mb-6">
 					<p className="text-secondary-700 dark:text-secondary-200">
-						Are you sure you want to delete the host group{" "}
-						<span className="font-semibold">"{group.name}"</span>?
+						{t("host_groups.delete_modal.confirm", { name: group.name })}
 					</p>
 					{group._count?.hosts > 0 && (
 						<div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
 							<p className="text-sm text-blue-800 mb-2">
-								<strong>Note:</strong> This group contains {group._count?.hosts}{" "}
-								host
-								{group._count?.hosts !== 1 ? "s" : ""}. These hosts will be
-								moved to "No group" after deletion.
+								<strong>{t("host_groups.delete_modal.note_label")}</strong>{" "}
+								{t("host_groups.delete_modal.note_body", {
+									count: group._count?.hosts || 0,
+								})}
 							</p>
 							{hosts.length > 0 && (
 								<div className="mt-2">
 									<p className="text-xs font-medium text-blue-900 mb-1">
-										Hosts in this group:
+										{t("host_groups.delete_modal.hosts_in_group")}
 									</p>
 									<div className="max-h-32 overflow-y-auto bg-blue-100 rounded p-2">
 										{hosts.map((host) => (
@@ -656,7 +670,7 @@ const DeleteHostGroupModal = ({ group, onClose, onConfirm, isLoading }) => {
 						className="btn-outline"
 						disabled={isLoading}
 					>
-						Cancel
+						{t("common.cancel")}
 					</button>
 					<button
 						type="button"
@@ -664,7 +678,9 @@ const DeleteHostGroupModal = ({ group, onClose, onConfirm, isLoading }) => {
 						className="btn-danger"
 						disabled={isLoading}
 					>
-						{isLoading ? "Deleting..." : "Delete Group"}
+						{isLoading
+							? t("host_groups.actions.deleting")
+							: t("host_groups.actions.delete_group")}
 					</button>
 				</div>
 			</div>

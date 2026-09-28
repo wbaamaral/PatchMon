@@ -79,7 +79,7 @@ func NewCommunityHandler(cfg *config.Config) *CommunityHandler {
 // Public endpoint - no auth required.
 func (h *CommunityHandler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		Error(w, http.StatusMethodNotAllowed, "Method not allowed")
+		ErrorKey(w, r, http.StatusMethodNotAllowed, "error.method_not_allowed")
 		return
 	}
 	links := make([]CommunityLink, 0, len(defaultCommunityLinks))

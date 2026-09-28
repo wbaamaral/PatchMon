@@ -1,0 +1,430 @@
+{
+	"host_down": "Agente do host offline",
+	"host_recovered": "Agente do host recuperado",
+	"channels": {
+		"title": "Notificações",
+		"subtitle": "Gerencie destinos, regras de roteamento, relatórios agendados e histórico de entregas",
+		"actions": {
+			"refreshLog": "Atualizar log",
+			"addDestination": "Adicionar destino",
+			"addEventRule": "Adicionar regra de evento",
+			"newReport": "Novo relatório",
+			"test": "Testar",
+			"edit": "Editar",
+			"save": "Salvar",
+			"create": "Criar",
+			"cancel": "Cancelar",
+			"back": "Voltar",
+			"next": "Próximo",
+			"add": "Adicionar",
+			"createFailed": "Falha ao criar",
+			"updateFailed": "Falha ao atualizar",
+			"deleteFailed": "Falha ao excluir"
+		},
+		"common": {
+			"enabled": "Habilitado"
+		},
+		"status": {
+			"active": "Ativo",
+			"disabled": "Desabilitado"
+		},
+		"eventTypes": {
+			"all": "Todos os eventos",
+			"host_down": "Agente do host offline",
+			"host_recovered": "Agente do host recuperado",
+			"host_enrolled": "Host registrado",
+			"host_deleted": "Host excluído",
+			"server_update": "Atualização do servidor",
+			"agent_update": "Atualização do agente",
+			"patch_run_started": "Execução de patches iniciada",
+			"patch_run_completed": "Execução de patches concluída",
+			"patch_run_failed": "Execução de patches falhou",
+			"patch_run_approved": "Execução de patches aprovada",
+			"patch_run_cancelled": "Execução de patches cancelada",
+			"patch_reboot_required": "Reinicialização necessária",
+			"compliance_scan_completed": "Verificação de conformidade concluída",
+			"compliance_scan_failed": "Verificação de conformidade falhou",
+			"container_stopped": "Container parado",
+			"container_started": "Container iniciado",
+			"container_image_update_available": "Atualização de imagem de container disponível",
+			"ssh_session_started": "Sessão SSH iniciada",
+			"rdp_session_started": "Sessão RDP iniciada",
+			"host_security_updates_exceeded": "Limite de atualizações de segurança excedido",
+			"host_pending_updates_exceeded": "Limite de atualizações pendentes excedido",
+			"user_login": "Login de usuário",
+			"user_login_failed": "Tentativa de login falhou",
+			"account_locked": "Conta bloqueada",
+			"user_created": "Usuário criado",
+			"user_role_changed": "Função do usuário alterada",
+			"user_tfa_disabled": "2FA desabilitado"
+		},
+		"severities": {
+			"informational": "Informativo",
+			"warning": "Aviso",
+			"error": "Erro",
+			"critical": "Crítico"
+		},
+		"reportSections": {
+			"executive_summary": "Resumo executivo",
+			"compliance_summary": "Resumo de conformidade",
+			"recent_patch_runs": "Execuções de patches recentes",
+			"hosts_offline": "Hosts / status",
+			"open_alerts": "Alertas abertos",
+			"hosts_by_updates": "Hosts por atualizações pendentes",
+			"top_security_packages": "Principais pacotes de segurança desatualizados"
+		},
+		"channelTypes": {
+			"webhook": {
+				"label": "Webhook",
+				"description": "Genérico, Discord, Slack, Mattermost ou Rocket.Chat"
+			},
+			"email": {
+				"label": "E-mail",
+				"description": "Entrega via SMTP"
+			},
+			"ntfy": {
+				"label": "ntfy",
+				"description": "Notificações push via ntfy.sh"
+			},
+			"internal": {
+				"label": "Alertas internos",
+				"description": "Registros de alerta na aba Alertas"
+			}
+		},
+		"frequency": {
+			"daily": "Diário",
+			"weekdays": "Dias úteis (Seg-Sex)",
+			"weekly": "Semanal",
+			"monthly": "Mensal"
+		},
+		"monthDay": {
+			"first": "1º",
+			"fifteenth": "15º",
+			"last": "Último dia",
+			"or": "ou",
+			"dayPlaceholder": "Dia"
+		},
+		"days": {
+			"mon": "Seg",
+			"tue": "Ter",
+			"wed": "Qua",
+			"thu": "Qui",
+			"fri": "Sex",
+			"sat": "Sáb",
+			"sun": "Dom"
+		},
+		"tls": {
+			"modes": {
+				"starttls": "STARTTLS (recomendado)",
+				"tls": "TLS implícito / SSL",
+				"none": "Nenhum (inseguro)",
+				"auto": "Automático"
+			},
+			"help": {
+				"starttls": "Conecta em texto puro na porta de submissão e depois atualiza para TLS via comando STARTTLS. Porta típica: 587.",
+				"tls": "Abre uma conexão TLS desde o início (às vezes chamada de SMTPS). Porta típica: 465.",
+				"none": "Envia e-mail em texto puro. As credenciais só são enviadas se você habilitar a opção de credenciais não criptografadas abaixo. Use apenas para retransmissores locais confiáveis.",
+				"auto": "Tenta STARTTLS primeiro e depois recorre ao TLS implícito no mesmo host e porta. O e-mail nunca é enviado em texto puro neste modo; se nenhum funcionar, o envio falha."
+			}
+		},
+		"schedule": {
+			"daily": "Diário às {{time}}",
+			"weekdays": "Dias úteis às {{time}}",
+			"lastDayOfMonth": "Último dia do mês às {{time}}",
+			"dayOfMonth": "Dia {{day}}{{ordinal}} do mês às {{time}}",
+			"daysAt": "{{days}} às {{time}}",
+			"ordinals": {
+				"st": "º",
+				"nd": "º",
+				"rd": "º",
+				"th": "º"
+			}
+		},
+		"webhookHint": {
+			"autoDetect": "URLs do Discord, Slack, Mattermost e Rocket.Chat são detectadas automaticamente para formatação rica",
+			"detectedPrefix": "Detectado"
+		},
+		"destination": {
+			"title": {
+				"edit": "Editar destino",
+				"choose": "Escolher canal",
+				"configure": "Configurar destino"
+			},
+			"fields": {
+				"displayName": "Nome de exibição",
+				"displayNamePlaceholder": "ex.: Ops Discord",
+				"webhookUrl": "URL do webhook",
+				"webhookUrlPlaceholder": "https://hooks.slack.com/services/... ou https://discord.com/api/webhooks/...",
+				"signingSecret": "Segredo de assinatura",
+				"signingSecretPlaceholder": "Segredo de assinatura HMAC opcional",
+				"smtpHost": "Host SMTP",
+				"smtpHostPlaceholder": "smtp.example.com",
+				"smtpPort": "Porta SMTP",
+				"username": "Usuário",
+				"password": "Senha",
+				"from": "De",
+				"fromPlaceholder": "noreply@example.com",
+				"to": "Para",
+				"toPlaceholder": "team@example.com",
+				"tlsMode": "Modo TLS",
+				"serverUrl": "URL do servidor",
+				"serverUrlPlaceholder": "https://ntfy.sh",
+				"serverUrlHelp": "Deixe vazio para ntfy.sh",
+				"topic": "Tópico",
+				"topicPlaceholder": "patchmon-alerts",
+				"accessToken": "Token de acesso",
+				"optional": "Opcional",
+				"optionalBasicAuth": "Autenticação básica opcional"
+			},
+			"insecure": {
+				"warning": "Esta conexão não é criptografada, então o usuário e a senha são enviados em texto puro. Qualquer pessoa no caminho de rede entre o PatchMon e este relay pode lê-los. Faça isso apenas em uma rede local confiável.",
+				"checkbox": "Enviar credenciais por uma conexão não criptografada",
+				"blocked": "Até que isto esteja marcado, o PatchMon não autenticará por uma conexão não criptografada e o envio falhará. Alternativamente, limpe as credenciais ou escolha STARTTLS / TLS implícito."
+			},
+			"validation": {
+				"displayNameRequired": "O nome de exibição é obrigatório",
+				"webhookUrlRequired": "A URL do webhook é obrigatória",
+				"smtpRequired": "Host SMTP, remetente e destinatário são obrigatórios",
+				"insecureAuthBlocked": "Marque a opção de credenciais não criptografadas, limpe as credenciais ou escolha STARTTLS / TLS implícito antes de salvar",
+				"topicRequired": "O tópico é obrigatório"
+			},
+			"test": {
+				"saveFirst": "Salve o destino primeiro para enviar um e-mail de teste",
+				"tooltip": "Envia usando a última configuração salva. Salve primeiro para testar alterações não salvas.",
+				"sending": "Enviando...",
+				"send": "Enviar e-mail de teste",
+				"sent": "E-mail de teste enviado com sucesso",
+				"stageFailed": "{{stage}} falhou",
+				"failed": "Teste falhou",
+				"sendFailed": "Falha ao enviar e-mail de teste"
+			}
+		},
+		"route": {
+			"title": {
+				"edit": "Editar rota",
+				"add": "Adicionar rota"
+			},
+			"fields": {
+				"destination": "Destino",
+				"destinationPlaceholder": "Selecionar destino...",
+				"events": "Eventos",
+				"minSeverity": "Severidade mínima",
+				"hostGroups": "Grupos de hosts",
+				"optionalAll": "(opcional, deixe vazio para todos)",
+				"individualHosts": "Hosts individuais"
+			},
+			"validation": {
+				"chooseDestination": "Escolha um destino"
+			}
+		},
+		"report": {
+			"title": {
+				"edit": "Editar relatório",
+				"new": "Novo relatório agendado"
+			},
+			"fields": {
+				"reportName": "Nome do relatório",
+				"reportNamePlaceholder": "Relatório semanal de operações",
+				"schedule": "Agendamento",
+				"at": "às",
+				"serverTimezone": "Fuso horário do servidor",
+				"sections": "Seções",
+				"deliverTo": "Entregar para",
+				"addDestinationFirst": "Adicione um destino primeiro.",
+				"scopeToHostGroups": "Escopo para grupos de hosts",
+				"topRows": "Principais linhas por seção"
+			},
+			"validation": {
+				"nameRequired": "O nome do relatório é obrigatório",
+				"selectDay": "Selecione pelo menos um dia"
+			},
+			"run": {
+				"enableFirst": "Habilite o relatório primeiro",
+				"now": "Executar agora",
+				"scheduled": "Relatório agendado para entrega imediata",
+				"failed": "Falha ao executar"
+			}
+		},
+		"destinations": {
+			"title": "Destinos",
+			"empty": "Nenhum destino ainda. Adicione um para começar a receber notificações.",
+			"table": {
+				"channel": "Canal",
+				"name": "Nome",
+				"enabled": "Habilitado",
+				"actions": "Ações"
+			},
+			"builtIn": "Integrado",
+			"confirm": {
+				"deleteTitle": "Excluir destino",
+				"deleteMessage": "Excluir o destino \"{{name}}\"?",
+				"deleteConfirm": "Excluir destino"
+			},
+			"toasts": {
+				"created": "Destino criado",
+				"updated": "Destino atualizado",
+				"deleted": "Destino excluído"
+			}
+		},
+		"routes": {
+			"title": "Regras de evento",
+			"empty": "Nenhuma regra de evento ainda. Regras de evento mapeiam eventos para destinos.",
+			"table": {
+				"destination": "Destino",
+				"events": "Eventos",
+				"minSeverity": "Severidade mín.",
+				"scope": "Escopo",
+				"status": "Status",
+				"actions": "Ações"
+			},
+			"scopeAll": "Todos",
+			"confirm": {
+				"deleteTitle": "Excluir rota",
+				"deleteMessage": "Excluir esta rota de eventos?",
+				"deleteConfirm": "Excluir rota"
+			},
+			"toasts": {
+				"created": "Rota criada",
+				"updated": "Rota atualizada",
+				"deleted": "Rota excluída"
+			}
+		},
+		"reports": {
+			"title": "Relatórios agendados",
+			"empty": "Nenhum relatório agendado ainda.",
+			"table": {
+				"name": "Nome",
+				"schedule": "Agendamento",
+				"nextRun": "Próxima execução",
+				"status": "Status",
+				"actions": "Ações"
+			},
+			"confirm": {
+				"deleteTitle": "Excluir relatório agendado",
+				"deleteMessage": "Excluir o relatório agendado \"{{name}}\"?",
+				"deleteConfirm": "Excluir relatório"
+			},
+			"toasts": {
+				"created": "Relatório criado",
+				"updated": "Relatório atualizado",
+				"deleted": "Relatório excluído"
+			}
+		},
+		"log": {
+			"title": "Log de entregas",
+			"empty": "Nenhuma entrada de entrega ainda.",
+			"table": {
+				"time": "Hora",
+				"status": "Status",
+				"event": "Evento",
+				"destination": "Destino",
+				"reference": "Referência",
+				"error": "Erro"
+			},
+			"pagination": {
+				"page": "Página {{page}}",
+				"entries_one": "· {{count}} entrada",
+				"entries_other": "· {{count}} entradas"
+			}
+		},
+		"toasts": {
+			"testEnqueued": "Notificação de teste enfileirada",
+			"testFailed": "Teste falhou"
+		},
+		"noPermission": "Você não tem permissão para ver esta página."
+	},
+	"settings": {
+		"severities": {
+			"informational": "Info",
+			"warning": "Aviso",
+			"error": "Erro",
+			"critical": "Crítico"
+		},
+		"units": {
+			"sec": "seg",
+			"min": "min",
+			"days": "dias"
+		},
+		"table": {
+			"alertType": "Tipo de alerta",
+			"active": "Ativo",
+			"severity": "Severidade",
+			"alertDelay": "Atraso do alerta",
+			"frequency": "Frequência",
+			"threshold": "Limite",
+			"autoAssign": "Atribuição automática",
+			"retention": "Retenção",
+			"autoResolve": "Resolução automática"
+		},
+		"assign": {
+			"loading": "Carregando...",
+			"noUsers": "Nenhum usuário encontrado",
+			"selectUser": "Selecionar usuário..."
+		},
+		"toasts": {
+			"settingsSaved": "Configurações salvas",
+			"saveFailed": "Falha ao salvar",
+			"settingsApplied": "Configurações aplicadas",
+			"applyFailed": "Falha ao aplicar",
+			"discarded": "Alterações descartadas"
+		},
+		"error": {
+			"loadFailed": "Falha ao carregar as configurações de alerta",
+			"retry": "Tentar novamente"
+		},
+		"dirty": {
+			"message": "Você tem alterações não salvas",
+			"discard": "Descartar",
+			"apply": "Aplicar"
+		},
+		"tableSection": {
+			"title": "Configurações de tipo de alerta",
+			"refresh": "Atualizar"
+		},
+		"disabledPlaceholder": "Habilite o sistema de alertas usando o interruptor principal abaixo para configurar os tipos de alerta.",
+		"cleanup": {
+			"title": "Limpeza de alertas",
+			"description": "Visualize e exclua alertas com base nas políticas de retenção configuradas acima.",
+			"preview": "Visualizar limpeza",
+			"previewFailed": "Falha ao visualizar limpeza",
+			"deleteButton_one": "Excluir {{count}} alerta",
+			"deleteButton_other": "Excluir {{count}} alertas",
+			"confirmTitle": "Excluir alertas",
+			"confirmDelete_one": "Excluir {{count}} alerta?",
+			"confirmDelete_other": "Excluir {{count}} alertas?",
+			"confirmLabel": "Excluir alertas",
+			"completed_one": "Limpeza concluída: {{count}} alerta excluído",
+			"completed_other": "Limpeza concluída: {{count}} alertas excluídos",
+			"failed": "Falha na limpeza: {{error}}",
+			"none": "Nenhum alerta precisa de limpeza.",
+			"previewHeader_one": "{{count}} alerta seria excluído:",
+			"previewHeader_other": "{{count}} alertas seriam excluídos:",
+			"andMore": "... e mais {{count}}"
+		},
+		"master": {
+			"title": "Sistema de alertas",
+			"description": "Interruptor principal de todo o sistema de alertas",
+			"enabled": "Habilitado",
+			"disabled": "Desabilitado",
+			"disabledWarning": "Todos os serviços de alerta estão desabilitados. Nenhum alerta será criado."
+		}
+	},
+	"webhook_hint": {
+		"discord": {
+			"label": "Discord",
+			"detail": "Embed rico com cor de severidade"
+		},
+		"slack": {
+			"label": "Slack",
+			"detail": "Mensagem de webhook do Slack"
+		},
+		"slack_compatible": {
+			"label": "Mattermost ou Rocket.Chat",
+			"detail": "Mensagem compatível com Slack"
+		},
+		"generic": {
+			"label": "JSON Genérico",
+			"detail": "Campos estruturados do PatchMon, mais um texto no topo"
+		}
+	}
+}

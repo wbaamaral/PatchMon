@@ -111,13 +111,13 @@ var allowedProviders = map[string]bool{
 func (h *AIHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
 	var req UpdateSettingsRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
@@ -139,7 +139,7 @@ func (h *AIHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		} else {
 			encrypted, err := h.enc.Encrypt(*req.AiAPIKey)
 			if err != nil {
-				Error(w, http.StatusInternalServerError, "Failed to encrypt API key")
+				ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_encrypt_api_key")
 				return
 			}
 			s.AiAPIKey = &encrypted
@@ -147,7 +147,7 @@ func (h *AIHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.settings.Update(r.Context(), s); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.update_settings_failed")
 		return
 	}
 
@@ -165,7 +165,7 @@ func (h *AIHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 func (h *AIHandler) GetDebug(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 
@@ -207,17 +207,17 @@ func (h *AIHandler) GetDebug(w http.ResponseWriter, r *http.Request) {
 func (h *AIHandler) TestConnection(w http.ResponseWriter, r *http.Request) {
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	if s.AiAPIKey == nil || *s.AiAPIKey == "" {
-		Error(w, http.StatusBadRequest, "AI API key not configured")
+		ErrorKey(w, r, http.StatusBadRequest, "error.ai_key_not_configured")
 		return
 	}
 
 	response, err := h.aiSvc.GetAssistance(s, "Respond with exactly: 'Connection successful!' - nothing else.", "", nil)
 	if err != nil {
-		Error(w, http.StatusBadRequest, "Connection test failed: "+err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.connection_test_failed", "detail", err.Error())
 		return
 	}
 
@@ -243,32 +243,32 @@ type AssistRequest struct {
 func (h *AIHandler) Assist(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if !h.checkRateLimit(r.Context(), userID) {
-		Error(w, http.StatusTooManyRequests, "Rate limit exceeded. Please wait a moment.")
+		ErrorKey(w, r, http.StatusTooManyRequests, "error.rate_limit_wait")
 		return
 	}
 
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	if !s.AiEnabled {
-		Error(w, http.StatusBadRequest, "AI assistant is not enabled")
+		ErrorKey(w, r, http.StatusBadRequest, "error.ai_not_enabled")
 		return
 	}
 	if s.AiAPIKey == nil || *s.AiAPIKey == "" {
-		Error(w, http.StatusBadRequest, "AI API key not configured")
+		ErrorKey(w, r, http.StatusBadRequest, "error.ai_key_not_configured")
 		return
 	}
 
 	var req AssistRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	req.Question = strings.TrimSpace(req.Question)
 	if len(req.Question) < 1 || len(req.Question) > 2000 {
-		Error(w, http.StatusBadRequest, "question must be 1-2000 characters")
+		ErrorKey(w, r, http.StatusBadRequest, "error.question_length")
 		return
 	}
 	if len(req.Context) > 10000 {
@@ -299,7 +299,7 @@ func (h *AIHandler) Assist(w http.ResponseWriter, r *http.Request) {
 
 	response, err := h.aiSvc.GetAssistance(s, req.Question, req.Context, sanitized)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "AI request failed: "+err.Error())
+		ErrorKey(w, r, http.StatusInternalServerError, "error.ai_request_failed", "detail", err.Error())
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"response": response})
@@ -315,32 +315,32 @@ type CompleteRequest struct {
 func (h *AIHandler) Complete(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if !h.checkRateLimit(r.Context(), userID) {
-		Error(w, http.StatusTooManyRequests, "Rate limit exceeded")
+		ErrorKey(w, r, http.StatusTooManyRequests, "error.rate_limit")
 		return
 	}
 
 	s, err := h.settings.GetFirst(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load settings")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_settings_failed")
 		return
 	}
 	if !s.AiEnabled {
-		Error(w, http.StatusBadRequest, "AI assistant is not enabled")
+		ErrorKey(w, r, http.StatusBadRequest, "error.ai_not_enabled")
 		return
 	}
 	if s.AiAPIKey == nil || *s.AiAPIKey == "" {
-		Error(w, http.StatusBadRequest, "AI API key not configured")
+		ErrorKey(w, r, http.StatusBadRequest, "error.ai_key_not_configured")
 		return
 	}
 
 	var req CompleteRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	req.Input = strings.TrimSpace(req.Input)
 	if len(req.Input) < 2 || len(req.Input) > 500 {
-		Error(w, http.StatusBadRequest, "input must be 2-500 characters")
+		ErrorKey(w, r, http.StatusBadRequest, "error.input_length")
 		return
 	}
 	if len(req.Context) > 5000 {
@@ -349,7 +349,7 @@ func (h *AIHandler) Complete(w http.ResponseWriter, r *http.Request) {
 
 	completion, err := h.aiSvc.GetCompletion(s, req.Input, req.Context)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Completion request failed: "+err.Error())
+		ErrorKey(w, r, http.StatusInternalServerError, "error.completion_request_failed", "detail", err.Error())
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{"completion": completion})

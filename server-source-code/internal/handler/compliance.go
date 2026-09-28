@@ -588,7 +588,7 @@ func (h *ComplianceHandler) ListProfiles(w http.ResponseWriter, r *http.Request)
 	profiles, err := h.complianceStore.ListProfiles(r.Context())
 	if err != nil {
 		slog.Error("compliance list profiles failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch profiles")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_profiles")
 		return
 	}
 	JSON(w, http.StatusOK, profiles)
@@ -599,7 +599,7 @@ func (h *ComplianceHandler) GetDashboard(w http.ResponseWriter, r *http.Request)
 	dash, err := h.complianceStore.GetDashboard(r.Context())
 	if err != nil {
 		slog.Error("compliance dashboard failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch dashboard data")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_dashboard")
 		return
 	}
 	JSON(w, http.StatusOK, dash)
@@ -610,7 +610,7 @@ func (h *ComplianceHandler) GetActiveScans(w http.ResponseWriter, r *http.Reques
 	scans, err := h.complianceStore.ListActiveScans(r.Context())
 	if err != nil {
 		slog.Error("compliance active scans failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch active scans")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_active_scans")
 		return
 	}
 	// Add connection status
@@ -698,7 +698,7 @@ func (h *ComplianceHandler) GetScanHistory(w http.ResponseWriter, r *http.Reques
 	scans, total, err := h.complianceStore.ListScansHistory(r.Context(), int32(limit), int32(offset), status, hostID, profileType, search)
 	if err != nil {
 		slog.Error("compliance scan history failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch scan history")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_scan_history")
 		return
 	}
 	rows := make([]map[string]interface{}, 0, len(scans))
@@ -736,7 +736,7 @@ func (h *ComplianceHandler) GetStalledScans(w http.ResponseWriter, r *http.Reque
 	scans, err := h.complianceStore.ListStalledScans(r.Context(), threshold)
 	if err != nil {
 		slog.Error("compliance stalled scans failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch stalled scans")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_stalled_scans")
 		return
 	}
 	out := make([]map[string]interface{}, 0, len(scans))
@@ -760,7 +760,7 @@ func (h *ComplianceHandler) GetStalledScans(w http.ResponseWriter, r *http.Reque
 func (h *ComplianceHandler) GetHostScans(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID format")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id_format")
 		return
 	}
 	limit := parseIntParam(r, "limit", 20, 1, 100)
@@ -769,7 +769,7 @@ func (h *ComplianceHandler) GetHostScans(w http.ResponseWriter, r *http.Request)
 	scans, total, err := h.complianceStore.ListScansByHost(r.Context(), hostID, int32(limit), int32(offset))
 	if err != nil {
 		slog.Error("compliance host scans failed", "error", err, "host_id", hostID)
-		Error(w, http.StatusInternalServerError, "Failed to fetch scans")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_scans")
 		return
 	}
 	rows := make([]interface{}, 0, len(scans))
@@ -793,7 +793,7 @@ func (h *ComplianceHandler) GetHostScans(w http.ResponseWriter, r *http.Request)
 func (h *ComplianceHandler) GetLatestScan(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID format")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id_format")
 		return
 	}
 	profileType := strParam(r, "profile_type")
@@ -801,11 +801,11 @@ func (h *ComplianceHandler) GetLatestScan(w http.ResponseWriter, r *http.Request
 	scan, err := h.complianceStore.GetLatestScan(r.Context(), hostID, profileType)
 	if err != nil {
 		slog.Error("compliance latest scan failed", "error", err, "host_id", hostID)
-		Error(w, http.StatusInternalServerError, "Failed to fetch latest scan")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_latest_scan")
 		return
 	}
 	if scan == nil {
-		Error(w, http.StatusNotFound, "No scans found for this host")
+		ErrorKey(w, r, http.StatusNotFound, "error.no_scans_found")
 		return
 	}
 	// Return full scan with results
@@ -841,13 +841,13 @@ func (h *ComplianceHandler) GetLatestScan(w http.ResponseWriter, r *http.Request
 func (h *ComplianceHandler) GetLatestScansByType(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID format")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id_format")
 		return
 	}
 	result, err := h.complianceStore.GetLatestScansByType(r.Context(), hostID)
 	if err != nil {
 		slog.Error("compliance latest by type failed", "error", err, "host_id", hostID)
-		Error(w, http.StatusInternalServerError, "Failed to fetch latest scans by type")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_latest_scans_by_type")
 		return
 	}
 	// Convert to JSON-friendly format
@@ -869,7 +869,7 @@ func (h *ComplianceHandler) GetLatestScansByType(w http.ResponseWriter, r *http.
 func (h *ComplianceHandler) GetScanResults(w http.ResponseWriter, r *http.Request) {
 	scanID := chi.URLParam(r, "scanId")
 	if scanID == "" || !isValidUUID(scanID) {
-		Error(w, http.StatusBadRequest, "Invalid scan ID format")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_scan_id_format")
 		return
 	}
 	status := strParam(r, "status")
@@ -880,7 +880,7 @@ func (h *ComplianceHandler) GetScanResults(w http.ResponseWriter, r *http.Reques
 	results, total, severityBreakdown, err := h.complianceStore.ListResultsByScan(r.Context(), scanID, status, severity, int32(limit), int32(offset))
 	if err != nil {
 		slog.Error("compliance scan results failed", "error", err, "scan_id", scanID)
-		Error(w, http.StatusInternalServerError, "Failed to fetch results")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_results")
 		return
 	}
 	rows := make([]map[string]interface{}, 0, len(results))
@@ -921,7 +921,7 @@ func (h *ComplianceHandler) GetRules(w http.ResponseWriter, r *http.Request) {
 	rules, total, err := h.complianceStore.ListRules(r.Context(), severity, status, search, profileType, hostID, int32(limit), int32(offset), sortBy, sortDir)
 	if err != nil {
 		slog.Error("compliance rules failed", "error", err)
-		Error(w, http.StatusInternalServerError, "Failed to fetch rules")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_rules")
 		return
 	}
 	rows := make([]map[string]interface{}, 0, len(rules))
@@ -944,13 +944,13 @@ func (h *ComplianceHandler) GetRules(w http.ResponseWriter, r *http.Request) {
 func (h *ComplianceHandler) GetRuleDetail(w http.ResponseWriter, r *http.Request) {
 	ruleID := chi.URLParam(r, "ruleId")
 	if ruleID == "" || !isValidUUID(ruleID) {
-		Error(w, http.StatusBadRequest, "Invalid rule ID format")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_rule_id_format")
 		return
 	}
 	detail, err := h.complianceStore.GetRuleDetail(r.Context(), ruleID)
 	if err != nil {
 		slog.Error("compliance rule detail failed", "error", err, "rule_id", ruleID)
-		Error(w, http.StatusInternalServerError, "Failed to fetch rule detail")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_rule_detail")
 		return
 	}
 	affected := make([]map[string]interface{}, 0, len(detail.AffectedHosts))
@@ -976,23 +976,23 @@ func (h *ComplianceHandler) GetRuleDetail(w http.ResponseWriter, r *http.Request
 // TriggerScan handles POST /compliance/trigger/:hostId.
 func (h *ComplianceHandler) TriggerScan(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	host, err := h.hostsStore.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	// Run scan now works for both on-demand and scheduled compliance modes.
 	// Only reject if compliance is disabled for this host.
 	if !host.ComplianceEnabled {
-		Error(w, http.StatusBadRequest, "Compliance scanning is disabled for this host")
+		ErrorKey(w, r, http.StatusBadRequest, "error.compliance_disabled_host")
 		return
 	}
 	var req struct {
@@ -1007,7 +1007,7 @@ func (h *ComplianceHandler) TriggerScan(w http.ResponseWriter, r *http.Request) 
 		profileType = req.ProfileType
 	}
 	if err := queue.ValidateComplianceScanReadiness([]byte(host.ComplianceScannerStatus), profileType, req.ProfileID, host.ComplianceOpenscapEnabled, host.ComplianceDockerBenchEnabled); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 	if h.integrationStatus != nil {
@@ -1023,12 +1023,12 @@ func (h *ComplianceHandler) TriggerScan(w http.ResponseWriter, r *http.Request) 
 		FetchRemoteResources: req.FetchRemoteResources,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create scan task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_scan_task")
 		return
 	}
 	info, err := h.queueClient.Enqueue(task)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to enqueue scan")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enqueue_scan")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -1045,12 +1045,12 @@ func (h *ComplianceHandler) TriggerBulkScan(w http.ResponseWriter, r *http.Reque
 		HostIDs []string `json:"hostIds"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || len(req.HostIDs) == 0 {
-		Error(w, http.StatusBadRequest, "hostIds required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_ids_array_required")
 		return
 	}
 	hosts, err := h.hostsStore.GetByIDs(r.Context(), req.HostIDs)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to load hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.load_hosts_failed")
 		return
 	}
 	hostByID := make(map[string]*models.Host)
@@ -1119,12 +1119,12 @@ func (h *ComplianceHandler) TriggerBulkScan(w http.ResponseWriter, r *http.Reque
 func (h *ComplianceHandler) CancelScan(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	host, err := h.hostsStore.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	// Remove queued run_scan job so it won't run when agent connects
@@ -1138,7 +1138,7 @@ func (h *ComplianceHandler) CancelScan(w http.ResponseWriter, r *http.Request) {
 	}
 	if h.registry.IsConnected(host.ApiID) {
 		if err := h.registry.SendJSON(host.ApiID, map[string]interface{}{"type": "compliance_scan_cancel"}); err != nil {
-			Error(w, http.StatusServiceUnavailable, "Failed to send cancel to agent")
+			ErrorKey(w, r, http.StatusServiceUnavailable, "error.failed_to_send_cancel_agent")
 			return
 		}
 	}
@@ -1151,22 +1151,22 @@ func (h *ComplianceHandler) CancelScan(w http.ResponseWriter, r *http.Request) {
 // InstallScanner handles POST /compliance/install-scanner/:hostId.
 func (h *ComplianceHandler) InstallScanner(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	host, err := h.hostsStore.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	task, err := queue.NewInstallComplianceToolsTask(hostID, host.ApiID, hostFromRequest(r))
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create install task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_install_task")
 		return
 	}
 	// Drop the previous install's events before the new job exists, so the
@@ -1176,7 +1176,7 @@ func (h *ComplianceHandler) InstallScanner(w http.ResponseWriter, r *http.Reques
 	}
 	info, err := h.queueClient.Enqueue(task)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to enqueue install")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enqueue_install")
 		return
 	}
 	if h.integrationStatus != nil {
@@ -1194,12 +1194,12 @@ func (h *ComplianceHandler) InstallScanner(w http.ResponseWriter, r *http.Reques
 func (h *ComplianceHandler) CancelInstall(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	host, err := h.hostsStore.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	jobID := ""
@@ -1287,7 +1287,7 @@ func installJobStatusFromEvents(events []interface{}) (status, message string, o
 func (h *ComplianceHandler) GetInstallJobStatus(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	jobID := ""
@@ -1366,22 +1366,22 @@ func (h *ComplianceHandler) GetInstallJobStatus(w http.ResponseWriter, r *http.R
 // Enqueues a per-host ssg_upgrade job so progress is tracked in job_history.
 func (h *ComplianceHandler) UpgradeSSG(w http.ResponseWriter, r *http.Request) {
 	if h.queueClient == nil {
-		Error(w, http.StatusServiceUnavailable, "Queue service unavailable")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.queue_unavailable")
 		return
 	}
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	host, err := h.hostsStore.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	ssgVersion := h.readSSGVersion()
 	if ssgVersion == "" {
-		Error(w, http.StatusServiceUnavailable, "No SSG content available on server")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.no_ssg_content")
 		return
 	}
 	task, err := queue.NewSSGUpgradeTask(queue.SSGUpgradePayload{
@@ -1391,12 +1391,12 @@ func (h *ComplianceHandler) UpgradeSSG(w http.ResponseWriter, r *http.Request) {
 		SSGVersion: ssgVersion,
 	})
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create upgrade task")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_upgrade_task")
 		return
 	}
 	info, err := h.queueClient.Enqueue(task)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to enqueue SSG upgrade")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enqueue_ssg_upgrade")
 		return
 	}
 	if h.integrationStatus != nil {
@@ -1415,7 +1415,7 @@ func (h *ComplianceHandler) UpgradeSSG(w http.ResponseWriter, r *http.Request) {
 func (h *ComplianceHandler) GetSSGUpgradeJobStatus(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	jobID := ""
@@ -1493,7 +1493,7 @@ func (h *ComplianceHandler) AgentSSGVersion(w http.ResponseWriter, r *http.Reque
 	}
 	payload, ok := h.agentSSGVersionPayload()
 	if !ok {
-		Error(w, http.StatusServiceUnavailable, "No SSG content available on server")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.no_ssg_content")
 		return
 	}
 	JSON(w, http.StatusOK, payload)
@@ -1520,12 +1520,12 @@ func (h *ComplianceHandler) SSGContent(w http.ResponseWriter, r *http.Request) {
 	}
 	filename := chi.URLParam(r, "filename")
 	if !ssgcontent.FilenameRe.MatchString(filename) {
-		Error(w, http.StatusBadRequest, "Invalid filename")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_filename")
 		return
 	}
 	filePath := filepath.Join(h.ssgContentDir, filename)
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		Error(w, http.StatusNotFound, "Content file not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.content_file_not_found")
 		return
 	}
 	w.Header().Set("Content-Type", "application/xml")
@@ -1561,27 +1561,27 @@ func (h *ComplianceHandler) authenticateAgent(w http.ResponseWriter, r *http.Req
 func (h *ComplianceHandler) RemediateRule(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id")
 		return
 	}
 	var req struct {
 		RuleID string `json:"rule_id"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.RuleID == "" {
-		Error(w, http.StatusBadRequest, "rule_id required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.rule_id_required")
 		return
 	}
 	host, err := h.hostsStore.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 	if !h.registry.IsConnected(host.ApiID) {
-		Error(w, http.StatusServiceUnavailable, "Agent is not connected")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.agent_not_connected")
 		return
 	}
 	if err := h.registry.SendJSON(host.ApiID, map[string]interface{}{"type": "remediate_rule", "rule_id": req.RuleID}); err != nil {
-		Error(w, http.StatusServiceUnavailable, "Failed to send remediate command")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.failed_to_send_remediate")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -1594,7 +1594,7 @@ func (h *ComplianceHandler) RemediateRule(w http.ResponseWriter, r *http.Request
 func (h *ComplianceHandler) GetTrends(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" || !isValidUUID(hostID) {
-		Error(w, http.StatusBadRequest, "Invalid host ID format")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_host_id_format")
 		return
 	}
 	days := parseIntParam(r, "days", 30, 1, 365)
@@ -1602,7 +1602,7 @@ func (h *ComplianceHandler) GetTrends(w http.ResponseWriter, r *http.Request) {
 	rows, err := h.complianceStore.GetTrends(r.Context(), hostID, days)
 	if err != nil {
 		slog.Error("compliance trends failed", "error", err, "host_id", hostID)
-		Error(w, http.StatusInternalServerError, "Failed to fetch trends")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_trends")
 		return
 	}
 	out := make([]map[string]interface{}, 0, len(rows))

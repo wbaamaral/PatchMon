@@ -11,6 +11,7 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useConfirm } from "../../contexts/ConfirmContext";
 import { useToast } from "../../contexts/ToastContext";
 import { formatAlertType } from "../../utils/alertLabels";
@@ -29,24 +30,24 @@ const TD =
 const SEVERITIES = [
 	{
 		value: "informational",
-		label: "Info",
+		labelKey: "settings.severities.informational",
 		color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
 	},
 	{
 		value: "warning",
-		label: "Warning",
+		labelKey: "settings.severities.warning",
 		color:
 			"bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
 	},
 	{
 		value: "error",
-		label: "Error",
+		labelKey: "settings.severities.error",
 		color:
 			"bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
 	},
 	{
 		value: "critical",
-		label: "Critical",
+		labelKey: "settings.severities.critical",
 		color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
 	},
 ];
@@ -171,6 +172,7 @@ const Toggle = ({ checked, onChange, disabled }) => (
 const AlertSettings = () => {
 	const queryClient = useQueryClient();
 	const toast = useToast();
+	const { t } = useTranslation("alerts");
 	const [localConfigs, setLocalConfigs] = useState(null);
 	const [collapsedCategories, setCollapsedCategories] = useState({});
 
@@ -221,10 +223,10 @@ const AlertSettings = () => {
 		mutationFn: (data) => settingsAPI.update(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["settings"] });
-			toast.success("Settings saved");
+			toast.success(t("settings.toasts.settingsSaved"));
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || "Failed to save"),
+			toast.error(err.response?.data?.error || t("settings.toasts.saveFailed")),
 	});
 
 	const bulkUpdateMutation = useMutation({
@@ -239,10 +241,12 @@ const AlertSettings = () => {
 			// re-hydrate unconditionally, including any value the server
 			// normalised on the way in.
 			setLocalConfigs(null);
-			toast.success("Settings applied");
+			toast.success(t("settings.toasts.settingsApplied"));
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || "Failed to apply"),
+			toast.error(
+				err.response?.data?.error || t("settings.toasts.applyFailed"),
+			),
 	});
 
 	const isDirty =
@@ -315,7 +319,7 @@ const AlertSettings = () => {
 		if (alertConfigs && Array.isArray(alertConfigs)) {
 			setLocalConfigs(alertConfigs.map((c) => ({ ...c })));
 		}
-		toast.info("Changes discarded");
+		toast.info(t("settings.toasts.discarded"));
 	};
 
 	const alertsEnabled = settings?.alerts_enabled !== false;
@@ -344,14 +348,14 @@ const AlertSettings = () => {
 					<AlertTriangle className="h-5 w-5 text-danger-500 mt-0.5" />
 					<div>
 						<p className="text-sm font-medium text-danger-800 dark:text-danger-200">
-							Failed to load alert settings
+							{t("settings.error.loadFailed")}
 						</p>
 						<button
 							type="button"
 							onClick={() => refetch()}
 							className="mt-2 btn-outline text-xs"
 						>
-							Try again
+							{t("settings.error.retry")}
 						</button>
 					</div>
 				</div>
@@ -365,7 +369,7 @@ const AlertSettings = () => {
 			{isDirty && alertsEnabled && (
 				<div className="card p-3 flex items-center justify-between bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800">
 					<p className="text-sm text-amber-800 dark:text-amber-200">
-						You have unsaved changes
+						{t("settings.dirty.message")}
 					</p>
 					<div className="flex items-center gap-2">
 						<button
@@ -374,7 +378,7 @@ const AlertSettings = () => {
 							disabled={bulkUpdateMutation.isPending}
 							className="btn-outline flex items-center gap-1 text-sm"
 						>
-							<X className="h-3.5 w-3.5" /> Discard
+							<X className="h-3.5 w-3.5" /> {t("settings.dirty.discard")}
 						</button>
 						<button
 							type="button"
@@ -387,7 +391,7 @@ const AlertSettings = () => {
 							) : (
 								<Save className="h-3.5 w-3.5" />
 							)}
-							Apply
+							{t("settings.dirty.apply")}
 						</button>
 					</div>
 				</div>
@@ -398,14 +402,15 @@ const AlertSettings = () => {
 				<div className="card p-4 md:p-6 space-y-4">
 					<div className="flex items-center justify-between">
 						<h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
-							Alert type configurations
+							{t("settings.tableSection.title")}
 						</h2>
 						<button
 							type="button"
 							onClick={() => refetch()}
 							className="btn-outline flex items-center gap-1 text-sm"
 						>
-							<RefreshCw className="h-3.5 w-3.5" /> Refresh
+							<RefreshCw className="h-3.5 w-3.5" />{" "}
+							{t("settings.tableSection.refresh")}
 						</button>
 					</div>
 
@@ -413,15 +418,31 @@ const AlertSettings = () => {
 						<table className="min-w-full divide-y divide-secondary-200 dark:divide-secondary-600">
 							<thead className="bg-secondary-50 dark:bg-secondary-700">
 								<tr>
-									<th className={`${TH} min-w-[160px]`}>Alert type</th>
-									<th className={`${TH} w-16`}>Active</th>
-									<th className={`${TH} w-28`}>Severity</th>
-									<th className={`${TH} w-28`}>Alert delay</th>
-									<th className={`${TH} w-28`}>Frequency</th>
-									<th className={`${TH} w-24`}>Threshold</th>
-									<th className={`${TH} min-w-[180px]`}>Auto-assign</th>
-									<th className={`${TH} w-28`}>Retention</th>
-									<th className={`${TH} w-28`}>Auto-resolve</th>
+									<th className={`${TH} min-w-[160px]`}>
+										{t("settings.table.alertType")}
+									</th>
+									<th className={`${TH} w-16`}>{t("settings.table.active")}</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.severity")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.alertDelay")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.frequency")}
+									</th>
+									<th className={`${TH} w-24`}>
+										{t("settings.table.threshold")}
+									</th>
+									<th className={`${TH} min-w-[180px]`}>
+										{t("settings.table.autoAssign")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.retention")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.autoResolve")}
+									</th>
 								</tr>
 							</thead>
 							<tbody className="bg-white dark:bg-secondary-800 divide-y divide-secondary-200 dark:divide-secondary-600">
@@ -494,7 +515,7 @@ const AlertSettings = () => {
 																	>
 																		{SEVERITIES.map((s) => (
 																			<option key={s.value} value={s.value}>
-																				{s.label}
+																				{t(s.labelKey)}
 																			</option>
 																		))}
 																	</select>
@@ -526,7 +547,7 @@ const AlertSettings = () => {
 																			disabled={dis}
 																		/>
 																		<span className="text-xs text-secondary-400">
-																			sec
+																			{t("settings.units.sec")}
 																		</span>
 																	</div>
 																)}
@@ -558,7 +579,7 @@ const AlertSettings = () => {
 																			disabled={dis}
 																		/>
 																		<span className="text-xs text-secondary-400">
-																			min
+																			{t("settings.units.min")}
 																		</span>
 																	</div>
 																)}
@@ -610,7 +631,7 @@ const AlertSettings = () => {
 																			c.alert_type,
 																		) && (
 																			<span className="text-xs text-secondary-400">
-																				sec
+																				{t("settings.units.sec")}
 																			</span>
 																		)}
 																	</div>
@@ -651,10 +672,10 @@ const AlertSettings = () => {
 																			>
 																				<option value="">
 																					{usersLoading
-																						? "Loading..."
+																						? t("settings.assign.loading")
 																						: !usersData?.length
-																							? "No users found"
-																							: "Select user..."}
+																							? t("settings.assign.noUsers")
+																							: t("settings.assign.selectUser")}
 																				</option>
 																				{usersData?.map((u) => (
 																					<option key={u.id} value={u.id}>
@@ -692,7 +713,7 @@ const AlertSettings = () => {
 																			disabled={dis}
 																		/>
 																		<span className="text-xs text-secondary-400">
-																			days
+																			{t("settings.units.days")}
 																		</span>
 																	</div>
 																)}
@@ -723,7 +744,7 @@ const AlertSettings = () => {
 																			disabled={dis}
 																		/>
 																		<span className="text-xs text-secondary-400">
-																			days
+																			{t("settings.units.days")}
 																		</span>
 																	</div>
 																)}
@@ -745,8 +766,7 @@ const AlertSettings = () => {
 				<div className="card p-8 text-center">
 					<AlertTriangle className="h-12 w-12 mx-auto text-secondary-300 dark:text-secondary-600 mb-3" />
 					<p className="text-sm text-secondary-500">
-						Enable the alerts system using the master switch below to configure
-						alert types.
+						{t("settings.disabledPlaceholder")}
 					</p>
 				</div>
 			)}
@@ -757,11 +777,10 @@ const AlertSettings = () => {
 				{alertsEnabled && (
 					<div className="card p-4 md:p-6 space-y-4">
 						<h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
-							Alert cleanup
+							{t("settings.cleanup.title")}
 						</h2>
 						<p className="text-sm text-secondary-600 dark:text-white">
-							Preview and delete alerts based on retention policies configured
-							above.
+							{t("settings.cleanup.description")}
 						</p>
 						<CleanupSection />
 					</div>
@@ -774,10 +793,10 @@ const AlertSettings = () => {
 					<div className="flex items-center justify-between">
 						<div>
 							<h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
-								Alerts system
+								{t("settings.master.title")}
 							</h2>
 							<p className="text-sm text-secondary-600 dark:text-white mt-1">
-								Master switch for the entire alerts system
+								{t("settings.master.description")}
 							</p>
 						</div>
 						<div className="flex items-center gap-3">
@@ -791,7 +810,9 @@ const AlertSettings = () => {
 								disabled={updateSettingsMutation.isPending}
 							/>
 							<span className="text-sm font-medium text-secondary-700 dark:text-white">
-								{alertsEnabled ? "Enabled" : "Disabled"}
+								{alertsEnabled
+									? t("settings.master.enabled")
+									: t("settings.master.disabled")}
 							</span>
 						</div>
 					</div>
@@ -799,7 +820,7 @@ const AlertSettings = () => {
 						<div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md flex items-start gap-2">
 							<AlertTriangle className="h-4 w-4 text-yellow-600 dark:text-yellow-400 mt-0.5 shrink-0" />
 							<p className="text-sm text-yellow-700 dark:text-yellow-300">
-								All alert services are disabled. No alerts will be created.
+								{t("settings.master.disabledWarning")}
 							</p>
 						</div>
 					)}
@@ -812,6 +833,7 @@ const AlertSettings = () => {
 const CleanupSection = () => {
 	const toast = useToast();
 	const confirm = useConfirm();
+	const { t } = useTranslation("alerts");
 	const [previewLoading, setPreviewLoading] = useState(false);
 	const [previewData, setPreviewData] = useState(null);
 
@@ -822,7 +844,7 @@ const CleanupSection = () => {
 			const data = response.data.data;
 			setPreviewData(Array.isArray(data) ? data : (data?.alerts ?? []));
 		} catch {
-			toast.error("Failed to preview cleanup");
+			toast.error(t("settings.cleanup.previewFailed"));
 		} finally {
 			setPreviewLoading(false);
 		}
@@ -830,9 +852,11 @@ const CleanupSection = () => {
 
 	const handleCleanup = async () => {
 		const confirmed = await confirm({
-			title: "Delete alerts",
-			message: `Delete ${previewData.length} alert(s)?`,
-			confirmLabel: "Delete alerts",
+			title: t("settings.cleanup.confirmTitle"),
+			message: t("settings.cleanup.confirmDelete", {
+				count: previewData.length,
+			}),
+			confirmLabel: t("settings.cleanup.confirmLabel"),
 		});
 		if (!confirmed) return;
 
@@ -840,11 +864,13 @@ const CleanupSection = () => {
 			const response = await alertsAPI.triggerCleanup();
 			const count =
 				response.data.data.deleted ?? response.data.data.deleted_count ?? 0;
-			toast.success(`Cleanup completed: ${count} alert(s) deleted`);
+			toast.success(t("settings.cleanup.completed", { count }));
 			setPreviewData(null);
 		} catch (err) {
 			toast.error(
-				`Cleanup failed: ${err.response?.data?.error || err.message}`,
+				t("settings.cleanup.failed", {
+					error: err.response?.data?.error || err.message,
+				}),
 			);
 		}
 	};
@@ -863,7 +889,7 @@ const CleanupSection = () => {
 					) : (
 						<RefreshCw className="h-3.5 w-3.5" />
 					)}
-					Preview cleanup
+					{t("settings.cleanup.preview")}
 				</button>
 				{previewData && previewData.length > 0 && (
 					<button
@@ -871,20 +897,25 @@ const CleanupSection = () => {
 						onClick={handleCleanup}
 						className="btn-danger flex items-center gap-2 text-sm"
 					>
-						<Trash2 className="h-3.5 w-3.5" /> Delete {previewData.length}{" "}
-						alerts
+						<Trash2 className="h-3.5 w-3.5" />{" "}
+						{t("settings.cleanup.deleteButton", {
+							count: previewData.length,
+						})}
 					</button>
 				)}
 			</div>
 			{previewData && previewData.length === 0 && (
 				<p className="text-sm text-secondary-500 flex items-center gap-1">
-					<Check className="h-4 w-4 text-green-500" /> No alerts need cleanup.
+					<Check className="h-4 w-4 text-green-500" />{" "}
+					{t("settings.cleanup.none")}
 				</p>
 			)}
 			{previewData && previewData.length > 0 && (
 				<div className="rounded-md p-3 bg-secondary-50 dark:bg-secondary-700/50">
 					<p className="text-sm font-medium text-secondary-900 dark:text-white mb-2">
-						{previewData.length} alert(s) would be deleted:
+						{t("settings.cleanup.previewHeader", {
+							count: previewData.length,
+						})}
 					</p>
 					<ul className="list-disc list-inside text-sm text-secondary-600 dark:text-white space-y-0.5">
 						{previewData.slice(0, 10).map((a) => (
@@ -894,7 +925,11 @@ const CleanupSection = () => {
 							</li>
 						))}
 						{previewData.length > 10 && (
-							<li>... and {previewData.length - 10} more</li>
+							<li>
+								{t("settings.cleanup.andMore", {
+									count: previewData.length - 10,
+								})}
+							</li>
 						)}
 					</ul>
 				</div>

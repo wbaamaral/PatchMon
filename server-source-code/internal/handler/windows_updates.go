@@ -201,20 +201,20 @@ func (h *WindowsUpdatesHandler) GetApprovedGUIDs(w http.ResponseWriter, r *http.
 func (h *WindowsUpdatesHandler) ListForHost(w http.ResponseWriter, r *http.Request) {
 	hostID := chi.URLParam(r, "hostId")
 	if hostID == "" {
-		Error(w, http.StatusBadRequest, "hostId is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_ids_required")
 		return
 	}
 
 	host, err := h.hosts.GetByID(r.Context(), hostID)
 	if err != nil || host == nil {
-		Error(w, http.StatusNotFound, "Host not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 		return
 	}
 
 	d := h.db.DB(r.Context())
 	rows, err := d.Queries.GetHostWindowsUpdates(r.Context(), hostID)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch Windows updates")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_windows_updates")
 		return
 	}
 

@@ -5,13 +5,15 @@
 // the module catalog in `multi-tenancy/go-manager/internal/modules/catalog.go`.
 // If the marketing tier table changes, update this file too.
 
+import i18n from "../i18n";
+
 export const TIER_ORDER = ["starter", "plus", "max"];
 
 export const TIERS = {
 	starter: {
 		id: "starter",
-		name: "Starter",
-		tagline: "Monitor your patches. Patch elsewhere.",
+		nameKey: "billing:tiers.starter.name",
+		taglineKey: "billing:tiers.starter.tagline",
 		userLimit: 3,
 		unitAmountCents: 100, // per host / month (psychological parity across USD/GBP/EUR)
 		// Tailwind badge classes — match Packages list in the manager
@@ -20,8 +22,8 @@ export const TIERS = {
 	},
 	plus: {
 		id: "plus",
-		name: "Plus",
-		tagline: "Patch, monitor, report. The everyday workhorse.",
+		nameKey: "billing:tiers.plus.name",
+		taglineKey: "billing:tiers.plus.tagline",
 		userLimit: null, // unlimited
 		unitAmountCents: 200,
 		badgeClass:
@@ -30,8 +32,8 @@ export const TIERS = {
 	},
 	max: {
 		id: "max",
-		name: "Max",
-		tagline: "Everything. SSH, RDP, AI, compliance.",
+		nameKey: "billing:tiers.max.name",
+		taglineKey: "billing:tiers.max.tagline",
 		userLimit: null,
 		unitAmountCents: 300,
 		badgeClass:
@@ -40,129 +42,170 @@ export const TIERS = {
 	},
 };
 
-// Feature matrix rows. `value` entries are either boolean or a display string.
+// Feature matrix rows. `value` entries are boolean or an i18n key string
+// (resolved at render time with `i18n.t(v)`).
 export const TIER_FEATURES = [
 	{
-		label: "Core monitoring (inventory, detection, repos)",
+		labelKey: "billing:tiers.features.core_monitoring",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Linux + FreeBSD + Windows agents",
+		labelKey: "billing:tiers.features.agents",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Host groups, dashboards, search, Gethomepage",
+		labelKey: "billing:tiers.features.host_groups_dashboards",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Basic alerts (host-down, threshold)",
+		labelKey: "billing:tiers.features.basic_alerts",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Scheduled reports (email/PDF)",
+		labelKey: "billing:tiers.features.scheduled_reports",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Notification destinations + routes",
-		starter: true,
-		plus: true,
-		max: true,
-	},
-	{ label: "2FA / TOTP", starter: true, plus: true, max: true },
-	{ label: "Trusted devices", starter: true, plus: true, max: true },
-	{ label: "OIDC / SSO", starter: true, plus: true, max: true },
-	{ label: "Discord OAuth login", starter: true, plus: true, max: true },
-	{
-		label: "Built-in roles (admin/viewer)",
+		labelKey: "billing:tiers.features.notification_destinations",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Scoped REST API + auto-enrollment tokens",
+		labelKey: "billing:tiers.features.tfa_totp",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Automation / job management",
+		labelKey: "billing:tiers.features.trusted_devices",
 		starter: true,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "User limit",
-		starter: "3",
-		plus: "Unlimited",
-		max: "Unlimited",
+		labelKey: "billing:tiers.features.oidc_sso",
+		starter: true,
+		plus: true,
+		max: true,
 	},
-	{ label: "Manual patch runs", starter: false, plus: true, max: true },
 	{
-		label: "Patch scheduling policies + approval workflow",
+		labelKey: "billing:tiers.features.discord_oauth",
+		starter: true,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.builtin_roles",
+		starter: true,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.rest_api_tokens",
+		starter: true,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.automation",
+		starter: true,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.user_limit",
+		starter: "billing:tiers.values.three",
+		plus: "billing:tiers.values.unlimited",
+		max: "billing:tiers.values.unlimited",
+	},
+	{
+		labelKey: "billing:tiers.features.manual_patch_runs",
 		starter: false,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Docker container monitoring",
+		labelKey: "billing:tiers.features.patch_policies",
 		starter: false,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Advanced alert config + custom rules",
-		starter: false,
-		plus: true,
-		max: true,
-	},
-	{ label: "Custom RBAC roles", starter: false, plus: true, max: true },
-	{ label: "Audit log export", starter: false, plus: true, max: true },
-	{
-		label: "Custom domain (email to request)",
+		labelKey: "billing:tiers.features.docker_monitoring",
 		starter: false,
 		plus: true,
 		max: true,
 	},
 	{
-		label: "Custom branding (logo/favicon)",
+		labelKey: "billing:tiers.features.advanced_alerts",
 		starter: false,
 		plus: true,
 		max: true,
 	},
-	{ label: "Browser SSH terminal", starter: false, plus: false, max: true },
 	{
-		label: "Browser RDP (Guacamole)",
+		labelKey: "billing:tiers.features.custom_rbac",
+		starter: false,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.audit_log_export",
+		starter: false,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.custom_domain",
+		starter: false,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.custom_branding",
+		starter: false,
+		plus: true,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.ssh_terminal",
 		starter: false,
 		plus: false,
 		max: true,
 	},
 	{
-		label: "BYO-AI terminal assistant",
+		labelKey: "billing:tiers.features.rdp",
 		starter: false,
 		plus: false,
 		max: true,
 	},
 	{
-		label: "Compliance (OpenSCAP + CIS + Docker Bench)",
+		labelKey: "billing:tiers.features.byoi_ai",
 		starter: false,
 		plus: false,
 		max: true,
 	},
 	{
-		label: "Direct support channels",
-		starter: "Email, Discord",
-		plus: "Email, Slack, Discord",
-		max: "Email, Slack, Discord, Phone",
+		labelKey: "billing:tiers.features.compliance",
+		starter: false,
+		plus: false,
+		max: true,
+	},
+	{
+		labelKey: "billing:tiers.features.support_channels",
+		starter: "billing:tiers.values.support_email_discord",
+		plus: "billing:tiers.values.support_email_slack_discord",
+		max: "billing:tiers.values.support_email_slack_discord_phone",
 	},
 ];
 
@@ -177,7 +220,7 @@ export const getNextTier = (tierId) => {
 // Module → required tier mapping for feature-gating UI.
 // MUST stay in sync with RequireModule(...) calls in
 // server-source-code/internal/server/router.go. When a new gated module is
-// added server-side, add it here and to MODULE_LABELS below.
+// added server-side, add it here and to MODULE_LABEL_KEYS below.
 export const MODULE_TIER_MAP = {
 	patching: "plus",
 	patching_policies: "plus",
@@ -191,45 +234,49 @@ export const MODULE_TIER_MAP = {
 	ai: "max",
 };
 
-// Human-readable feature names for upgrade screens.
-export const MODULE_LABELS = {
-	patching: "Patching",
-	patching_policies: "Patching Policies",
-	docker: "Docker Monitoring",
-	alerts_advanced: "Advanced Alerts",
-	rbac_custom: "Custom RBAC Roles",
-	custom_branding: "Custom Branding",
-	compliance: "Compliance Scanning",
-	ssh_terminal: "Browser SSH Terminal",
-	rdp: "Browser RDP",
-	ai: "AI Terminal Assistant",
+// Human-readable feature names for upgrade screens (i18n keys).
+export const MODULE_LABEL_KEYS = {
+	patching: "billing:module_labels.patching",
+	patching_policies: "billing:module_labels.patching_policies",
+	docker: "billing:module_labels.docker",
+	alerts_advanced: "billing:module_labels.alerts_advanced",
+	rbac_custom: "billing:module_labels.rbac_custom",
+	custom_branding: "billing:module_labels.custom_branding",
+	compliance: "billing:module_labels.compliance",
+	ssh_terminal: "billing:module_labels.ssh_terminal",
+	rdp: "billing:module_labels.rdp",
+	ai: "billing:module_labels.ai",
 };
 
 // Rows from TIER_FEATURES that a given tier unlocks compared to the previous
 // tier. Used by the upgrade screen to show "what you get" when upgrading to
 // Plus or Max. Starter-exclusive rows are never shown as an upgrade benefit.
-const TIER_UNLOCK_LABELS = {
+// Values are i18n keys matching TIER_FEATURES labelKeys.
+const TIER_UNLOCK_LABEL_KEYS = {
 	plus: [
-		"Manual patch runs",
-		"Patch scheduling policies + approval workflow",
-		"Docker container monitoring",
-		"Advanced alert config + custom rules",
-		"Custom RBAC roles",
-		"Audit log export",
-		"Custom branding (logo/favicon)",
+		"billing:tiers.features.manual_patch_runs",
+		"billing:tiers.features.patch_policies",
+		"billing:tiers.features.docker_monitoring",
+		"billing:tiers.features.advanced_alerts",
+		"billing:tiers.features.custom_rbac",
+		"billing:tiers.features.audit_log_export",
+		"billing:tiers.features.custom_branding",
 	],
 	max: [
-		"Browser SSH terminal",
-		"Browser RDP (Guacamole)",
-		"BYO-AI terminal assistant",
-		"Compliance (OpenSCAP + CIS + Docker Bench)",
+		"billing:tiers.features.ssh_terminal",
+		"billing:tiers.features.rdp",
+		"billing:tiers.features.byoi_ai",
+		"billing:tiers.features.compliance",
 	],
 };
 
 export const getRequiredTier = (moduleKey) =>
 	MODULE_TIER_MAP[moduleKey] ?? null;
 
-export const getModuleLabel = (moduleKey) =>
-	MODULE_LABELS[moduleKey] ?? moduleKey;
+export const getModuleLabel = (moduleKey) => {
+	const key = MODULE_LABEL_KEYS[moduleKey];
+	return key ? i18n.t(key) : moduleKey;
+};
 
-export const getTierUnlocks = (tierId) => TIER_UNLOCK_LABELS[tierId] ?? [];
+export const getTierUnlocks = (tierId) =>
+	(TIER_UNLOCK_LABEL_KEYS[tierId] ?? []).map((key) => i18n.t(key));

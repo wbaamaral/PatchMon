@@ -18,6 +18,7 @@ import {
 	X,
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "../contexts/ToastContext";
 import { usePageRefresh } from "../hooks/usePageRefresh";
@@ -37,7 +38,17 @@ const VALID_DOCKER_TABS = [
 	"hosts",
 ];
 
+const DOCKER_TABS = [
+	{ id: "stacks", labelKey: "tabs.stacks", icon: Layers },
+	{ id: "containers", labelKey: "tabs.containers", icon: Container },
+	{ id: "images", labelKey: "tabs.images", icon: Package },
+	{ id: "volumes", labelKey: "tabs.volumes", icon: HardDrive },
+	{ id: "networks", labelKey: "tabs.networks", icon: Network },
+	{ id: "hosts", labelKey: "tabs.hosts", icon: Server },
+];
+
 const Docker = () => {
+	const { t } = useTranslation("docker");
 	const queryClient = useQueryClient();
 	const toast = useToast();
 	const [searchParams] = useSearchParams();
@@ -172,7 +183,9 @@ const Docker = () => {
 		},
 		onError: (error) => {
 			toast.error(
-				`Failed to delete container: ${error.response?.data?.error || error.message}`,
+				t("toasts.delete_container_failed", {
+					error: error.response?.data?.error || error.message,
+				}),
 			);
 		},
 	});
@@ -190,7 +203,9 @@ const Docker = () => {
 		},
 		onError: (error) => {
 			toast.error(
-				`Failed to delete image: ${error.response?.data?.error || error.message}`,
+				t("toasts.delete_image_failed", {
+					error: error.response?.data?.error || error.message,
+				}),
 			);
 		},
 	});
@@ -208,7 +223,9 @@ const Docker = () => {
 		},
 		onError: (error) => {
 			toast.error(
-				`Failed to delete volume: ${error.response?.data?.error || error.message}`,
+				t("toasts.delete_volume_failed", {
+					error: error.response?.data?.error || error.message,
+				}),
 			);
 		},
 	});
@@ -226,7 +243,9 @@ const Docker = () => {
 		},
 		onError: (error) => {
 			toast.error(
-				`Failed to delete network: ${error.response?.data?.error || error.message}`,
+				t("toasts.delete_network_failed", {
+					error: error.response?.data?.error || error.message,
+				}),
 			);
 		},
 	});
@@ -509,7 +528,7 @@ const Docker = () => {
 					"bg-secondary-100 text-secondary-800 dark:bg-secondary-700 dark:text-secondary-200"
 				}`}
 			>
-				{status}
+				{t(`status.${status}`, { defaultValue: status })}
 			</span>
 		);
 	};
@@ -557,7 +576,7 @@ const Docker = () => {
 					target="_blank"
 					rel="noopener noreferrer"
 					className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-medium transition-colors ${colorScheme}`}
-					title={`View on ${displayName}`}
+					title={t("actions.view_on", { name: displayName })}
 				>
 					{displayName}
 					<ExternalLink className="h-3 w-3" />
@@ -580,10 +599,10 @@ const Docker = () => {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-2xl font-semibold text-secondary-900 dark:text-white">
-						Docker Inventory
+						{t("title")}
 					</h1>
 					<p className="text-sm text-secondary-600 dark:text-white mt-1">
-						Monitor containers, images, and updates across your infrastructure
+						{t("subtitle")}
 					</p>
 				</div>
 				<div className="flex items-center gap-3">
@@ -592,7 +611,7 @@ const Docker = () => {
 						onClick={() => refreshDocker()}
 						disabled={isRefreshing}
 						className="btn-outline flex items-center justify-center p-2"
-						title="Refresh data"
+						title={t("actions.refresh_data")}
 					>
 						<RefreshCw
 							className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
@@ -610,7 +629,7 @@ const Docker = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Hosts with Docker
+								{t("stats.hosts_with_docker")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{dashboardLoading ? (
@@ -630,7 +649,7 @@ const Docker = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Running Containers
+								{t("stats.running_containers")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{dashboardLoading ? (
@@ -639,7 +658,9 @@ const Docker = () => {
 									<>
 										{dashboard?.stats?.runningContainers || 0}
 										<span className="ml-2 text-sm text-secondary-500 dark:text-white font-normal">
-											/ {dashboard?.stats?.totalContainers || 0} total
+											{t("stats.running_of_total", {
+												count: dashboard?.stats?.totalContainers || 0,
+											})}
 										</span>
 									</>
 								)}
@@ -655,7 +676,7 @@ const Docker = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Total Images
+								{t("stats.total_images")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{dashboardLoading ? (
@@ -687,7 +708,7 @@ const Docker = () => {
 						</div>
 						<div className="w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Updates Available
+								{t("stats.updates_available")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{dashboardLoading ? (
@@ -705,16 +726,9 @@ const Docker = () => {
 			<div className="border-b border-secondary-200 dark:border-secondary-600 overflow-x-auto scrollbar-hide">
 				<nav
 					className="-mb-px flex space-x-4 sm:space-x-8 px-4"
-					aria-label="Tabs"
+					aria-label={t("tabs.aria_label")}
 				>
-					{[
-						{ id: "stacks", label: "Stacks", icon: Layers },
-						{ id: "containers", label: "Containers", icon: Container },
-						{ id: "images", label: "Images", icon: Package },
-						{ id: "volumes", label: "Volumes", icon: HardDrive },
-						{ id: "networks", label: "Networks", icon: Network },
-						{ id: "hosts", label: "Hosts", icon: Server },
-					].map((tab) => {
+					{DOCKER_TABS.map((tab) => {
 						const Icon = tab.icon;
 						return (
 							<button
@@ -745,7 +759,7 @@ const Docker = () => {
 								} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
 							>
 								<Icon className="h-4 w-4 mr-2" />
-								{tab.label}
+								{t(tab.labelKey)}
 							</button>
 						);
 					})}
@@ -765,7 +779,7 @@ const Docker = () => {
 								<input
 									type="text"
 									className="block w-full pl-10 pr-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md leading-5 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
-									placeholder={`Search ${activeTab}...`}
+									placeholder={t(`search.${activeTab}`)}
 									value={searchTerm}
 									onChange={(e) => setSearchTerm(e.target.value)}
 								/>
@@ -786,12 +800,12 @@ const Docker = () => {
 								onChange={(e) => setStatusFilter(e.target.value)}
 								className="block w-full sm:w-48 pl-3 pr-10 py-2 text-base border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
 							>
-								<option value="all">All Statuses</option>
-								<option value="running">Running</option>
-								<option value="exited">Exited</option>
-								<option value="paused">Paused</option>
-								<option value="restarting">Restarting</option>
-								<option value="removed">Removed</option>
+								<option value="all">{t("filters.all_statuses")}</option>
+								<option value="running">{t("status.running")}</option>
+								<option value="exited">{t("status.exited")}</option>
+								<option value="paused">{t("status.paused")}</option>
+								<option value="restarting">{t("status.restarting")}</option>
+								<option value="removed">{t("status.removed")}</option>
 							</select>
 						)}
 						{activeTab === "images" && (
@@ -801,26 +815,26 @@ const Docker = () => {
 									onChange={(e) => setSourceFilter(e.target.value)}
 									className="block w-full sm:w-48 pl-3 pr-10 py-2 text-base border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
 								>
-									<option value="all">All Sources</option>
-									<option value="docker-hub">Docker Hub</option>
-									<option value="github">GitHub</option>
-									<option value="gitlab">GitLab</option>
-									<option value="google">Google</option>
-									<option value="quay">Quay.io</option>
-									<option value="redhat">Red Hat</option>
-									<option value="azure">Azure</option>
-									<option value="aws">AWS ECR</option>
-									<option value="private">Private</option>
-									<option value="local">Local</option>
+									<option value="all">{t("filters.all_sources")}</option>
+									<option value="docker-hub">{t("sources.docker_hub")}</option>
+									<option value="github">{t("sources.github")}</option>
+									<option value="gitlab">{t("sources.gitlab")}</option>
+									<option value="google">{t("sources.google")}</option>
+									<option value="quay">{t("sources.quay")}</option>
+									<option value="redhat">{t("sources.redhat")}</option>
+									<option value="azure">{t("sources.azure")}</option>
+									<option value="aws">{t("sources.aws")}</option>
+									<option value="private">{t("sources.private")}</option>
+									<option value="local">{t("sources.local")}</option>
 								</select>
 								<select
 									value={updatesFilter}
 									onChange={(e) => setUpdatesFilter(e.target.value)}
 									className="block w-full sm:w-48 pl-3 pr-10 py-2 text-base border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
 								>
-									<option value="all">All Updates Status</option>
-									<option value="available">Has Updates</option>
-									<option value="none">Up to Date</option>
+									<option value="all">{t("filters.all_updates_status")}</option>
+									<option value="available">{t("filters.has_updates")}</option>
+									<option value="none">{t("filters.up_to_date")}</option>
 								</select>
 							</>
 						)}
@@ -830,12 +844,12 @@ const Docker = () => {
 								onChange={(e) => setDriverFilter(e.target.value)}
 								className="block w-full sm:w-48 pl-3 pr-10 py-2 text-base border-secondary-300 dark:border-secondary-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
 							>
-								<option value="all">All Drivers</option>
-								<option value="local">Local</option>
-								<option value="bridge">Bridge</option>
-								<option value="host">Host</option>
-								<option value="overlay">Overlay</option>
-								<option value="macvlan">Macvlan</option>
+								<option value="all">{t("filters.all_drivers")}</option>
+								<option value="local">{t("drivers.local")}</option>
+								<option value="bridge">{t("drivers.bridge")}</option>
+								<option value="host">{t("drivers.host")}</option>
+								<option value="overlay">{t("drivers.overlay")}</option>
+								<option value="macvlan">{t("drivers.macvlan")}</option>
 							</select>
 						)}
 					</div>
@@ -849,7 +863,7 @@ const Docker = () => {
 							<div className="text-center py-8">
 								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto" />
 								<p className="text-secondary-500 dark:text-white mt-2">
-									Loading stacks...
+									{t("loading.stacks")}
 								</p>
 							</div>
 						) : (
@@ -865,19 +879,19 @@ const Docker = () => {
 							<div className="text-center py-8">
 								<RefreshCw className="h-8 w-8 animate-spin mx-auto text-secondary-400" />
 								<p className="mt-2 text-sm text-secondary-500">
-									Loading containers...
+									{t("loading.containers")}
 								</p>
 							</div>
 						) : filteredContainers.length === 0 ? (
 							<div className="text-center py-8">
 								<Container className="h-12 w-12 mx-auto text-secondary-400" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									No containers found
+									{t("empty.no_containers")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{searchTerm
-										? "Try adjusting your search filters"
-										: "No Docker containers detected on any hosts"}
+										? t("empty.try_adjusting")
+										: t("empty.no_containers_hint")}
 								</p>
 							</div>
 						) : (
@@ -906,7 +920,7 @@ const Docker = () => {
 											<div className="space-y-2 pt-2 border-t border-secondary-200 dark:border-secondary-600">
 												<div className="text-sm">
 													<span className="text-secondary-500 dark:text-white">
-														Image:&nbsp;
+														{t("labels.image")}&nbsp;
 													</span>
 													<span className="text-secondary-900 dark:text-white font-mono text-sm">
 														{container.image_name}:{container.image_tag}
@@ -914,7 +928,7 @@ const Docker = () => {
 												</div>
 												<div className="text-sm">
 													<span className="text-secondary-500 dark:text-white">
-														Host:&nbsp;
+														{t("labels.host")}&nbsp;
 													</span>
 													<Link
 														to={`/hosts/${container.host_id}`}
@@ -922,7 +936,7 @@ const Docker = () => {
 													>
 														{container.host?.friendly_name ||
 															container.host?.hostname ||
-															"Unknown"}
+															t("labels.unknown")}
 													</Link>
 												</div>
 											</div>
@@ -932,19 +946,19 @@ const Docker = () => {
 												<Link
 													to={`/docker/containers/${container.id}`}
 													className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm"
-													title="View details"
+													title={t("actions.view_details")}
 												>
 													<ExternalLink className="h-4 w-4" />
-													View
+													{t("actions.view")}
 												</Link>
 												<button
 													type="button"
 													onClick={() => setDeleteContainerModal(container)}
 													className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center gap-1 text-sm"
-													title="Delete container from inventory"
+													title={t("actions.delete_container_from_inventory")}
 												>
 													<Trash2 className="h-4 w-4" />
-													Delete
+													{t("actions.delete")}
 												</button>
 											</div>
 										</div>
@@ -962,7 +976,7 @@ const Docker = () => {
 														onClick={() => handleSort("name")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Container Name
+														{t("table.container_name")}
 														{getSortIcon("name")}
 													</button>
 												</th>
@@ -972,7 +986,7 @@ const Docker = () => {
 														onClick={() => handleSort("image")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Image
+														{t("table.image")}
 														{getSortIcon("image")}
 													</button>
 												</th>
@@ -982,7 +996,7 @@ const Docker = () => {
 														onClick={() => handleSort("status")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Status
+														{t("table.status")}
 														{getSortIcon("status")}
 													</button>
 												</th>
@@ -992,12 +1006,12 @@ const Docker = () => {
 														onClick={() => handleSort("host")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Host
+														{t("table.host")}
 														{getSortIcon("host")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Actions
+													{t("table.actions")}
 												</th>
 											</tr>
 										</thead>
@@ -1033,7 +1047,7 @@ const Docker = () => {
 														>
 															{container.host?.friendly_name ||
 																container.host?.hostname ||
-																"Unknown"}
+																t("labels.unknown")}
 														</Link>
 													</td>
 													<td className="px-4 py-2 whitespace-nowrap text-center">
@@ -1041,7 +1055,7 @@ const Docker = () => {
 															<Link
 																to={`/docker/containers/${container.id}`}
 																className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1"
-																title="View details"
+																title={t("actions.view_details")}
 															>
 																<ExternalLink className="h-4 w-4" />
 															</Link>
@@ -1051,7 +1065,9 @@ const Docker = () => {
 																	setDeleteContainerModal(container)
 																}
 																className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center"
-																title="Delete container from inventory"
+																title={t(
+																	"actions.delete_container_from_inventory",
+																)}
 															>
 																<Trash2 className="h-4 w-4" />
 															</button>
@@ -1071,19 +1087,19 @@ const Docker = () => {
 							<div className="text-center py-8">
 								<RefreshCw className="h-8 w-8 animate-spin mx-auto text-secondary-400" />
 								<p className="mt-2 text-sm text-secondary-500">
-									Loading images...
+									{t("loading.images")}
 								</p>
 							</div>
 						) : filteredImages.length === 0 ? (
 							<div className="text-center py-8">
 								<Package className="h-12 w-12 mx-auto text-secondary-400" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									No images found
+									{t("empty.no_images")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{searchTerm
-										? "Try adjusting your search filters"
-										: "No Docker images detected"}
+										? t("empty.try_adjusting")
+										: t("empty.no_images_hint")}
 								</p>
 							</div>
 						) : (
@@ -1103,7 +1119,7 @@ const Docker = () => {
 														{image.repository}
 													</div>
 													<div className="text-sm text-secondary-500 dark:text-white">
-														Tag: {image.tag}
+														{t("labels.tag")} {image.tag}
 													</div>
 												</div>
 											</Link>
@@ -1116,11 +1132,11 @@ const Docker = () => {
 												{image.hasUpdates ? (
 													<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
 														<AlertTriangle className="h-3 w-3 mr-1" />
-														Updates Available
+														{t("status.updates_available")}
 													</span>
 												) : (
 													<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-														Up to date
+														{t("status.up_to_date")}
 													</span>
 												)}
 											</div>
@@ -1129,7 +1145,7 @@ const Docker = () => {
 											<div className="pt-2 border-t border-secondary-200 dark:border-secondary-600">
 												<div className="text-sm">
 													<span className="text-secondary-500 dark:text-white">
-														Containers:&nbsp;
+														{t("labels.containers")}&nbsp;
 													</span>
 													<span className="text-secondary-900 dark:text-white font-semibold">
 														{image._count?.docker_containers || 0}
@@ -1142,19 +1158,19 @@ const Docker = () => {
 												<Link
 													to={`/docker/images/${image.id}`}
 													className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm"
-													title="View details"
+													title={t("actions.view_details")}
 												>
 													<ExternalLink className="h-4 w-4" />
-													View
+													{t("actions.view")}
 												</Link>
 												<button
 													type="button"
 													onClick={() => setDeleteImageModal(image)}
 													className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center gap-1 text-sm"
-													title="Delete image from inventory"
+													title={t("actions.delete_image_from_inventory")}
 												>
 													<Trash2 className="h-4 w-4" />
-													Delete
+													{t("actions.delete")}
 												</button>
 											</div>
 										</div>
@@ -1172,7 +1188,7 @@ const Docker = () => {
 														onClick={() => handleSort("repository")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Repository
+														{t("table.repository")}
 														{getSortIcon("repository")}
 													</button>
 												</th>
@@ -1182,12 +1198,12 @@ const Docker = () => {
 														onClick={() => handleSort("tag")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Tag
+														{t("table.tag")}
 														{getSortIcon("tag")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Source
+													{t("table.source")}
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
 													<button
@@ -1195,15 +1211,15 @@ const Docker = () => {
 														onClick={() => handleSort("containers")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Containers
+														{t("table.containers")}
 														{getSortIcon("containers")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Updates
+													{t("table.updates")}
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Actions
+													{t("table.actions")}
 												</th>
 											</tr>
 										</thead>
@@ -1239,11 +1255,11 @@ const Docker = () => {
 														{image.hasUpdates ? (
 															<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
 																<AlertTriangle className="h-3 w-3 mr-1" />
-																Available
+																{t("status.available")}
 															</span>
 														) : (
 															<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-																Up to date
+																{t("status.up_to_date")}
 															</span>
 														)}
 													</td>
@@ -1252,7 +1268,7 @@ const Docker = () => {
 															<Link
 																to={`/docker/images/${image.id}`}
 																className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center"
-																title="View details"
+																title={t("actions.view_details")}
 															>
 																<ExternalLink className="h-4 w-4" />
 															</Link>
@@ -1260,7 +1276,7 @@ const Docker = () => {
 																type="button"
 																onClick={() => setDeleteImageModal(image)}
 																className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center"
-																title="Delete image from inventory"
+																title={t("actions.delete_image_from_inventory")}
 															>
 																<Trash2 className="h-4 w-4" />
 															</button>
@@ -1280,14 +1296,14 @@ const Docker = () => {
 							<div className="text-center py-8">
 								<RefreshCw className="h-8 w-8 animate-spin mx-auto text-secondary-400" />
 								<p className="mt-2 text-sm text-secondary-500">
-									Loading hosts...
+									{t("loading.hosts")}
 								</p>
 							</div>
 						) : hostsError ? (
 							<div className="text-center py-8">
 								<AlertTriangle className="h-12 w-12 mx-auto text-red-500" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									Failed to load hosts
+									{t("errors.load_hosts")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{formatError(hostsErrorDetail)}
@@ -1298,19 +1314,19 @@ const Docker = () => {
 									className="mt-4 btn-outline inline-flex items-center gap-2"
 								>
 									<RefreshCw className="h-4 w-4" />
-									Retry
+									{t("actions.retry")}
 								</button>
 							</div>
 						) : filteredHosts.length === 0 ? (
 							<div className="text-center py-8">
 								<Server className="h-12 w-12 mx-auto text-secondary-400" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									No hosts found
+									{t("empty.no_hosts")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{searchTerm
-										? "Try adjusting your search filters"
-										: "No hosts with Docker detected"}
+										? t("empty.try_adjusting")
+										: t("empty.no_hosts_hint")}
 								</p>
 							</div>
 						) : (
@@ -1334,7 +1350,7 @@ const Docker = () => {
 											<div className="grid grid-cols-3 gap-3 pt-2 border-t border-secondary-200 dark:border-secondary-600">
 												<div className="text-center">
 													<div className="text-xs text-secondary-500 dark:text-white">
-														Containers
+														{t("table.containers")}
 													</div>
 													<div className="text-base font-semibold text-secondary-900 dark:text-white">
 														{host.dockerStats?.totalContainers || 0}
@@ -1342,7 +1358,7 @@ const Docker = () => {
 												</div>
 												<div className="text-center">
 													<div className="text-xs text-secondary-500 dark:text-white">
-														Running
+														{t("table.running")}
 													</div>
 													<div className="text-base font-semibold text-green-600 dark:text-green-400">
 														{host.dockerStats?.runningContainers || 0}
@@ -1350,7 +1366,7 @@ const Docker = () => {
 												</div>
 												<div className="text-center">
 													<div className="text-xs text-secondary-500 dark:text-white">
-														Images
+														{t("table.images")}
 													</div>
 													<div className="text-base font-semibold text-secondary-900 dark:text-white">
 														{host.dockerStats?.totalImages || 0}
@@ -1363,10 +1379,10 @@ const Docker = () => {
 												<Link
 													to={`/hosts/${host.id}`}
 													className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm"
-													title="View details"
+													title={t("actions.view_details")}
 												>
 													<ExternalLink className="h-4 w-4" />
-													View
+													{t("actions.view")}
 												</Link>
 											</div>
 										</div>
@@ -1384,7 +1400,7 @@ const Docker = () => {
 														onClick={() => handleSort("name")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Host Name
+														{t("table.host_name")}
 														{getSortIcon("name")}
 													</button>
 												</th>
@@ -1394,12 +1410,12 @@ const Docker = () => {
 														onClick={() => handleSort("containers")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Containers
+														{t("table.containers")}
 														{getSortIcon("containers")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Running
+													{t("table.running")}
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
 													<button
@@ -1407,12 +1423,12 @@ const Docker = () => {
 														onClick={() => handleSort("images")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Images
+														{t("table.images")}
 														{getSortIcon("images")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Actions
+													{t("table.actions")}
 												</th>
 											</tr>
 										</thead>
@@ -1446,7 +1462,7 @@ const Docker = () => {
 														<Link
 															to={`/hosts/${host.id}`}
 															className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1"
-															title="View details"
+															title={t("actions.view_details")}
 														>
 															<ExternalLink className="h-4 w-4" />
 														</Link>
@@ -1465,14 +1481,14 @@ const Docker = () => {
 							<div className="text-center py-8">
 								<RefreshCw className="h-8 w-8 animate-spin mx-auto text-secondary-400" />
 								<p className="mt-2 text-sm text-secondary-500">
-									Loading volumes...
+									{t("loading.volumes")}
 								</p>
 							</div>
 						) : volumesError ? (
 							<div className="text-center py-8">
 								<AlertTriangle className="h-12 w-12 mx-auto text-red-500" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									Failed to load volumes
+									{t("errors.load_volumes")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{formatError(volumesErrorDetail)}
@@ -1483,19 +1499,19 @@ const Docker = () => {
 									className="mt-4 btn-outline inline-flex items-center gap-2"
 								>
 									<RefreshCw className="h-4 w-4" />
-									Retry
+									{t("actions.retry")}
 								</button>
 							</div>
 						) : filteredVolumes.length === 0 ? (
 							<div className="text-center py-8">
 								<HardDrive className="h-12 w-12 mx-auto text-secondary-400" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									No volumes found
+									{t("empty.no_volumes")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{searchTerm
-										? "Try adjusting your search filters"
-										: "No Docker volumes detected"}
+										? t("empty.try_adjusting")
+										: t("empty.no_volumes_hint")}
 								</p>
 							</div>
 						) : (
@@ -1522,12 +1538,13 @@ const Docker = () => {
 												</span>
 												{volume.ref_count > 0 ? (
 													<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-														{volume.ref_count} container
-														{volume.ref_count !== 1 ? "s" : ""}
+														{t("labels.containers_count", {
+															count: volume.ref_count,
+														})}
 													</span>
 												) : (
 													<span className="text-xs text-secondary-400 dark:text-white">
-														Unused
+														{t("status.unused")}
 													</span>
 												)}
 											</div>
@@ -1537,7 +1554,7 @@ const Docker = () => {
 												{volume.size_bytes && (
 													<div className="text-sm">
 														<span className="text-secondary-500 dark:text-white">
-															Size:&nbsp;
+															{t("labels.size")}&nbsp;
 														</span>
 														<span className="text-secondary-900 dark:text-white">
 															{(
@@ -1546,13 +1563,13 @@ const Docker = () => {
 																1024 /
 																1024
 															).toFixed(2)}{" "}
-															GB
+															{t("labels.gb")}
 														</span>
 													</div>
 												)}
 												<div className="text-sm">
 													<span className="text-secondary-500 dark:text-white">
-														Host:&nbsp;
+														{t("labels.host")}&nbsp;
 													</span>
 													<Link
 														to={`/hosts/${volume.host_id}`}
@@ -1560,7 +1577,7 @@ const Docker = () => {
 													>
 														{volume.hosts?.friendly_name ||
 															volume.hosts?.hostname ||
-															"Unknown"}
+															t("labels.unknown")}
 													</Link>
 												</div>
 											</div>
@@ -1570,19 +1587,19 @@ const Docker = () => {
 												<Link
 													to={`/docker/volumes/${volume.id}`}
 													className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm"
-													title="View details"
+													title={t("actions.view_details")}
 												>
 													<ExternalLink className="h-4 w-4" />
-													View
+													{t("actions.view")}
 												</Link>
 												<button
 													type="button"
 													onClick={() => setDeleteVolumeModal(volume)}
 													className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center gap-1 text-sm"
-													title="Delete from inventory"
+													title={t("actions.delete_from_inventory")}
 												>
 													<Trash2 className="h-4 w-4" />
-													Delete
+													{t("actions.delete")}
 												</button>
 											</div>
 										</div>
@@ -1600,7 +1617,7 @@ const Docker = () => {
 														onClick={() => handleSort("name")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Volume Name
+														{t("table.volume_name")}
 														{getSortIcon("name")}
 													</button>
 												</th>
@@ -1610,7 +1627,7 @@ const Docker = () => {
 														onClick={() => handleSort("driver")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Driver
+														{t("table.driver")}
 														{getSortIcon("driver")}
 													</button>
 												</th>
@@ -1620,7 +1637,7 @@ const Docker = () => {
 														onClick={() => handleSort("size")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Size
+														{t("table.size")}
 														{getSortIcon("size")}
 													</button>
 												</th>
@@ -1630,7 +1647,7 @@ const Docker = () => {
 														onClick={() => handleSort("ref_count")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														In Use
+														{t("table.in_use")}
 														{getSortIcon("ref_count")}
 													</button>
 												</th>
@@ -1640,12 +1657,12 @@ const Docker = () => {
 														onClick={() => handleSort("host")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Host
+														{t("table.host")}
 														{getSortIcon("host")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Actions
+													{t("table.actions")}
 												</th>
 											</tr>
 										</thead>
@@ -1673,18 +1690,19 @@ const Docker = () => {
 													</td>
 													<td className="px-4 py-2 whitespace-nowrap text-center text-sm text-secondary-900 dark:text-white">
 														{volume.size_bytes
-															? `${(Number(volume.size_bytes) / 1024 / 1024 / 1024).toFixed(2)} GB`
+															? `${(Number(volume.size_bytes) / 1024 / 1024 / 1024).toFixed(2)} ${t("labels.gb")}`
 															: "-"}
 													</td>
 													<td className="px-4 py-2 whitespace-nowrap text-center text-sm text-secondary-900 dark:text-white">
 														{volume.ref_count > 0 ? (
 															<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-																{volume.ref_count} container
-																{volume.ref_count !== 1 ? "s" : ""}
+																{t("labels.containers_count", {
+																	count: volume.ref_count,
+																})}
 															</span>
 														) : (
 															<span className="text-secondary-400 dark:text-white">
-																Unused
+																{t("status.unused")}
 															</span>
 														)}
 													</td>
@@ -1695,7 +1713,7 @@ const Docker = () => {
 														>
 															{volume.hosts?.friendly_name ||
 																volume.hosts?.hostname ||
-																"Unknown"}
+																t("labels.unknown")}
 														</Link>
 													</td>
 													<td className="px-4 py-2 whitespace-nowrap text-center">
@@ -1703,7 +1721,7 @@ const Docker = () => {
 															<Link
 																to={`/docker/volumes/${volume.id}`}
 																className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1"
-																title="View details"
+																title={t("actions.view_details")}
 															>
 																<ExternalLink className="h-4 w-4" />
 															</Link>
@@ -1711,7 +1729,7 @@ const Docker = () => {
 																type="button"
 																onClick={() => setDeleteVolumeModal(volume)}
 																className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-																title="Delete from inventory"
+																title={t("actions.delete_from_inventory")}
 															>
 																<Trash2 className="h-4 w-4" />
 															</button>
@@ -1731,14 +1749,14 @@ const Docker = () => {
 							<div className="text-center py-8">
 								<RefreshCw className="h-8 w-8 animate-spin mx-auto text-secondary-400" />
 								<p className="mt-2 text-sm text-secondary-500">
-									Loading networks...
+									{t("loading.networks")}
 								</p>
 							</div>
 						) : networksError ? (
 							<div className="text-center py-8">
 								<AlertTriangle className="h-12 w-12 mx-auto text-red-500" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									Failed to load networks
+									{t("errors.load_networks")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{formatError(networksErrorDetail)}
@@ -1749,19 +1767,19 @@ const Docker = () => {
 									className="mt-4 btn-outline inline-flex items-center gap-2"
 								>
 									<RefreshCw className="h-4 w-4" />
-									Retry
+									{t("actions.retry")}
 								</button>
 							</div>
 						) : filteredNetworks.length === 0 ? (
 							<div className="text-center py-8">
 								<Network className="h-12 w-12 mx-auto text-secondary-400" />
 								<h3 className="mt-2 text-sm font-medium text-secondary-900 dark:text-white">
-									No networks found
+									{t("empty.no_networks")}
 								</h3>
 								<p className="mt-1 text-sm text-secondary-500">
 									{searchTerm
-										? "Try adjusting your search filters"
-										: "No Docker networks detected"}
+										? t("empty.try_adjusting")
+										: t("empty.no_networks_hint")}
 								</p>
 							</div>
 						) : (
@@ -1791,8 +1809,9 @@ const Docker = () => {
 												</span>
 												{network.container_count > 0 && (
 													<span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-														{network.container_count} container
-														{network.container_count !== 1 ? "s" : ""}
+														{t("labels.containers_count", {
+															count: network.container_count,
+														})}
 													</span>
 												)}
 											</div>
@@ -1805,7 +1824,7 @@ const Docker = () => {
 													{network.internal && (
 														<span
 															className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-															title="Internal"
+															title={t("flags.internal")}
 														>
 															I
 														</span>
@@ -1813,7 +1832,7 @@ const Docker = () => {
 													{network.ipv6_enabled && (
 														<span
 															className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-															title="IPv6 Enabled"
+															title={t("flags.ipv6_enabled")}
 														>
 															6
 														</span>
@@ -1821,7 +1840,7 @@ const Docker = () => {
 													{network.ingress && (
 														<span
 															className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-															title="Swarm Ingress"
+															title={t("flags.swarm_ingress")}
 														>
 															S
 														</span>
@@ -1833,7 +1852,7 @@ const Docker = () => {
 											<div className="pt-2 border-t border-secondary-200 dark:border-secondary-600">
 												<div className="text-sm">
 													<span className="text-secondary-500 dark:text-white">
-														Host:&nbsp;
+														{t("labels.host")}&nbsp;
 													</span>
 													<Link
 														to={`/hosts/${network.host_id}`}
@@ -1841,7 +1860,7 @@ const Docker = () => {
 													>
 														{network.hosts?.friendly_name ||
 															network.hosts?.hostname ||
-															"Unknown"}
+															t("labels.unknown")}
 													</Link>
 												</div>
 											</div>
@@ -1851,19 +1870,19 @@ const Docker = () => {
 												<Link
 													to={`/docker/networks/${network.id}`}
 													className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1 text-sm"
-													title="View details"
+													title={t("actions.view_details")}
 												>
 													<ExternalLink className="h-4 w-4" />
-													View
+													{t("actions.view")}
 												</Link>
 												<button
 													type="button"
 													onClick={() => setDeleteNetworkModal(network)}
 													className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 inline-flex items-center gap-1 text-sm"
-													title="Delete from inventory"
+													title={t("actions.delete_from_inventory")}
 												>
 													<Trash2 className="h-4 w-4" />
-													Delete
+													{t("actions.delete")}
 												</button>
 											</div>
 										</div>
@@ -1881,7 +1900,7 @@ const Docker = () => {
 														onClick={() => handleSort("name")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Network Name
+														{t("table.network_name")}
 														{getSortIcon("name")}
 													</button>
 												</th>
@@ -1891,12 +1910,12 @@ const Docker = () => {
 														onClick={() => handleSort("driver")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Driver
+														{t("table.driver")}
 														{getSortIcon("driver")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Scope
+													{t("table.scope")}
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
 													<button
@@ -1904,12 +1923,12 @@ const Docker = () => {
 														onClick={() => handleSort("containers")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Containers
+														{t("table.containers")}
 														{getSortIcon("containers")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Flags
+													{t("table.flags")}
 												</th>
 												<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
 													<button
@@ -1917,12 +1936,12 @@ const Docker = () => {
 														onClick={() => handleSort("host")}
 														className="flex items-center gap-2 hover:text-secondary-700"
 													>
-														Host
+														{t("table.host")}
 														{getSortIcon("host")}
 													</button>
 												</th>
 												<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-													Actions
+													{t("table.actions")}
 												</th>
 											</tr>
 										</thead>
@@ -1969,7 +1988,7 @@ const Docker = () => {
 															{network.internal && (
 																<span
 																	className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-																	title="Internal"
+																	title={t("flags.internal")}
 																>
 																	I
 																</span>
@@ -1977,7 +1996,7 @@ const Docker = () => {
 															{network.ipv6_enabled && (
 																<span
 																	className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
-																	title="IPv6 Enabled"
+																	title={t("flags.ipv6_enabled")}
 																>
 																	6
 																</span>
@@ -1985,7 +2004,7 @@ const Docker = () => {
 															{network.ingress && (
 																<span
 																	className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-																	title="Swarm Ingress"
+																	title={t("flags.swarm_ingress")}
 																>
 																	S
 																</span>
@@ -2006,7 +2025,7 @@ const Docker = () => {
 														>
 															{network.hosts?.friendly_name ||
 																network.hosts?.hostname ||
-																"Unknown"}
+																t("labels.unknown")}
 														</Link>
 													</td>
 													<td className="px-4 py-2 whitespace-nowrap text-center">
@@ -2014,7 +2033,7 @@ const Docker = () => {
 															<Link
 																to={`/docker/networks/${network.id}`}
 																className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 inline-flex items-center gap-1"
-																title="View details"
+																title={t("actions.view_details")}
 															>
 																<ExternalLink className="h-4 w-4" />
 															</Link>
@@ -2022,7 +2041,7 @@ const Docker = () => {
 																type="button"
 																onClick={() => setDeleteNetworkModal(network)}
 																className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-																title="Delete from inventory"
+																title={t("actions.delete_from_inventory")}
 															>
 																<Trash2 className="h-4 w-4" />
 															</button>
@@ -2050,30 +2069,30 @@ const Docker = () => {
 							</div>
 							<div className="ml-3 flex-1">
 								<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-									Delete Container
+									{t("delete_modal.container.title")}
 								</h3>
 								<div className="mt-2 text-sm text-secondary-600 dark:text-white">
-									<p className="mb-2">
-										Are you sure you want to delete this container from the
-										inventory?
-									</p>
+									<p className="mb-2">{t("delete_modal.container.confirm")}</p>
 									<div className="bg-secondary-100 dark:bg-secondary-700 p-3 rounded-md">
 										<p className="font-medium text-secondary-900 dark:text-white">
 											{deleteContainerModal.name}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white mt-1">
-											Image: {deleteContainerModal.image_name}:
-											{deleteContainerModal.image_tag}
+											{t("delete_modal.fields.image", {
+												image: deleteContainerModal.image_name,
+												tag: deleteContainerModal.image_tag,
+											})}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white">
-											Host:{" "}
-											{deleteContainerModal.host?.friendly_name || "Unknown"}
+											{t("delete_modal.fields.host", {
+												name:
+													deleteContainerModal.host?.friendly_name ||
+													t("labels.unknown"),
+											})}
 										</p>
 									</div>
 									<p className="mt-3 text-red-600 dark:text-red-400 font-medium">
-										⚠️ This only removes the container from PatchMon's inventory.
-										It does NOT stop or delete the actual Docker container on
-										the host.
+										{t("delete_modal.container.warning")}
 									</p>
 								</div>
 							</div>
@@ -2088,8 +2107,8 @@ const Docker = () => {
 								className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{deleteContainerMutation.isPending
-									? "Deleting..."
-									: "Delete from Inventory"}
+									? t("delete_modal.deleting")
+									: t("delete_modal.delete_from_inventory")}
 							</button>
 							<button
 								type="button"
@@ -2097,7 +2116,7 @@ const Docker = () => {
 								disabled={deleteContainerMutation.isPending}
 								className="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 dark:border-secondary-600 shadow-sm px-4 py-2 bg-white dark:bg-secondary-700 text-base font-medium text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								Cancel
+								{t("delete_modal.cancel")}
 							</button>
 						</div>
 					</div>
@@ -2114,35 +2133,34 @@ const Docker = () => {
 							</div>
 							<div className="ml-3 flex-1">
 								<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-									Delete Image
+									{t("delete_modal.image.title")}
 								</h3>
 								<div className="mt-2 text-sm text-secondary-600 dark:text-white">
-									<p className="mb-2">
-										Are you sure you want to delete this image from the
-										inventory?
-									</p>
+									<p className="mb-2">{t("delete_modal.image.confirm")}</p>
 									<div className="bg-secondary-100 dark:bg-secondary-700 p-3 rounded-md">
 										<p className="font-medium text-secondary-900 dark:text-white">
 											{deleteImageModal.repository}:{deleteImageModal.tag}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white mt-1">
-											Source: {deleteImageModal.source}
+											{t("delete_modal.fields.source", {
+												source: deleteImageModal.source,
+											})}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white">
-											Containers using this:{" "}
-											{deleteImageModal._count?.docker_containers || 0}
+											{t("delete_modal.fields.containers_using", {
+												count: deleteImageModal._count?.docker_containers || 0,
+											})}
 										</p>
 									</div>
 									{deleteImageModal._count?.docker_containers > 0 ? (
 										<p className="mt-3 text-red-600 dark:text-red-400 font-medium">
-											⚠️ Cannot delete: This image is in use by{" "}
-											{deleteImageModal._count.docker_containers} container(s).
-											Delete the containers first.
+											{t("delete_modal.image.in_use_warning", {
+												count: deleteImageModal._count.docker_containers,
+											})}
 										</p>
 									) : (
 										<p className="mt-3 text-red-600 dark:text-red-400 font-medium">
-											⚠️ This only removes the image from PatchMon's inventory.
-											It does NOT delete the actual Docker image from hosts.
+											{t("delete_modal.image.warning")}
 										</p>
 									)}
 								</div>
@@ -2159,8 +2177,8 @@ const Docker = () => {
 								className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{deleteImageMutation.isPending
-									? "Deleting..."
-									: "Delete from Inventory"}
+									? t("delete_modal.deleting")
+									: t("delete_modal.delete_from_inventory")}
 							</button>
 							<button
 								type="button"
@@ -2168,7 +2186,7 @@ const Docker = () => {
 								disabled={deleteImageMutation.isPending}
 								className="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 dark:border-secondary-600 shadow-sm px-4 py-2 bg-white dark:bg-secondary-700 text-base font-medium text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								Cancel
+								{t("delete_modal.cancel")}
 							</button>
 						</div>
 					</div>
@@ -2185,36 +2203,37 @@ const Docker = () => {
 							</div>
 							<div className="ml-3 flex-1">
 								<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-									Delete Volume
+									{t("delete_modal.volume.title")}
 								</h3>
 								<div className="mt-2 text-sm text-secondary-600 dark:text-white">
-									<p className="mb-2">
-										Are you sure you want to delete this volume from the
-										inventory?
-									</p>
+									<p className="mb-2">{t("delete_modal.volume.confirm")}</p>
 									<div className="bg-secondary-100 dark:bg-secondary-700 p-3 rounded-md">
 										<p className="font-medium text-secondary-900 dark:text-white">
 											{deleteVolumeModal.name}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white mt-1">
-											Driver: {deleteVolumeModal.driver}
+											{t("delete_modal.fields.driver", {
+												driver: deleteVolumeModal.driver,
+											})}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white">
-											Host:{" "}
-											{deleteVolumeModal.hosts?.friendly_name ||
-												deleteVolumeModal.hosts?.hostname ||
-												"Unknown"}
+											{t("delete_modal.fields.host", {
+												name:
+													deleteVolumeModal.hosts?.friendly_name ||
+													deleteVolumeModal.hosts?.hostname ||
+													t("labels.unknown"),
+											})}
 										</p>
 										{deleteVolumeModal.ref_count > 0 && (
 											<p className="text-xs text-secondary-600 dark:text-white">
-												In use by: {deleteVolumeModal.ref_count} container
-												{deleteVolumeModal.ref_count !== 1 ? "s" : ""}
+												{t("delete_modal.fields.in_use_by", {
+													count: deleteVolumeModal.ref_count,
+												})}
 											</p>
 										)}
 									</div>
 									<p className="mt-3 text-red-600 dark:text-red-400 font-medium">
-										⚠️ This only removes the volume from PatchMon's inventory. It
-										does NOT delete the actual Docker volume from the host.
+										{t("delete_modal.volume.warning")}
 									</p>
 								</div>
 							</div>
@@ -2229,8 +2248,8 @@ const Docker = () => {
 								className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{deleteVolumeMutation.isPending
-									? "Deleting..."
-									: "Delete from Inventory"}
+									? t("delete_modal.deleting")
+									: t("delete_modal.delete_from_inventory")}
 							</button>
 							<button
 								type="button"
@@ -2238,7 +2257,7 @@ const Docker = () => {
 								disabled={deleteVolumeMutation.isPending}
 								className="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 dark:border-secondary-600 shadow-sm px-4 py-2 bg-white dark:bg-secondary-700 text-base font-medium text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								Cancel
+								{t("delete_modal.cancel")}
 							</button>
 						</div>
 					</div>
@@ -2255,39 +2274,42 @@ const Docker = () => {
 							</div>
 							<div className="ml-3 flex-1">
 								<h3 className="text-lg font-medium text-secondary-900 dark:text-white">
-									Delete Network
+									{t("delete_modal.network.title")}
 								</h3>
 								<div className="mt-2 text-sm text-secondary-600 dark:text-white">
-									<p className="mb-2">
-										Are you sure you want to delete this network from the
-										inventory?
-									</p>
+									<p className="mb-2">{t("delete_modal.network.confirm")}</p>
 									<div className="bg-secondary-100 dark:bg-secondary-700 p-3 rounded-md">
 										<p className="font-medium text-secondary-900 dark:text-white">
 											{deleteNetworkModal.name}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white mt-1">
-											Driver: {deleteNetworkModal.driver}
+											{t("delete_modal.fields.driver", {
+												driver: deleteNetworkModal.driver,
+											})}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white">
-											Scope: {deleteNetworkModal.scope}
+											{t("delete_modal.fields.scope", {
+												scope: deleteNetworkModal.scope,
+											})}
 										</p>
 										<p className="text-xs text-secondary-600 dark:text-white">
-											Host:{" "}
-											{deleteNetworkModal.hosts?.friendly_name ||
-												deleteNetworkModal.hosts?.hostname ||
-												"Unknown"}
+											{t("delete_modal.fields.host", {
+												name:
+													deleteNetworkModal.hosts?.friendly_name ||
+													deleteNetworkModal.hosts?.hostname ||
+													t("labels.unknown"),
+											})}
 										</p>
 										{deleteNetworkModal.container_count > 0 && (
 											<p className="text-xs text-secondary-600 dark:text-white">
-												Connected containers:{" "}
-												{deleteNetworkModal.container_count}
+												{t("delete_modal.fields.connected_containers", {
+													count: deleteNetworkModal.container_count,
+												})}
 											</p>
 										)}
 									</div>
 									<p className="mt-3 text-red-600 dark:text-red-400 font-medium">
-										⚠️ This only removes the network from PatchMon's inventory.
-										It does NOT delete the actual Docker network from the host.
+										{t("delete_modal.network.warning")}
 									</p>
 								</div>
 							</div>
@@ -2302,8 +2324,8 @@ const Docker = () => {
 								className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{deleteNetworkMutation.isPending
-									? "Deleting..."
-									: "Delete from Inventory"}
+									? t("delete_modal.deleting")
+									: t("delete_modal.delete_from_inventory")}
 							</button>
 							<button
 								type="button"
@@ -2311,7 +2333,7 @@ const Docker = () => {
 								disabled={deleteNetworkMutation.isPending}
 								className="mt-3 w-full inline-flex justify-center rounded-md border border-secondary-300 dark:border-secondary-600 shadow-sm px-4 py-2 bg-white dark:bg-secondary-700 text-base font-medium text-secondary-700 dark:text-secondary-200 hover:bg-secondary-50 dark:hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								Cancel
+								{t("delete_modal.cancel")}
 							</button>
 						</div>
 					</div>
@@ -2324,6 +2346,7 @@ const Docker = () => {
 /* ───────────────── Stacks View ───────────────── */
 
 function StacksView({ containers, getStatusBadge }) {
+	const { t } = useTranslation("docker");
 	const [expandedStack, setExpandedStack] = useState(null);
 
 	const stacksMap = new Map();
@@ -2350,10 +2373,10 @@ function StacksView({ containers, getStatusBadge }) {
 			<div className="text-center py-12">
 				<Layers className="h-12 w-12 text-secondary-400 mx-auto mb-3" />
 				<p className="text-secondary-500 dark:text-white">
-					No Docker Compose stacks found
+					{t("empty.no_stacks")}
 				</p>
 				<p className="text-xs text-secondary-400 mt-1">
-					Containers started with docker-compose will appear here
+					{t("empty.no_stacks_hint")}
 				</p>
 			</div>
 		);
@@ -2362,14 +2385,16 @@ function StacksView({ containers, getStatusBadge }) {
 	return (
 		<>
 			<div className="flex items-center gap-4 text-sm text-secondary-500 dark:text-white mb-4">
+				<span>{t("labels.stacks_count", { count: stacks.length })}</span>
 				<span>
-					{stacks.length} stack{stacks.length !== 1 ? "s" : ""}
-				</span>
-				<span>
-					{containers.length} container{containers.length !== 1 ? "s" : ""}
+					{t("labels.containers_count", { count: containers.length })}
 				</span>
 				{standaloneContainers.length > 0 && (
-					<span>{standaloneContainers.length} standalone</span>
+					<span>
+						{t("labels.standalone_count", {
+							count: standaloneContainers.length,
+						})}
+					</span>
 				)}
 			</div>
 
@@ -2380,16 +2405,16 @@ function StacksView({ containers, getStatusBadge }) {
 						<tr>
 							<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider w-8" />
 							<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-								Stack Name
+								{t("table.stack_name")}
 							</th>
 							<th className="px-4 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-								Host
+								{t("table.host")}
 							</th>
 							<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-								Services
+								{t("table.services")}
 							</th>
 							<th className="px-4 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-								Status
+								{t("table.status")}
 							</th>
 						</tr>
 					</thead>
@@ -2404,7 +2429,7 @@ function StacksView({ containers, getStatusBadge }) {
 							const hostName =
 								stackContainers[0]?.host?.friendly_name ||
 								stackContainers[0]?.host?.hostname ||
-								"Unknown";
+								t("labels.unknown");
 							const hostId = stackContainers[0]?.host_id;
 
 							return (
@@ -2445,14 +2470,17 @@ function StacksView({ containers, getStatusBadge }) {
 										</td>
 										<td className="px-4 py-2 whitespace-nowrap text-center">
 											<span className="text-sm text-secondary-600 dark:text-secondary-400">
-												{totalCount} service{totalCount !== 1 ? "s" : ""}
+												{t("labels.services_count", { count: totalCount })}
 											</span>
 										</td>
 										<td className="px-4 py-2 whitespace-nowrap text-center">
 											<span
 												className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${allRunning ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}
 											>
-												{runningCount}/{totalCount} running
+												{t("stacks.running_of_total", {
+													running: runningCount,
+													total: totalCount,
+												})}
 											</span>
 										</td>
 									</tr>
@@ -2510,7 +2538,9 @@ function StacksView({ containers, getStatusBadge }) {
 										className="px-4 py-2 bg-secondary-100 dark:bg-secondary-700"
 									>
 										<span className="text-xs font-medium text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
-											Standalone Containers ({standaloneContainers.length})
+											{t("labels.standalone_header", {
+												count: standaloneContainers.length,
+											})}
 										</span>
 									</td>
 								</tr>
@@ -2539,11 +2569,11 @@ function StacksView({ containers, getStatusBadge }) {
 												>
 													{container.host?.friendly_name ||
 														container.host?.hostname ||
-														"Unknown"}
+														t("labels.unknown")}
 												</Link>
 											) : (
 												<span className="text-sm text-secondary-600 dark:text-secondary-400">
-													Unknown
+													{t("labels.unknown")}
 												</span>
 											)}
 										</td>
@@ -2571,7 +2601,7 @@ function StacksView({ containers, getStatusBadge }) {
 					const hostName =
 						stackContainers[0]?.host?.friendly_name ||
 						stackContainers[0]?.host?.hostname ||
-						"Unknown";
+						t("labels.unknown");
 
 					return (
 						<div key={stackName} className="card p-4 space-y-3">
@@ -2592,22 +2622,25 @@ function StacksView({ containers, getStatusBadge }) {
 								<span
 									className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${allRunning ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"}`}
 								>
-									{runningCount}/{totalCount} running
+									{t("stacks.running_of_total", {
+										running: runningCount,
+										total: totalCount,
+									})}
 								</span>
 							</div>
 							<div className="space-y-2 pt-2 border-t border-secondary-200 dark:border-secondary-600">
 								<div className="text-sm">
 									<span className="text-secondary-500 dark:text-white">
-										Host:{" "}
-									</span>
+										{t("labels.host")}
+									</span>{" "}
 									<span className="text-secondary-900 dark:text-white">
 										{hostName}
 									</span>
 								</div>
 								<div className="text-sm">
 									<span className="text-secondary-500 dark:text-white">
-										Services:{" "}
-									</span>
+										{t("labels.services")}
+									</span>{" "}
 									<span className="text-secondary-900 dark:text-white">
 										{totalCount}
 									</span>

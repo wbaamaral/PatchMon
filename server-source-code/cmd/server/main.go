@@ -15,6 +15,7 @@ import (
 	"github.com/PatchMon/PatchMon/server-source-code/internal/config"
 	hostctx "github.com/PatchMon/PatchMon/server-source-code/internal/context"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/database"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/logger"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/migrate"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/monitor"
@@ -223,6 +224,12 @@ func main() {
 			slog.Info("startup package-stats-refresh enqueued")
 		}
 	}()
+
+	if err := i18n.Init(); err != nil {
+		slog.Error("i18n initialization failed", "error", err)
+		os.Exit(1)
+	}
+	slog.Info("i18n initialized", "locales", i18n.Supported())
 
 	httpHandler, guacdProc := server.NewRouter(ctx, cfg, db, rdb, registry, queueClient, queueInspector, ctxRegistry, poolCache, redisCache, notifyEmit, slog, frontendFS)
 

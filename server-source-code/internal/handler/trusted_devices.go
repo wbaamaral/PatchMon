@@ -29,7 +29,7 @@ func NewTrustedDevicesHandler(trustedDevices *store.TrustedDevicesStore, log *sl
 func (h *TrustedDevicesHandler) List(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	devices, err := h.trustedDevices.ListForUser(r.Context(), userID)
@@ -37,7 +37,7 @@ func (h *TrustedDevicesHandler) List(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("trusted devices list failed", "user_id", userID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to load trusted devices")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_load_trusted_devices")
 		return
 	}
 	// Surface the caller's own trust cookie so the UI can badge "This device".
@@ -65,12 +65,12 @@ func (h *TrustedDevicesHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *TrustedDevicesHandler) Revoke(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "id is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.id_required")
 		return
 	}
 	// Determine if the caller is revoking their own current device so we can
@@ -88,7 +88,7 @@ func (h *TrustedDevicesHandler) Revoke(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("trusted device revoke failed", "user_id", userID, "id", id, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to revoke trusted device")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_revoke_trusted_device")
 		return
 	}
 	if revokingCurrent {
@@ -101,14 +101,14 @@ func (h *TrustedDevicesHandler) Revoke(w http.ResponseWriter, r *http.Request) {
 func (h *TrustedDevicesHandler) RevokeAll(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	if err := h.trustedDevices.RevokeAllForUser(r.Context(), userID); err != nil {
 		if h.log != nil {
 			h.log.Error("trusted devices revoke all failed", "user_id", userID, "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to revoke trusted devices")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_revoke_trusted_devices")
 		return
 	}
 	clearDeviceTrustCookie(w, r)

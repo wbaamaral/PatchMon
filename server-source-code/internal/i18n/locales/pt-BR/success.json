@@ -1,0 +1,8 @@
+{
+	"success.saved": "Salvo com sucesso",
+	"success.deleted": "Excluído com sucesso",
+	"success.created": "Criado com sucesso",
+	"success.updated": "Atualizado com sucesso",
+	"success.login": "Login realizado com sucesso",
+	"success.logout": "Logout realizado com sucesso"
+}

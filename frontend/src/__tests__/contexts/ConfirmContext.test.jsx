@@ -10,6 +10,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
+import "../../i18n";
 import { ConfirmProvider, useConfirm } from "../../contexts/ConfirmContext";
 
 const Trigger = ({ onResult, options, label = "Delete thing" }) => {

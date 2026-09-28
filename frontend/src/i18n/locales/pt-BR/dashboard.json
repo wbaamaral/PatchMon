@@ -1,0 +1,140 @@
+{
+	"welcome": "Bem-vindo de volta, {{name}} 👋",
+	"default_name": "Usuário",
+	"subtitle": "Visão geral da sua infraestrutura PatchMon",
+	"never": "Nunca",
+	"actions": {
+		"edit_dashboard": "Editar painel",
+		"customize_layout_title": "Personalizar layout do painel",
+		"refresh_title": "Atualizar dados do painel"
+	},
+	"edit": {
+		"instructions": "Arraste os cards para reordenar. Arraste a borda direita de um card para torná-lo mais largo ou mais estreito. Altere as colunas das linhas abaixo, se necessário, e depois Salvar ordem para aplicar.",
+		"saving": "Salvando...",
+		"save_order": "Salvar ordem",
+		"reset_defaults": "Redefinir para padrões",
+		"cancel": "Cancelar",
+		"row_layout": "Layout das linhas:",
+		"stats_row": "Linha de estatísticas",
+		"charts_row": "Linha de gráficos",
+		"columns_one": "{{count}} coluna",
+		"columns_other": "{{count}} colunas",
+		"hide_card": "Ocultar card",
+		"show_card": "Mostrar card"
+	},
+	"a11y": {
+		"card_width": "Largura do card em colunas",
+		"drag_to_reorder": "Arraste para reordenar"
+	},
+	"stats": {
+		"needs_reboots": "Precisam reiniciar",
+		"total_hosts": "Total de hosts",
+		"needs_updating": "Precisam atualizar",
+		"up_to_date": "Atualizados",
+		"outdated_packages": "Pacotes desatualizados",
+		"security_updates": "Atualizações de segurança",
+		"host_groups": "Grupos de hosts",
+		"users": "Usuários",
+		"repositories": "Repositórios",
+		"compliance": "Conformidade",
+		"compliance_count": "{{compliant}}/{{total}} hosts"
+	},
+	"errored": {
+		"title_one": "{{count}} host não reportou em {{threshold}}+",
+		"title_other": "{{count}} hosts não reportaram em {{threshold}}+",
+		"description": "Esses hosts podem estar offline ou com problemas de conectividade.",
+		"all_reporting": "Todos os hosts estão reportando normalmente",
+		"no_failures": "Nenhum host deixou de reportar nas últimas {{threshold}}."
+	},
+	"offline": {
+		"title_one": "{{count}} host obsoleto",
+		"title_other": "{{count}} hosts obsoletos",
+		"description": "Esses hosts não reportaram há mais de {{threshold}}.",
+		"all_reporting": "Todos os hosts estão reportando",
+		"no_stale": "Nenhum host está obsoleto."
+	},
+	"charts": {
+		"os_distribution": "Distribuição de SO",
+		"update_status": "Status de atualização",
+		"view_hosts_needing_updates": "Ver hosts que precisam de atualização",
+		"outdated_by_priority": "Pacotes desatualizados por prioridade",
+		"host_compliance_status": "Status de conformidade dos hosts",
+		"openscap_distribution": "Distribuição de benchmarks OpenSCAP",
+		"failures_by_severity": "Falhas por severidade",
+		"compliance_profiles": "Perfis de conformidade em uso",
+		"last_scan_age": "Idade da última verificação",
+		"dataset_hosts": "Hosts",
+		"axis_time_hours": "Horas",
+		"axis_date": "Data",
+		"axis_packages": "Número de pacotes",
+		"now": "Agora",
+		"unknown_date": "Data desconhecida",
+		"unknown": "Desconhecido",
+		"tooltip_no_data": "{{label}}: Sem dados",
+		"tooltip_value": "{{label}}: {{value}}",
+		"hour_am": "{{hour}} AM",
+		"hour_pm": "{{hour}} PM"
+	},
+	"package_trends": {
+		"title": "Tendências de pacotes ao longo do tempo",
+		"refresh": "Atualizar",
+		"trigger_stats_title": "Acionar coleta de estatísticas do sistema",
+		"refresh_data_title": "Atualizar dados",
+		"all_hosts": "Todos os hosts",
+		"loading_hosts": "Carregando hosts...",
+		"no_hosts": "Nenhum host disponível",
+		"job_ran": "Tarefa de coleta #{{jobId}} executada",
+		"no_data": "Nenhum dado disponível",
+		"periods": {
+			"last_24_hours": "Últimas 24 horas",
+			"last_7_days": "Últimos 7 dias",
+			"last_30_days": "Últimos 30 dias",
+			"last_90_days": "Últimos 90 dias",
+			"last_6_months": "Últimos 6 meses",
+			"last_year": "Último ano"
+		}
+	},
+	"quick_stats": {
+		"need_updates": "Precisam atualizar",
+		"security": "Segurança",
+		"security_title": "Problemas de segurança",
+		"reporting": "Reportando",
+		"avg_per_host": "Média/host",
+		"avg_per_host_title": "Média por host",
+		"outdated": "desatualizados"
+	},
+	"recent_users": {
+		"title": "Usuários recentes conectados",
+		"count_one": "{{count}} usuário",
+		"count_other": "{{count}} usuários",
+		"empty": "Nenhum usuário encontrado",
+		"username": "Nome de usuário",
+		"last_login": "Último acesso"
+	},
+	"recent_collection": {
+		"title": "Coleta recente",
+		"count_one": "{{count}} host",
+		"count_other": "{{count}} hosts",
+		"empty": "Nenhum host encontrado",
+		"host": "Host",
+		"last_update": "Última atualização"
+	},
+	"errors": {
+		"title": "Erro ao carregar o painel",
+		"load_failed": "Falha ao carregar as estatísticas do painel",
+		"try_again": "Tentar novamente"
+	},
+	"toasts": {
+		"welcome": "Bem-vindo ao PatchMon!"
+	},
+	"time": {
+		"minutes_one": "{{count}} minuto",
+		"minutes_other": "{{count}} minutos",
+		"hours_one": "{{count}} hora",
+		"hours_other": "{{count}} horas",
+		"days_one": "{{count}} dia",
+		"days_other": "{{count}} dias",
+		"hours_minutes": "{{hours}}h {{minutes}}m",
+		"days_hours": "{{days}}d {{hours}}h"
+	}
+}

@@ -1,0 +1,430 @@
+{
+	"host_down": "Host Agent Down",
+	"host_recovered": "Host Agent Recovered",
+	"channels": {
+		"title": "Notifications",
+		"subtitle": "Manage destinations, routing rules, scheduled reports, and delivery history",
+		"actions": {
+			"refreshLog": "Refresh log",
+			"addDestination": "Add destination",
+			"addEventRule": "Add event rule",
+			"newReport": "New report",
+			"test": "Test",
+			"edit": "Edit",
+			"save": "Save",
+			"create": "Create",
+			"cancel": "Cancel",
+			"back": "Back",
+			"next": "Next",
+			"add": "Add",
+			"createFailed": "Failed to create",
+			"updateFailed": "Failed to update",
+			"deleteFailed": "Failed to delete"
+		},
+		"common": {
+			"enabled": "Enabled"
+		},
+		"status": {
+			"active": "Active",
+			"disabled": "Disabled"
+		},
+		"eventTypes": {
+			"all": "All events",
+			"host_down": "Host Agent Down",
+			"host_recovered": "Host Agent Recovered",
+			"host_enrolled": "Host enrolled",
+			"host_deleted": "Host deleted",
+			"server_update": "Server update",
+			"agent_update": "Agent update",
+			"patch_run_started": "Patch run started",
+			"patch_run_completed": "Patch run completed",
+			"patch_run_failed": "Patch run failed",
+			"patch_run_approved": "Patch run approved",
+			"patch_run_cancelled": "Patch run cancelled",
+			"patch_reboot_required": "Reboot required",
+			"compliance_scan_completed": "Compliance scan completed",
+			"compliance_scan_failed": "Compliance scan failed",
+			"container_stopped": "Container stopped",
+			"container_started": "Container started",
+			"container_image_update_available": "Container image update available",
+			"ssh_session_started": "SSH session started",
+			"rdp_session_started": "RDP session started",
+			"host_security_updates_exceeded": "Security updates threshold exceeded",
+			"host_pending_updates_exceeded": "Pending updates threshold exceeded",
+			"user_login": "User login",
+			"user_login_failed": "Failed login attempt",
+			"account_locked": "Account locked",
+			"user_created": "User created",
+			"user_role_changed": "User role changed",
+			"user_tfa_disabled": "2FA disabled"
+		},
+		"severities": {
+			"informational": "Informational",
+			"warning": "Warning",
+			"error": "Error",
+			"critical": "Critical"
+		},
+		"reportSections": {
+			"executive_summary": "Executive summary",
+			"compliance_summary": "Compliance summary",
+			"recent_patch_runs": "Recent patch runs",
+			"hosts_offline": "Hosts / status",
+			"open_alerts": "Open alerts",
+			"hosts_by_updates": "Hosts by outstanding updates",
+			"top_security_packages": "Top outdated security packages"
+		},
+		"channelTypes": {
+			"webhook": {
+				"label": "Webhook",
+				"description": "Generic, Discord, Slack, Mattermost or Rocket.Chat"
+			},
+			"email": {
+				"label": "Email",
+				"description": "SMTP delivery"
+			},
+			"ntfy": {
+				"label": "ntfy",
+				"description": "Push notifications via ntfy.sh"
+			},
+			"internal": {
+				"label": "Internal Alerts",
+				"description": "Alert records in the Alerts tab"
+			}
+		},
+		"frequency": {
+			"daily": "Daily",
+			"weekdays": "Weekdays (Mon-Fri)",
+			"weekly": "Weekly",
+			"monthly": "Monthly"
+		},
+		"monthDay": {
+			"first": "1st",
+			"fifteenth": "15th",
+			"last": "Last day",
+			"or": "or",
+			"dayPlaceholder": "Day"
+		},
+		"days": {
+			"mon": "Mon",
+			"tue": "Tue",
+			"wed": "Wed",
+			"thu": "Thu",
+			"fri": "Fri",
+			"sat": "Sat",
+			"sun": "Sun"
+		},
+		"tls": {
+			"modes": {
+				"starttls": "STARTTLS (recommended)",
+				"tls": "Implicit TLS / SSL",
+				"none": "None (insecure)",
+				"auto": "Auto"
+			},
+			"help": {
+				"starttls": "Connect in plaintext on the submission port, then upgrade to TLS via the STARTTLS command. Typical port: 587.",
+				"tls": "Open a TLS connection from the start (sometimes called SMTPS). Typical port: 465.",
+				"none": "Send mail in plaintext. Credentials are only sent if you enable the unencrypted credentials option below. Use only for local relays you trust.",
+				"auto": "Try STARTTLS first, then fall back to implicit TLS on the same host and port. Mail is never sent in plaintext in this mode; if neither works, sending fails."
+			}
+		},
+		"schedule": {
+			"daily": "Daily at {{time}}",
+			"weekdays": "Weekdays at {{time}}",
+			"lastDayOfMonth": "Last day of month at {{time}}",
+			"dayOfMonth": "{{day}}{{ordinal}} of month at {{time}}",
+			"daysAt": "{{days}} at {{time}}",
+			"ordinals": {
+				"st": "st",
+				"nd": "nd",
+				"rd": "rd",
+				"th": "th"
+			}
+		},
+		"webhookHint": {
+			"autoDetect": "Discord, Slack, Mattermost and Rocket.Chat URLs are auto-detected for rich formatting",
+			"detectedPrefix": "Detected"
+		},
+		"destination": {
+			"title": {
+				"edit": "Edit destination",
+				"choose": "Choose channel",
+				"configure": "Configure destination"
+			},
+			"fields": {
+				"displayName": "Display name",
+				"displayNamePlaceholder": "e.g. Ops Discord",
+				"webhookUrl": "Webhook URL",
+				"webhookUrlPlaceholder": "https://hooks.slack.com/services/... or https://discord.com/api/webhooks/...",
+				"signingSecret": "Signing secret",
+				"signingSecretPlaceholder": "Optional HMAC signing secret",
+				"smtpHost": "SMTP host",
+				"smtpHostPlaceholder": "smtp.example.com",
+				"smtpPort": "SMTP port",
+				"username": "Username",
+				"password": "Password",
+				"from": "From",
+				"fromPlaceholder": "noreply@example.com",
+				"to": "To",
+				"toPlaceholder": "team@example.com",
+				"tlsMode": "TLS mode",
+				"serverUrl": "Server URL",
+				"serverUrlPlaceholder": "https://ntfy.sh",
+				"serverUrlHelp": "Leave empty for ntfy.sh",
+				"topic": "Topic",
+				"topicPlaceholder": "patchmon-alerts",
+				"accessToken": "Access token",
+				"optional": "Optional",
+				"optionalBasicAuth": "Optional basic auth"
+			},
+			"insecure": {
+				"warning": "This connection is not encrypted, so the username and password are sent in cleartext. Anyone on the network path between PatchMon and this relay can read them. Only do this on a trusted local network.",
+				"checkbox": "Send credentials over an unencrypted connection",
+				"blocked": "Until this is ticked, PatchMon will not authenticate over an unencrypted connection and sending will fail. Alternatively, clear the credentials or choose STARTTLS / Implicit TLS."
+			},
+			"validation": {
+				"displayNameRequired": "Display name is required",
+				"webhookUrlRequired": "Webhook URL is required",
+				"smtpRequired": "SMTP host, from, and to are required",
+				"insecureAuthBlocked": "Tick the unencrypted credentials option, clear the credentials, or pick STARTTLS / Implicit TLS before saving",
+				"topicRequired": "Topic is required"
+			},
+			"test": {
+				"saveFirst": "Save the destination first to send a test email",
+				"tooltip": "Sends using the last saved configuration. Save first to test unsaved changes.",
+				"sending": "Sending...",
+				"send": "Send test email",
+				"sent": "Test email sent successfully",
+				"stageFailed": "{{stage}} failed",
+				"failed": "Test failed",
+				"sendFailed": "Failed to send test email"
+			}
+		},
+		"route": {
+			"title": {
+				"edit": "Edit route",
+				"add": "Add route"
+			},
+			"fields": {
+				"destination": "Destination",
+				"destinationPlaceholder": "Select destination...",
+				"events": "Events",
+				"minSeverity": "Minimum severity",
+				"hostGroups": "Host groups",
+				"optionalAll": "(optional, leave empty for all)",
+				"individualHosts": "Individual hosts"
+			},
+			"validation": {
+				"chooseDestination": "Choose a destination"
+			}
+		},
+		"report": {
+			"title": {
+				"edit": "Edit report",
+				"new": "New scheduled report"
+			},
+			"fields": {
+				"reportName": "Report name",
+				"reportNamePlaceholder": "Weekly ops report",
+				"schedule": "Schedule",
+				"at": "at",
+				"serverTimezone": "Server timezone",
+				"sections": "Sections",
+				"deliverTo": "Deliver to",
+				"addDestinationFirst": "Add a destination first.",
+				"scopeToHostGroups": "Scope to host groups",
+				"topRows": "Top rows per section"
+			},
+			"validation": {
+				"nameRequired": "Report name is required",
+				"selectDay": "Select at least one day"
+			},
+			"run": {
+				"enableFirst": "Enable the report first",
+				"now": "Run now",
+				"scheduled": "Report scheduled for immediate delivery",
+				"failed": "Failed to run"
+			}
+		},
+		"destinations": {
+			"title": "Destinations",
+			"empty": "No destinations yet. Add one to start receiving notifications.",
+			"table": {
+				"channel": "Channel",
+				"name": "Name",
+				"enabled": "Enabled",
+				"actions": "Actions"
+			},
+			"builtIn": "Built-in",
+			"confirm": {
+				"deleteTitle": "Delete destination",
+				"deleteMessage": "Delete the destination \"{{name}}\"?",
+				"deleteConfirm": "Delete destination"
+			},
+			"toasts": {
+				"created": "Destination created",
+				"updated": "Destination updated",
+				"deleted": "Destination deleted"
+			}
+		},
+		"routes": {
+			"title": "Event Rules",
+			"empty": "No event rules yet. Event rules map events to destinations.",
+			"table": {
+				"destination": "Destination",
+				"events": "Events",
+				"minSeverity": "Min severity",
+				"scope": "Scope",
+				"status": "Status",
+				"actions": "Actions"
+			},
+			"scopeAll": "All",
+			"confirm": {
+				"deleteTitle": "Delete route",
+				"deleteMessage": "Delete this event route?",
+				"deleteConfirm": "Delete route"
+			},
+			"toasts": {
+				"created": "Route created",
+				"updated": "Route updated",
+				"deleted": "Route deleted"
+			}
+		},
+		"reports": {
+			"title": "Scheduled reports",
+			"empty": "No scheduled reports yet.",
+			"table": {
+				"name": "Name",
+				"schedule": "Schedule",
+				"nextRun": "Next run",
+				"status": "Status",
+				"actions": "Actions"
+			},
+			"confirm": {
+				"deleteTitle": "Delete scheduled report",
+				"deleteMessage": "Delete the scheduled report \"{{name}}\"?",
+				"deleteConfirm": "Delete report"
+			},
+			"toasts": {
+				"created": "Report created",
+				"updated": "Report updated",
+				"deleted": "Report deleted"
+			}
+		},
+		"log": {
+			"title": "Delivery log",
+			"empty": "No delivery entries yet.",
+			"table": {
+				"time": "Time",
+				"status": "Status",
+				"event": "Event",
+				"destination": "Destination",
+				"reference": "Reference",
+				"error": "Error"
+			},
+			"pagination": {
+				"page": "Page {{page}}",
+				"entries_one": "· {{count}} entry",
+				"entries_other": "· {{count}} entries"
+			}
+		},
+		"toasts": {
+			"testEnqueued": "Test notification enqueued",
+			"testFailed": "Test failed"
+		},
+		"noPermission": "You don't have permission to view this page."
+	},
+	"settings": {
+		"severities": {
+			"informational": "Info",
+			"warning": "Warning",
+			"error": "Error",
+			"critical": "Critical"
+		},
+		"units": {
+			"sec": "sec",
+			"min": "min",
+			"days": "days"
+		},
+		"table": {
+			"alertType": "Alert type",
+			"active": "Active",
+			"severity": "Severity",
+			"alertDelay": "Alert delay",
+			"frequency": "Frequency",
+			"threshold": "Threshold",
+			"autoAssign": "Auto-assign",
+			"retention": "Retention",
+			"autoResolve": "Auto-resolve"
+		},
+		"assign": {
+			"loading": "Loading...",
+			"noUsers": "No users found",
+			"selectUser": "Select user..."
+		},
+		"toasts": {
+			"settingsSaved": "Settings saved",
+			"saveFailed": "Failed to save",
+			"settingsApplied": "Settings applied",
+			"applyFailed": "Failed to apply",
+			"discarded": "Changes discarded"
+		},
+		"error": {
+			"loadFailed": "Failed to load alert settings",
+			"retry": "Try again"
+		},
+		"dirty": {
+			"message": "You have unsaved changes",
+			"discard": "Discard",
+			"apply": "Apply"
+		},
+		"tableSection": {
+			"title": "Alert type configurations",
+			"refresh": "Refresh"
+		},
+		"disabledPlaceholder": "Enable the alerts system using the master switch below to configure alert types.",
+		"cleanup": {
+			"title": "Alert cleanup",
+			"description": "Preview and delete alerts based on retention policies configured above.",
+			"preview": "Preview cleanup",
+			"previewFailed": "Failed to preview cleanup",
+			"deleteButton_one": "Delete {{count}} alert",
+			"deleteButton_other": "Delete {{count}} alerts",
+			"confirmTitle": "Delete alerts",
+			"confirmDelete_one": "Delete {{count}} alert?",
+			"confirmDelete_other": "Delete {{count}} alerts?",
+			"confirmLabel": "Delete alerts",
+			"completed_one": "Cleanup completed: {{count}} alert deleted",
+			"completed_other": "Cleanup completed: {{count}} alerts deleted",
+			"failed": "Cleanup failed: {{error}}",
+			"none": "No alerts need cleanup.",
+			"previewHeader_one": "{{count}} alert would be deleted:",
+			"previewHeader_other": "{{count}} alerts would be deleted:",
+			"andMore": "... and {{count}} more"
+		},
+		"master": {
+			"title": "Alerts system",
+			"description": "Master switch for the entire alerts system",
+			"enabled": "Enabled",
+			"disabled": "Disabled",
+			"disabledWarning": "All alert services are disabled. No alerts will be created."
+		}
+	},
+	"webhook_hint": {
+		"discord": {
+			"label": "Discord",
+			"detail": "Rich embed with severity colour"
+		},
+		"slack": {
+			"label": "Slack",
+			"detail": "Slack incoming-webhook message"
+		},
+		"slack_compatible": {
+			"label": "Mattermost or Rocket.Chat",
+			"detail": "Slack-compatible message"
+		},
+		"generic": {
+			"label": "Generic JSON",
+			"detail": "Structured PatchMon fields, plus a top-level text"
+		}
+	}
+}

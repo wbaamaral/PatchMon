@@ -15,6 +15,7 @@ import (
 	"github.com/PatchMon/PatchMon/server-source-code/internal/agentregistry"
 	hostctx "github.com/PatchMon/PatchMon/server-source-code/internal/context"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/database"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/middleware"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/models"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/notifications"
@@ -416,7 +417,7 @@ func (h *RDPHandler) WebsocketTunnelHandler() http.Handler {
 		// enforce origin policy here at the HTTP layer.
 		if !h.isOriginAllowed(r) {
 			h.log.Info("rdp tunnel origin rejected", "origin", r.Header.Get("Origin"))
-			http.Error(w, "Forbidden: origin not allowed", http.StatusForbidden)
+			http.Error(w, i18n.T(r.Context(), "error.origin_not_allowed"), http.StatusForbidden)
 			return
 		}
 		guacWSHandler.ServeHTTP(w, r)

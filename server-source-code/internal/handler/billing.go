@@ -56,23 +56,23 @@ func NewBillingHandler(cfg *config.Config, log *slog.Logger, hosts *store.HostsS
 // because that's an operator error worth surfacing rather than silently 404'ing.
 func (h *BillingHandler) gateOrNotFound(w http.ResponseWriter, r *http.Request, permissions *store.PermissionsStore) bool {
 	if h.cfg == nil || !h.cfg.AdminMode {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return false
 	}
 	role, _ := r.Context().Value(middleware.UserRoleKey).(string)
 	if role == "" {
 		// No authenticated role - surface as 404 (not 401) to stay consistent.
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return false
 	}
 	p, err := permissions.GetByRole(r.Context(), role)
 	if err != nil || p == nil || !p.CanManageBilling {
-		Error(w, http.StatusNotFound, "Not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.not_found")
 		return false
 	}
 	if strings.TrimSpace(h.cfg.BillingServiceURL) == "" {
 		h.log.Warn("billing endpoint called but BILLING_SERVICE_URL is not configured")
-		Error(w, http.StatusServiceUnavailable, "Billing service is not configured")
+		ErrorKey(w, r, http.StatusServiceUnavailable, "error.billing_not_configured")
 		return false
 	}
 	return true
@@ -106,7 +106,7 @@ func (h *BillingHandler) GetMyBilling(permissions *store.PermissionsStore) http.
 		if tenantID == "" {
 			// Managed deployment but no context entry - typical for single-context
 			// admin access. Return 404 so the frontend hides the page.
-			Error(w, http.StatusNotFound, "Billing not available for this context")
+			ErrorKey(w, r, http.StatusNotFound, "error.billing_unavailable")
 			return
 		}
 
@@ -116,7 +116,7 @@ func (h *BillingHandler) GetMyBilling(permissions *store.PermissionsStore) http.
 		req, err := http.NewRequestWithContext(r.Context(), http.MethodGet, target, nil)
 		if err != nil {
 			h.log.Error("billing proxy build request", "err", err)
-			Error(w, http.StatusInternalServerError, "Failed to build billing request")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_build_billing_request")
 			return
 		}
 		if h.cfg.BillingInternalSecret != "" {
@@ -126,7 +126,7 @@ func (h *BillingHandler) GetMyBilling(permissions *store.PermissionsStore) http.
 		resp, err := h.http.Do(req)
 		if err != nil {
 			h.log.Error("billing proxy request", "err", err)
-			Error(w, http.StatusBadGateway, "Billing service unreachable")
+			ErrorKey(w, r, http.StatusBadGateway, "error.billing_unreachable")
 			return
 		}
 		defer func() { _ = resp.Body.Close() }()
@@ -134,7 +134,7 @@ func (h *BillingHandler) GetMyBilling(permissions *store.PermissionsStore) http.
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 256*1024))
 		if err != nil {
 			h.log.Error("billing proxy read body", "err", err)
-			Error(w, http.StatusBadGateway, "Failed to read billing response")
+			ErrorKey(w, r, http.StatusBadGateway, "error.failed_to_read_billing_response")
 			return
 		}
 
@@ -172,7 +172,7 @@ func (h *BillingHandler) GetMyBillingPortal(permissions *store.PermissionsStore)
 		}
 		tenantID := currentTenantID(r)
 		if tenantID == "" {
-			Error(w, http.StatusNotFound, "Billing not available for this context")
+			ErrorKey(w, r, http.StatusNotFound, "error.billing_unavailable")
 			return
 		}
 
@@ -187,7 +187,7 @@ func (h *BillingHandler) GetMyBillingPortal(permissions *store.PermissionsStore)
 			"return_url": strings.TrimSpace(in.ReturnURL),
 		})
 		if err != nil {
-			Error(w, http.StatusInternalServerError, "Failed to encode billing request")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_encode_billing_request")
 			return
 		}
 
@@ -197,7 +197,7 @@ func (h *BillingHandler) GetMyBillingPortal(permissions *store.PermissionsStore)
 		req, err := http.NewRequestWithContext(r.Context(), http.MethodPost, target, bytes.NewReader(payload))
 		if err != nil {
 			h.log.Error("billing portal proxy build request", "err", err)
-			Error(w, http.StatusInternalServerError, "Failed to build billing request")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_build_billing_request")
 			return
 		}
 		req.Header.Set("Content-Type", "application/json")
@@ -208,7 +208,7 @@ func (h *BillingHandler) GetMyBillingPortal(permissions *store.PermissionsStore)
 		resp, err := h.http.Do(req)
 		if err != nil {
 			h.log.Error("billing portal proxy request", "err", err)
-			Error(w, http.StatusBadGateway, "Billing service unreachable")
+			ErrorKey(w, r, http.StatusBadGateway, "error.billing_unreachable")
 			return
 		}
 		defer func() { _ = resp.Body.Close() }()
@@ -216,7 +216,7 @@ func (h *BillingHandler) GetMyBillingPortal(permissions *store.PermissionsStore)
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 32*1024))
 		if err != nil {
 			h.log.Error("billing portal proxy read body", "err", err)
-			Error(w, http.StatusBadGateway, "Failed to read billing response")
+			ErrorKey(w, r, http.StatusBadGateway, "error.failed_to_read_billing_response")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -244,13 +244,13 @@ func (h *BillingHandler) proxyTierChange(permissions *store.PermissionsStore, pr
 		}
 		tenantID := currentTenantID(r)
 		if tenantID == "" {
-			Error(w, http.StatusNotFound, "Billing not available for this context")
+			ErrorKey(w, r, http.StatusNotFound, "error.billing_unavailable")
 			return
 		}
 
 		var in tierChangeInput
 		if err := decodeJSON(r, &in); err != nil {
-			Error(w, http.StatusBadRequest, "Invalid JSON body")
+			ErrorKey(w, r, http.StatusBadRequest, "error.invalid_json_body")
 			return
 		}
 		newTier := strings.ToLower(strings.TrimSpace(in.NewTier))
@@ -263,11 +263,11 @@ func (h *BillingHandler) proxyTierChange(permissions *store.PermissionsStore, pr
 			interval = "year"
 		}
 		if newTier != "starter" && newTier != "plus" && newTier != "max" {
-			Error(w, http.StatusBadRequest, "new_tier must be one of: starter, plus, max")
+			ErrorKey(w, r, http.StatusBadRequest, "error.new_tier_invalid")
 			return
 		}
 		if interval != "month" && interval != "year" {
-			Error(w, http.StatusBadRequest, "interval must be 'month' or 'year'")
+			ErrorKey(w, r, http.StatusBadRequest, "error.interval_invalid")
 			return
 		}
 
@@ -277,7 +277,7 @@ func (h *BillingHandler) proxyTierChange(permissions *store.PermissionsStore, pr
 			"interval":  interval,
 		})
 		if err != nil {
-			Error(w, http.StatusInternalServerError, "Failed to encode billing request")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_encode_billing_request")
 			return
 		}
 
@@ -290,7 +290,7 @@ func (h *BillingHandler) proxyTierChange(permissions *store.PermissionsStore, pr
 		req, err := http.NewRequestWithContext(r.Context(), http.MethodPost, target, bytes.NewReader(payload))
 		if err != nil {
 			h.log.Error("tier-change proxy build request", "err", err, "preview", preview)
-			Error(w, http.StatusInternalServerError, "Failed to build billing request")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_build_billing_request")
 			return
 		}
 		req.Header.Set("Content-Type", "application/json")
@@ -301,7 +301,7 @@ func (h *BillingHandler) proxyTierChange(permissions *store.PermissionsStore, pr
 		resp, err := h.http.Do(req)
 		if err != nil {
 			h.log.Error("tier-change proxy request", "err", err, "preview", preview)
-			Error(w, http.StatusBadGateway, "Billing service unreachable")
+			ErrorKey(w, r, http.StatusBadGateway, "error.billing_unreachable")
 			return
 		}
 		defer func() { _ = resp.Body.Close() }()
@@ -309,7 +309,7 @@ func (h *BillingHandler) proxyTierChange(permissions *store.PermissionsStore, pr
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
 		if err != nil {
 			h.log.Error("tier-change proxy read body", "err", err, "preview", preview)
-			Error(w, http.StatusBadGateway, "Failed to read billing response")
+			ErrorKey(w, r, http.StatusBadGateway, "error.failed_to_read_billing_response")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
@@ -357,12 +357,12 @@ func (h *BillingHandler) PostMyBillingSync(permissions *store.PermissionsStore) 
 		}
 		tenantID := currentTenantID(r)
 		if tenantID == "" {
-			Error(w, http.StatusNotFound, "Billing not available for this context")
+			ErrorKey(w, r, http.StatusNotFound, "error.billing_unavailable")
 			return
 		}
 		if strings.TrimSpace(h.cfg.ProvisionerURL) == "" {
 			h.log.Warn("billing sync called but PROVISIONER_URL is not configured")
-			Error(w, http.StatusServiceUnavailable, "Provisioner is not configured")
+			ErrorKey(w, r, http.StatusServiceUnavailable, "error.provisioner_not_configured")
 			return
 		}
 
@@ -378,7 +378,7 @@ func (h *BillingHandler) PostMyBillingSync(permissions *store.PermissionsStore) 
 		req, err := http.NewRequestWithContext(r.Context(), http.MethodPost, target, nil)
 		if err != nil {
 			h.log.Error("billing sync proxy build request", "err", err)
-			Error(w, http.StatusInternalServerError, "Failed to build sync request")
+			ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_build_sync_request")
 			return
 		}
 		req.Header.Set("Content-Type", "application/json")
@@ -389,7 +389,7 @@ func (h *BillingHandler) PostMyBillingSync(permissions *store.PermissionsStore) 
 		resp, err := client.Do(req)
 		if err != nil {
 			h.log.Error("billing sync proxy request", "err", err)
-			Error(w, http.StatusBadGateway, "Provisioner unreachable")
+			ErrorKey(w, r, http.StatusBadGateway, "error.provisioner_unreachable")
 			return
 		}
 		defer func() { _ = resp.Body.Close() }()
@@ -397,7 +397,7 @@ func (h *BillingHandler) PostMyBillingSync(permissions *store.PermissionsStore) 
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
 		if err != nil {
 			h.log.Error("billing sync proxy read body", "err", err)
-			Error(w, http.StatusBadGateway, "Failed to read sync response")
+			ErrorKey(w, r, http.StatusBadGateway, "error.failed_to_read_sync_response")
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")

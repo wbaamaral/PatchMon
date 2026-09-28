@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/PatchMon/PatchMon/server-source-code/internal/agentregistry"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/patchstream"
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/websocket"
@@ -40,12 +41,12 @@ const patchStreamPingInterval = 30 * time.Second
 // tenant, so looking up by ID will fail for cross-tenant access.
 func (h *PatchingHandler) ServeRunStream(w http.ResponseWriter, r *http.Request) {
 	if h.hub == nil {
-		http.Error(w, "Streaming not available", http.StatusServiceUnavailable)
+		http.Error(w, i18n.T(r.Context(), "error.streaming_not_available"), http.StatusServiceUnavailable)
 		return
 	}
 	patchRunID := chi.URLParam(r, "id")
 	if !isValidPatchUUID(patchRunID) {
-		http.Error(w, "Invalid run ID", http.StatusBadRequest)
+		http.Error(w, i18n.T(r.Context(), "error.invalid_run_id"), http.StatusBadRequest)
 		return
 	}
 
@@ -53,7 +54,7 @@ func (h *PatchingHandler) ServeRunStream(w http.ResponseWriter, r *http.Request)
 	// reject the upgrade instead of completing it.
 	run, err := h.patchRuns.GetByID(r.Context(), patchRunID)
 	if err != nil || run == nil {
-		http.Error(w, "Patch run not found", http.StatusNotFound)
+		http.Error(w, i18n.T(r.Context(), "error.patch_run_not_found"), http.StatusNotFound)
 		return
 	}
 

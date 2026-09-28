@@ -22,6 +22,7 @@ import {
 	Wrench,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import PatchWizard from "../components/PatchWizard";
 import { useAuth } from "../contexts/AuthContext";
@@ -43,6 +44,7 @@ const isHostPatchable = (host) =>
 	!(host.osType || host.os_type || "").toLowerCase().includes("windows");
 
 const PackageDetail = () => {
+	const { t } = useTranslation("packages");
 	const { packageId } = useParams();
 	const decodedPackageId = decodeURIComponent(packageId || "");
 	const navigate = useNavigate();
@@ -92,11 +94,7 @@ const PackageDetail = () => {
 		queryClient.invalidateQueries({ queryKey: ["patching-runs"] });
 		const runs = info?.runs || [];
 		if (mode === "approval") {
-			toast.success(
-				runs.length === 1
-					? "Submitted 1 run for approval"
-					: `Submitted ${runs.length} runs for approval`,
-			);
+			toast.success(t("toasts.submitted_runs", { count: runs.length }));
 			return;
 		}
 		const immediate = runs.filter((r) => r.immediate);
@@ -105,7 +103,7 @@ const PackageDetail = () => {
 			return;
 		}
 		if (runs.length > 0) {
-			toast.success("Patch queued. View progress in Patching.");
+			toast.success(t("toasts.patch_queued"));
 		}
 	};
 
@@ -235,17 +233,17 @@ const PackageDetail = () => {
 						<AlertTriangle className="h-5 w-5 text-danger-400" />
 						<div className="ml-3">
 							<h3 className="text-sm font-medium text-danger-800">
-								Error loading package
+								{t("detail.errors.loading_package")}
 							</h3>
 							<p className="text-sm text-danger-700 mt-1">
-								{packageError.message || "Failed to load package details"}
+								{packageError.message || t("detail.errors.load_package")}
 							</p>
 							<button
 								type="button"
 								onClick={() => refetchPackage()}
 								className="mt-2 btn-danger text-xs"
 							>
-								Try again
+								{t("actions.try_again")}
 							</button>
 						</div>
 					</div>
@@ -260,7 +258,7 @@ const PackageDetail = () => {
 				<div className="text-center py-8">
 					<Package className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 					<p className="text-secondary-500 dark:text-white">
-						Package not found
+						{t("detail.empty.package_not_found")}
 					</p>
 				</div>
 			</div>
@@ -281,8 +279,10 @@ const PackageDetail = () => {
 						className="flex items-center gap-2 text-secondary-600 hover:text-secondary-900 dark:text-white dark:hover:text-white transition-colors text-sm sm:text-base"
 					>
 						<ArrowLeft className="h-4 w-4" />
-						<span className="hidden sm:inline">Back to Packages</span>
-						<span className="sm:hidden">Back</span>
+						<span className="hidden sm:inline">
+							{t("actions.back_to_packages")}
+						</span>
+						<span className="sm:hidden">{t("actions.back")}</span>
 					</button>
 					<ChevronRight className="h-4 w-4 text-secondary-400 hidden sm:block" />
 					<h1 className="text-xl sm:text-2xl font-semibold text-secondary-900 dark:text-white truncate">
@@ -292,13 +292,15 @@ const PackageDetail = () => {
 						stats.securityUpdates > 0 ? (
 							<span className="badge-danger flex items-center gap-1">
 								<Shield className="h-3 w-3" />
-								Security Update Available
+								{t("status.security_update_available")}
 							</span>
 						) : (
-							<span className="badge-warning">Update Available</span>
+							<span className="badge-warning">
+								{t("status.update_available")}
+							</span>
 						)
 					) : (
-						<span className="badge-success">Up to Date</span>
+						<span className="badge-success">{t("status.up_to_date")}</span>
 					)}
 				</div>
 				<button
@@ -310,7 +312,7 @@ const PackageDetail = () => {
 					<RefreshCw
 						className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
 					/>
-					Refresh
+					{t("actions.refresh")}
 				</button>
 			</div>
 
@@ -322,10 +324,10 @@ const PackageDetail = () => {
 						<Download className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0" />
 						<div className="min-w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Latest Version
+								{t("detail.cards.latest_version")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white truncate">
-								{pkg.latest_version || "Unknown"}
+								{pkg.latest_version || t("labels.unknown")}
 							</p>
 						</div>
 					</div>
@@ -337,10 +339,12 @@ const PackageDetail = () => {
 						<Calendar className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0" />
 						<div className="min-w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Updated
+								{t("detail.cards.updated")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
-								{pkg.updated_at ? formatRelativeTime(pkg.updated_at) : "Never"}
+								{pkg.updated_at
+									? formatRelativeTime(pkg.updated_at)
+									: t("labels.never")}
 							</p>
 						</div>
 					</div>
@@ -352,7 +356,7 @@ const PackageDetail = () => {
 						<Server className="h-5 w-5 text-primary-600 mr-2 flex-shrink-0" />
 						<div className="min-w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Hosts with Package
+								{t("detail.cards.hosts_with_package")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{stats.totalInstalls || 0}
@@ -367,7 +371,7 @@ const PackageDetail = () => {
 						<Shield className="h-5 w-5 text-success-600 mr-2 flex-shrink-0" />
 						<div className="min-w-0 flex-1">
 							<p className="text-sm text-secondary-500 dark:text-white">
-								Up to Date
+								{t("detail.cards.up_to_date")}
 							</p>
 							<p className="text-xl font-semibold text-secondary-900 dark:text-white">
 								{(stats.totalInstalls || 0) - (stats.updatesNeeded || 0)}
@@ -381,7 +385,7 @@ const PackageDetail = () => {
 			{pkg.sourceRepos?.length > 0 && (
 				<div className="card p-4">
 					<h3 className="text-sm font-medium text-secondary-500 dark:text-secondary-400 mb-2">
-						Source Repositories
+						{t("detail.sections.source_repositories")}
 					</h3>
 					<div className="flex flex-wrap gap-2">
 						{pkg.sourceRepos.map((repo) => (
@@ -402,23 +406,23 @@ const PackageDetail = () => {
 			{/* Description */}
 			<div className="card p-4">
 				<h4 className="text-sm font-medium text-secondary-600 dark:text-white mb-3 flex items-center gap-2">
-					Description
+					{t("detail.sections.description")}
 					<div className="relative group">
 						<Info className="dark:text-white" />
 						<div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 hidden group-hover:block w-max max-w-xs px-2 py-1 bg-secondary-900 text-white text-xs rounded shadow-lg z-[100]">
-							The description was pulled directly from the host package manager.
+							{t("detail.sections.description_tooltip")}
 						</div>
 					</div>
 				</h4>
 				<p className="text-sm text-secondary-600 dark:text-white">
-					{pkg.description || "No description available."}
+					{pkg.description || t("detail.empty.no_description")}
 				</p>
 			</div>
 
 			{/* Hosts / Activity Tabs */}
 			<div className="card">
 				<div className="border-b border-secondary-200 dark:border-secondary-600">
-					<nav className="-mb-px flex" aria-label="Tabs">
+					<nav className="-mb-px flex" aria-label={t("detail.tabs.aria_label")}>
 						<button
 							type="button"
 							onClick={() => setActiveTab("hosts")}
@@ -429,7 +433,7 @@ const PackageDetail = () => {
 							}`}
 						>
 							<Server className="h-4 w-4" />
-							Hosts
+							{t("detail.tabs.hosts")}
 						</button>
 						<button
 							type="button"
@@ -441,7 +445,7 @@ const PackageDetail = () => {
 							}`}
 						>
 							<History className="h-4 w-4" />
-							Activity
+							{t("detail.tabs.activity")}
 						</button>
 					</nav>
 				</div>
@@ -454,7 +458,7 @@ const PackageDetail = () => {
 								<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400" />
 								<input
 									type="text"
-									placeholder="Search hosts..."
+									placeholder={t("detail.search_placeholder")}
 									value={searchTerm}
 									onChange={(e) => setSearchTerm(e.target.value)}
 									className="w-full pl-10 pr-4 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white placeholder-secondary-500 dark:placeholder-secondary-400 text-sm sm:text-base"
@@ -471,7 +475,7 @@ const PackageDetail = () => {
 									}}
 									className="h-4 w-4 rounded border-secondary-300 dark:border-secondary-600 text-primary-600 focus:ring-primary-500"
 								/>
-								Only pending update
+								{t("detail.filters.only_pending")}
 							</label>
 							{/* Patch selected button */}
 							{canManageHosts() && selectedHostIds.size > 0 && (
@@ -479,10 +483,15 @@ const PackageDetail = () => {
 									type="button"
 									onClick={() => setShowMultiHostModal(true)}
 									className="btn-primary inline-flex items-center gap-2 whitespace-nowrap"
-									title={`Patch ${selectedHostIds.size} selected host(s) with ${pkg.name}`}
+									title={t("detail.actions.patch_selected_title", {
+										count: selectedHostIds.size,
+										package: pkg.name,
+									})}
 								>
 									<Wrench className="h-4 w-4" />
-									Patch selected ({selectedHostIds.size})
+									{t("actions.patch_selected", {
+										count: selectedHostIds.size,
+									})}
 								</button>
 							)}
 						</div>
@@ -499,10 +508,10 @@ const PackageDetail = () => {
 											<AlertTriangle className="h-5 w-5 text-danger-400" />
 											<div className="ml-3">
 												<h3 className="text-sm font-medium text-danger-800">
-													Error loading hosts
+													{t("detail.errors.loading_hosts")}
 												</h3>
 												<p className="text-sm text-danger-700 mt-1">
-													{hostsError.message || "Failed to load hosts"}
+													{hostsError.message || t("detail.errors.load_hosts")}
 												</p>
 											</div>
 										</div>
@@ -513,10 +522,10 @@ const PackageDetail = () => {
 									<Server className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 									<p className="text-secondary-500 dark:text-white">
 										{debouncedSearch
-											? "No hosts match your search"
+											? t("detail.empty.no_hosts_match")
 											: onlyPending
-												? "All hosts are up to date for this package"
-												: "No hosts have this package installed"}
+												? t("detail.empty.all_up_to_date")
+												: t("detail.empty.no_hosts_have_package")}
 									</p>
 								</div>
 							) : (
@@ -550,8 +559,8 @@ const PackageDetail = () => {
 															className="flex items-center justify-center p-1 -ml-1 rounded hover:bg-secondary-100 dark:hover:bg-secondary-700"
 															aria-label={
 																selectedHostIds.has(host.hostId)
-																	? "Deselect host"
-																	: "Select host"
+																	? t("actions.deselect_host")
+																	: t("actions.select_host")
 															}
 														>
 															{selectedHostIds.has(host.hostId) ? (
@@ -574,16 +583,16 @@ const PackageDetail = () => {
 													<div className="flex flex-col gap-2 flex-1">
 														<div className="flex items-center gap-2">
 															<span className="text-xs text-secondary-500 dark:text-white">
-																Version:
+																{t("labels.version")}
 															</span>
 															<span className="text-sm text-secondary-900 dark:text-white font-mono">
-																{host.currentVersion || "Unknown"}
+																{host.currentVersion || t("labels.unknown")}
 															</span>
 														</div>
 														{host.sourceRepoName && (
 															<div className="flex items-center gap-2">
 																<span className="text-xs text-secondary-500 dark:text-white">
-																	Repo:
+																	{t("labels.repo")}
 																</span>
 																<span className="badge-secondary text-xs">
 																	{formatRepoName(host.sourceRepoName)}
@@ -592,22 +601,22 @@ const PackageDetail = () => {
 														)}
 														<div className="flex items-center gap-2">
 															<span className="text-xs text-secondary-500 dark:text-white">
-																Status:
+																{t("labels.status")}
 															</span>
 															{host.needsUpdate ? (
 																host.isSecurityUpdate ? (
 																	<span className="badge-danger flex items-center gap-1 text-xs">
 																		<Shield className="h-3 w-3" />
-																		Security Update
+																		{t("status.security_update")}
 																	</span>
 																) : (
 																	<span className="badge-warning text-xs">
-																		Update Available
+																		{t("status.update_available")}
 																	</span>
 																)
 															) : (
 																<span className="badge-success text-xs">
-																	Up to Date
+																	{t("status.up_to_date")}
 																</span>
 															)}
 														</div>
@@ -634,17 +643,20 @@ const PackageDetail = () => {
 																>
 																	<Wrench className="h-3 w-3" />
 																	{patchingHostId === host.hostId
-																		? "Queuing…"
-																		: "Patch"}
+																		? t("actions.queuing")
+																		: t("actions.patch")}
 																</button>
 															)}
 														{host.needsReboot && (
 															<span
 																className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-																title={host.rebootReason || "Reboot required"}
+																title={
+																	host.rebootReason ||
+																	t("detail.actions.reboot_required_title")
+																}
 															>
 																<RotateCcw className="h-3 w-3" />
-																Reboot Required
+																{t("status.reboot_required")}
 															</span>
 														)}
 														{host.lastUpdate && (
@@ -672,15 +684,15 @@ const PackageDetail = () => {
 																className="flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
 																aria-label={
 																	allOnPageSelected
-																		? "Deselect all patchable hosts on this page"
-																		: "Select all patchable hosts on this page"
+																		? t("actions.deselect_all_patchable")
+																		: t("actions.select_all_patchable")
 																}
 																title={
 																	patchableOnPage.length === 0
-																		? "No patchable hosts on this page"
+																		? t("actions.no_patchable_title")
 																		: allOnPageSelected
-																			? "Deselect all on page"
-																			: "Select all on page"
+																			? t("actions.deselect_all_page")
+																			: t("actions.select_all_page")
 																}
 															>
 																{allOnPageSelected ? (
@@ -694,26 +706,26 @@ const PackageDetail = () => {
 														</th>
 													)}
 													<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-														Host
+														{t("detail.table.host")}
 													</th>
 													<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-														Current Version
+														{t("detail.table.current_version")}
 													</th>
 													<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-														Status
+														{t("detail.table.status")}
 													</th>
 													<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-														Source Repo
+														{t("detail.table.source_repo")}
 													</th>
 													<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-														Last Updated
+														{t("detail.table.last_updated")}
 													</th>
 													<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-														Reboot Required
+														{t("detail.table.reboot_required")}
 													</th>
 													{canManageHosts() && (
 														<th className="px-6 py-3 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-															Actions
+															{t("detail.table.actions")}
 														</th>
 													)}
 												</tr>
@@ -737,8 +749,8 @@ const PackageDetail = () => {
 																		className="flex items-center justify-center"
 																		aria-label={
 																			selectedHostIds.has(host.hostId)
-																				? "Deselect host"
-																				: "Select host"
+																				? t("actions.deselect_host")
+																				: t("actions.select_host")
 																		}
 																	>
 																		{selectedHostIds.has(host.hostId) ? (
@@ -761,23 +773,23 @@ const PackageDetail = () => {
 															</div>
 														</td>
 														<td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-900 dark:text-white">
-															{host.currentVersion || "Unknown"}
+															{host.currentVersion || t("labels.unknown")}
 														</td>
 														<td className="px-6 py-4 whitespace-nowrap">
 															{host.needsUpdate ? (
 																host.isSecurityUpdate ? (
 																	<span className="badge-danger flex items-center gap-1 w-fit">
 																		<Shield className="h-3 w-3" />
-																		Security Update
+																		{t("status.security_update")}
 																	</span>
 																) : (
 																	<span className="badge-warning w-fit">
-																		Update Available
+																		{t("status.update_available")}
 																	</span>
 																)
 															) : (
 																<span className="badge-success w-fit">
-																	Up to Date
+																	{t("status.up_to_date")}
 																</span>
 															)}
 														</td>
@@ -795,20 +807,23 @@ const PackageDetail = () => {
 														<td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-500 dark:text-white">
 															{host.lastUpdate
 																? formatRelativeTime(host.lastUpdate)
-																: "Never"}
+																: t("labels.never")}
 														</td>
 														<td className="px-6 py-4 whitespace-nowrap">
 															{host.needsReboot ? (
 																<span
 																	className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-																	title={host.rebootReason || "Reboot required"}
+																	title={
+																		host.rebootReason ||
+																		t("detail.actions.reboot_required_title")
+																	}
 																>
 																	<RotateCcw className="h-3 w-3" />
-																	Required
+																	{t("status.required")}
 																</span>
 															) : (
 																<span className="text-sm text-secondary-500 dark:text-white">
-																	No
+																	{t("status.no")}
 																</span>
 															)}
 														</td>
@@ -836,8 +851,8 @@ const PackageDetail = () => {
 																	>
 																		<Wrench className="h-3 w-3" />
 																		{patchingHostId === host.hostId
-																			? "Queuing…"
-																			: "Patch"}
+																			? t("actions.queuing")
+																			: t("actions.patch")}
 																	</button>
 																) : (
 																	<span className="text-sm text-secondary-500 dark:text-white">
@@ -857,7 +872,7 @@ const PackageDetail = () => {
 										<div className="px-4 sm:px-6 py-3 bg-white dark:bg-secondary-800 border-t border-secondary-200 dark:border-secondary-600 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-0">
 											<div className="flex items-center gap-2">
 												<span className="text-xs sm:text-sm text-secondary-700 dark:text-white">
-													Rows per page:
+													{t("pagination.rows_per_page")}
 												</span>
 												<select
 													value={pageSize}
@@ -879,10 +894,13 @@ const PackageDetail = () => {
 													disabled={currentPage === 1}
 													className="px-3 py-1 text-xs sm:text-sm border border-secondary-300 dark:border-secondary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 dark:hover:bg-secondary-700"
 												>
-													Previous
+													{t("pagination.previous")}
 												</button>
 												<span className="text-xs sm:text-sm text-secondary-700 dark:text-white">
-													Page {currentPage} of {totalPages}
+													{t("pagination.page_of", {
+														current: currentPage,
+														total: totalPages,
+													})}
 												</span>
 												<button
 													type="button"
@@ -890,7 +908,7 @@ const PackageDetail = () => {
 													disabled={currentPage === totalPages}
 													className="px-3 py-1 text-xs sm:text-sm border border-secondary-300 dark:border-secondary-600 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary-50 dark:hover:bg-secondary-700"
 												>
-													Next
+													{t("pagination.next")}
 												</button>
 											</div>
 										</div>
@@ -911,10 +929,10 @@ const PackageDetail = () => {
 							<div className="text-center py-12">
 								<History className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
 								<p className="text-secondary-500 dark:text-white">
-									No upgrade activity for this package yet
+									{t("detail.empty.no_activity")}
 								</p>
 								<p className="text-sm text-secondary-400 dark:text-secondary-300 mt-1">
-									Completed patch runs will appear here
+									{t("detail.empty.no_activity_hint")}
 								</p>
 							</div>
 						) : (
@@ -925,7 +943,7 @@ const PackageDetail = () => {
 										className="flex flex-wrap items-center gap-2 py-2 border-b border-secondary-200 dark:border-secondary-600 last:border-0"
 									>
 										<span className="text-sm text-secondary-600 dark:text-secondary-400">
-											Upgraded on host:
+											{t("detail.activity.upgraded_on_host")}
 										</span>
 										<Link
 											to={`/hosts/${a.host_id}`}
@@ -945,7 +963,7 @@ const PackageDetail = () => {
 											to={`/patching/runs/${a.run_id}`}
 											className="text-sm text-primary-600 dark:text-primary-400 hover:underline ml-auto"
 										>
-											View run
+											{t("actions.view_run")}
 										</Link>
 									</div>
 								))}

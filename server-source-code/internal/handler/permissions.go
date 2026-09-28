@@ -23,7 +23,7 @@ func NewPermissionsHandler(permissions *store.PermissionsStore) *PermissionsHand
 func (h *PermissionsHandler) GetRoles(w http.ResponseWriter, r *http.Request) {
 	roles, err := h.permissions.ListRoles(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch role permissions")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_role_permissions")
 		return
 	}
 	data := make([]map[string]interface{}, len(roles))
@@ -62,12 +62,12 @@ func (h *PermissionsHandler) GetRoles(w http.ResponseWriter, r *http.Request) {
 func (h *PermissionsHandler) GetRole(w http.ResponseWriter, r *http.Request) {
 	role := chi.URLParam(r, "role")
 	if role == "" {
-		Error(w, http.StatusBadRequest, "Role is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.role_required")
 		return
 	}
 	p, err := h.permissions.GetByRole(r.Context(), role)
 	if err != nil || p == nil {
-		Error(w, http.StatusNotFound, "Role not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.role_not_found")
 		return
 	}
 	JSON(w, http.StatusOK, roleToResponse(p))
@@ -77,14 +77,14 @@ func (h *PermissionsHandler) GetRole(w http.ResponseWriter, r *http.Request) {
 func (h *PermissionsHandler) UpdateRole(w http.ResponseWriter, r *http.Request) {
 	role := chi.URLParam(r, "role")
 	if role == "" {
-		Error(w, http.StatusBadRequest, "Role is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.role_required")
 		return
 	}
 	immutableRoles := map[string]bool{
 		"superadmin": true, "admin": true, "user": true,
 	}
 	if immutableRoles[role] {
-		Error(w, http.StatusBadRequest, "Cannot modify built-in role permissions")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_modify_builtin_role")
 		return
 	}
 	var req struct {
@@ -110,7 +110,7 @@ func (h *PermissionsHandler) UpdateRole(w http.ResponseWriter, r *http.Request) 
 		CanManageBilling        *bool `json:"can_manage_billing"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	boolVal := func(b *bool) bool {
@@ -143,7 +143,7 @@ func (h *PermissionsHandler) UpdateRole(w http.ResponseWriter, r *http.Request) 
 		CanManageBilling:        boolVal(req.CanManageBilling),
 	}
 	if err := h.permissions.UpsertRole(r.Context(), p); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update role permissions")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_role_permissions")
 		return
 	}
 	updated, _ := h.permissions.GetByRole(r.Context(), role)
@@ -161,23 +161,23 @@ func (h *PermissionsHandler) UpdateRole(w http.ResponseWriter, r *http.Request) 
 func (h *PermissionsHandler) DeleteRole(w http.ResponseWriter, r *http.Request) {
 	role := chi.URLParam(r, "role")
 	if role == "" {
-		Error(w, http.StatusBadRequest, "Role is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.role_required")
 		return
 	}
 	builtInRoles := map[string]bool{
 		"superadmin": true, "admin": true, "host_manager": true, "readonly": true, "user": true,
 	}
 	if builtInRoles[role] {
-		Error(w, http.StatusBadRequest, "Cannot delete built-in role")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_delete_builtin_role")
 		return
 	}
 	count, _ := h.permissions.CountUsersByRole(r.Context(), role)
 	if count > 0 {
-		Error(w, http.StatusBadRequest, "Cannot delete role: users are assigned to it")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_delete_role_with_users")
 		return
 	}
 	if err := h.permissions.DeleteRole(r.Context(), role); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete role")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_role")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]string{"message": "Role deleted successfully"})
@@ -209,7 +209,7 @@ func roleToResponse(p *models.RolePermission) map[string]interface{} {
 func (h *PermissionsHandler) UserPermissions(w http.ResponseWriter, r *http.Request) {
 	role, _ := r.Context().Value(middleware.UserRoleKey).(string)
 	if role == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 	p, err := h.permissions.GetByRole(r.Context(), role)
@@ -219,7 +219,7 @@ func (h *PermissionsHandler) UserPermissions(w http.ResponseWriter, r *http.Requ
 			JSON(w, http.StatusOK, fullPermissions())
 			return
 		}
-		Error(w, http.StatusForbidden, "No permissions found")
+		ErrorKey(w, r, http.StatusForbidden, "error.no_permissions")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]bool{

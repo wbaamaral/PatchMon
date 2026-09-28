@@ -1,15 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, Edit2, HelpCircle, Variable } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TimezoneSelect } from "../../components/TimezoneSelect";
 import { useToast } from "../../contexts/ToastContext";
 import { settingsAPI } from "../../utils/api";
-
-const sourceLabels = {
-	env: ".env",
-	db: "Database",
-	default: "Default",
-};
 
 const LOG_LEVEL_OPTIONS = ["debug", "info", "warn", "error"];
 
@@ -55,11 +50,17 @@ const getSelectOptionsForVar = (v) => {
 };
 
 const SourceBadge = ({ source }) => {
+	const { t } = useTranslation("settings");
 	const colors = {
 		env: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
 		db: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
 		default:
 			"bg-secondary-100 text-secondary-700 dark:bg-secondary-700 dark:text-secondary-300",
+	};
+	const sourceLabels = {
+		env: t("environment.source.env"),
+		db: t("environment.source.db"),
+		default: t("environment.source.default"),
 	};
 	return (
 		<span
@@ -71,6 +72,7 @@ const SourceBadge = ({ source }) => {
 };
 
 const EnvironmentSettings = () => {
+	const { t } = useTranslation("settings");
 	const queryClient = useQueryClient();
 	const toast = useToast();
 	const [editingKey, setEditingKey] = useState(null);
@@ -120,12 +122,12 @@ const EnvironmentSettings = () => {
 			await queryClient.invalidateQueries({ queryKey: ["environment-config"] });
 			setEditingKey(null);
 			setEditValue("");
-			toast.success(
-				"Saved. Restart the application for changes to take effect.",
-			);
+			toast.success(t("environment.toasts.saved"));
 		},
 		onError: (err) => {
-			toast.error(err.response?.data?.error || "Failed to update");
+			toast.error(
+				err.response?.data?.error || t("environment.toasts.update_failed"),
+			);
 		},
 	});
 
@@ -186,10 +188,10 @@ const EnvironmentSettings = () => {
 					<AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0 mt-0.5" />
 					<div className="ml-3">
 						<h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-							Error loading environment config
+							{t("environment.errors.title")}
 						</h3>
 						<p className="mt-1 text-sm text-red-700 dark:text-red-300">
-							{error.message || "Failed to load settings"}
+							{error.message || t("environment.errors.load_failed")}
 						</p>
 					</div>
 				</div>
@@ -203,20 +205,21 @@ const EnvironmentSettings = () => {
 				<Variable className="h-6 w-6 text-primary-600 mr-3" />
 				<div>
 					<h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
-						Environment Variables
+						{t("environment.title")}
 					</h2>
 					<p className="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
-						<strong>Priority 1</strong> - .env file •{" "}
-						<strong>Priority 2</strong> - Database settings (configurable below){" "}
-						• <strong>Priority 3</strong> - Coded defaults
+						<strong>{t("environment.priority_1")}</strong> -{" "}
+						{t("environment.priority_1_desc")} •{" "}
+						<strong>{t("environment.priority_2")}</strong> -{" "}
+						{t("environment.priority_2_desc")} •{" "}
+						<strong>{t("environment.priority_3")}</strong> -{" "}
+						{t("environment.priority_3_desc")}
 					</p>
 					<p className="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
-						Variables marked &quot;Configure via .env&quot; are
-						startup/deployment related and can only be changed in the .env file
-						(not in the database).
+						{t("environment.env_only_note")}
 					</p>
 					<p className="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
-						If any changes are made then please restart the PatchMon server.
+						{t("environment.restart_note")}
 					</p>
 				</div>
 			</div>
@@ -227,12 +230,10 @@ const EnvironmentSettings = () => {
 						<AlertTriangle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
 						<div className="ml-3">
 							<h3 className="text-sm font-medium text-amber-800 dark:text-amber-200">
-								Misconfiguration detected
+								{t("environment.conflict.title")}
 							</h3>
 							<p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
-								Some variables have both env and database values. Env takes
-								precedence. Remove from .env for the database value to take
-								effect.
+								{t("environment.conflict.body")}
 							</p>
 						</div>
 					</div>
@@ -245,22 +246,22 @@ const EnvironmentSettings = () => {
 						<thead className="bg-secondary-50 dark:bg-secondary-700">
 							<tr>
 								<th className="px-3 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-									Variable
+									{t("environment.table.variable")}
 								</th>
 								<th className="px-2 py-2 text-center text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider w-8">
-									Help
+									{t("environment.table.help")}
 								</th>
 								<th className="px-3 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-									Value
+									{t("environment.table.value")}
 								</th>
 								<th className="px-3 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-									Default
+									{t("environment.table.default")}
 								</th>
 								<th className="px-3 py-2 text-left text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-									Source
+									{t("environment.table.source")}
 								</th>
 								<th className="px-3 py-2 text-right text-xs font-medium text-secondary-500 dark:text-white uppercase tracking-wider">
-									Action
+									{t("environment.table.action")}
 								</th>
 							</tr>
 						</thead>
@@ -301,7 +302,7 @@ const EnvironmentSettings = () => {
 																)
 															}
 															className="inline-flex cursor-help text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-300 rounded p-0.5"
-															aria-label="Show help"
+															aria-label={t("environment.tooltips.show_help")}
 														>
 															<HelpCircle className="h-4 w-4" />
 														</button>
@@ -397,14 +398,14 @@ const EnvironmentSettings = () => {
 															disabled={updateMutation.isPending}
 															className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400"
 														>
-															Save
+															{t("environment.actions.save")}
 														</button>
 														<button
 															type="button"
 															onClick={handleCancel}
 															className="text-sm text-secondary-500 hover:text-secondary-700 dark:text-secondary-400"
 														>
-															Cancel
+															{t("environment.actions.cancel")}
 														</button>
 													</div>
 												) : v.effectiveValue?.includes(",") ? (
@@ -432,9 +433,11 @@ const EnvironmentSettings = () => {
 														{v.conflict && (
 															<span
 																className="text-xs text-amber-600 dark:text-amber-400"
-																title="Remove from .env for the database value to take effect"
+																title={t(
+																	"environment.tooltips.remove_from_env",
+																)}
 															>
-																Remove from .env
+																{t("environment.actions.remove_from_env")}
 															</span>
 														)}
 														<button
@@ -446,22 +449,22 @@ const EnvironmentSettings = () => {
 															className="inline-flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 disabled:opacity-50"
 															title={
 																v.conflict
-																	? "Remove from .env for the database value to take effect"
+																	? t("environment.tooltips.remove_from_env")
 																	: undefined
 															}
 														>
 															<Edit2 className="h-4 w-4" />
 															{v.effectiveSource === "env"
-																? "Override"
-																: "Edit"}
+																? t("environment.actions.override")
+																: t("environment.actions.edit")}
 														</button>
 													</div>
 												) : (
 													<span
 														className="text-xs text-secondary-400"
-														title="Startup/deployment only - configure via .env"
+														title={t("environment.tooltips.configure_via_env")}
 													>
-														Configure via .env
+														{t("environment.actions.configure_via_env")}
 													</span>
 												)}
 											</td>

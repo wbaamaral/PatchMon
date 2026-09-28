@@ -275,7 +275,7 @@ func (s *UsersStore) Delete(ctx context.Context, id string) error {
 	return d.Queries.DeleteUser(ctx, id)
 }
 
-// UpdatePreferences updates user preferences (theme_preference, color_theme, ui_preferences).
+// UpdatePreferences updates user preferences (theme_preference, color_theme, ui_preferences, locale).
 func (s *UsersStore) UpdatePreferences(ctx context.Context, userID string, themePref, colorTheme *string, uiPrefs []byte) error {
 	d := s.db.DB(ctx)
 	arg := db.UpdateUserPreferencesParams{
@@ -285,6 +285,13 @@ func (s *UsersStore) UpdatePreferences(ctx context.Context, userID string, theme
 		UiPreferences:   uiPrefs,
 	}
 	return d.Queries.UpdateUserPreferences(ctx, arg)
+}
+
+// UpdateLocale sets the user's preferred UI locale.
+func (s *UsersStore) UpdateLocale(ctx context.Context, userID string, locale *string) error {
+	d := s.db.DB(ctx)
+	_, err := d.Exec(ctx, `UPDATE users SET locale = $1, updated_at = now() WHERE id = $2`, locale, userID)
+	return err
 }
 
 // ListForAssignment returns active users for assignment dropdowns.

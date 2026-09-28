@@ -15,6 +15,7 @@ import (
 	"sync"
 
 	"github.com/PatchMon/PatchMon/server-source-code/internal/agentregistry"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/models"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/sshproxy"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/store"
@@ -87,7 +88,7 @@ func NewSshTerminalWSHandler(
 func (h *SshTerminalWSHandler) ServeWS(w http.ResponseWriter, r *http.Request) {
 	hostID := r.PathValue("hostId")
 	if hostID == "" {
-		http.Error(w, "Host ID required", http.StatusBadRequest)
+		http.Error(w, i18n.T(r.Context(), "error.host_id_required"), http.StatusBadRequest)
 		return
 	}
 

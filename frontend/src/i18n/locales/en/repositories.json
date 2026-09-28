@@ -1,0 +1,143 @@
+{
+	"actions": {
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"delete_repository": "Delete Repository",
+		"deleting": "Deleting...",
+		"edit": "Edit",
+		"edit_repository": "Edit Repository",
+		"save_changes": "Save Changes",
+		"saving": "Saving...",
+		"refresh": "Refresh",
+		"refreshing": "Refreshing...",
+		"refresh_title": "Refresh repositories data",
+		"columns": "Columns",
+		"done": "Done",
+		"reset_to_default": "Reset to Default",
+		"back_to_repositories": "Back to Repositories",
+		"close": "Close",
+		"close_modal": "Close modal",
+		"delete_title": "Delete repository"
+	},
+	"status": {
+		"active": "Active",
+		"inactive": "Inactive",
+		"secure": "Secure",
+		"insecure": "Insecure",
+		"secure_https": "Secure (HTTPS)",
+		"insecure_http": "Insecure (HTTP)",
+		"never": "Never",
+		"no": "No",
+		"required": "Required",
+		"reboot_required": "Reboot required"
+	},
+	"delete_modal": {
+		"title": "Delete Repository",
+		"cannot_undo": "This action cannot be undone",
+		"confirm": "Are you sure you want to delete \"{{name}}\"?",
+		"warning_label": "Warning:",
+		"warning_one": "This repository is currently assigned to {{count}} host.",
+		"warning_other": "This repository is currently assigned to {{count}} hosts."
+	},
+	"pagination": {
+		"rows_per_page": "Rows per page:",
+		"range": "{{start}}-{{end}} of {{total}}",
+		"page": "Page {{current}} of {{total}}",
+		"previous": "Previous",
+		"next": "Next",
+		"previous_label": "Previous repositories page",
+		"next_label": "Next repositories page"
+	},
+	"list": {
+		"title": "Repositories",
+		"subtitle": "Manage and monitor your package repositories",
+		"error_load": "Failed to load repositories: {{message}}",
+		"stats": {
+			"total": "Total Repositories",
+			"total_title": "Click to clear all repository filters",
+			"active": "Active Repositories",
+			"active_title": "Click to filter active repositories only",
+			"secure": "Secure (HTTPS)",
+			"secure_title": "Click to filter HTTPS repositories only",
+			"security_score": "Security Score"
+		},
+		"search_placeholder": "Search repositories...",
+		"filtered_by": "Filtered by: {{name}}",
+		"filters": {
+			"security_all": "All Security Types",
+			"https_only": "HTTPS Only",
+			"http_only": "HTTP Only",
+			"status_all": "All Statuses",
+			"active_only": "Active Only",
+			"inactive_only": "Inactive Only"
+		},
+		"empty": {
+			"no_repositories": "No repositories found",
+			"no_matches": "No repositories match your filters",
+			"no_reports": "No repositories have been reported by your hosts yet"
+		},
+		"columns": {
+			"name": "Repository",
+			"url": "URL",
+			"distribution": "Distribution",
+			"security": "Security",
+			"status": "Status",
+			"host_count": "Hosts",
+			"actions": "Actions"
+		},
+		"column_settings_title": "Column Settings",
+		"host_count_one": "{{count}} Host",
+		"host_count_other": "{{count}} Hosts"
+	},
+	"detail": {
+		"title": "Repository",
+		"error_load": "Failed to load repository: {{message}}",
+		"not_found_title": "Repository not found",
+		"not_found_body": "The repository you're looking for doesn't exist.",
+		"information_title": "Repository Information",
+		"fields": {
+			"name": "Repository Name",
+			"priority": "Priority",
+			"priority_placeholder": "Optional priority",
+			"description": "Description",
+			"description_placeholder": "Optional description",
+			"is_active": "Repository is active",
+			"url": "URL",
+			"distribution": "Distribution",
+			"components": "Components",
+			"type": "Repository Type",
+			"security": "Security",
+			"created": "Created"
+		},
+		"hosts_title": "Hosts Using This Repository ({{count}})",
+		"hosts_search_placeholder": "Search hosts...",
+		"hosts_empty_search": "No hosts match your search",
+		"hosts_empty": "This repository hasn't been reported by any hosts yet.",
+		"hosts_columns": {
+			"host": "Host",
+			"os": "Operating System",
+			"last_checked": "Last Checked",
+			"last_update": "Last Update",
+			"reboot_required": "Reboot Required"
+		},
+		"checked": "Checked:",
+		"updated": "Updated:",
+		"packages_title": "Packages from this Repository",
+		"packages_search_placeholder": "Search packages...",
+		"packages_empty_search": "No packages match your search",
+		"packages_empty": "No packages found from this repository.",
+		"packages_columns": {
+			"name": "Package Name",
+			"latest_version": "Latest Version",
+			"status": "Status",
+			"installed_on": "Installed On"
+		},
+		"package_status": {
+			"security_update": "Security Update",
+			"update_available": "Update Available",
+			"up_to_date": "Up to Date"
+		},
+		"install_count_one": "{{count}} host",
+		"install_count_other": "{{count}} hosts"
+	}
+}

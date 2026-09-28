@@ -36,21 +36,21 @@ func NewTfaHandler(users *store.UsersStore, sessions *store.SessionsStore, trust
 func (h *TfaHandler) Setup(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	if user.TfaEnabled {
-		Error(w, http.StatusBadRequest, "Two-factor authentication is already enabled for this account")
+		ErrorKey(w, r, http.StatusBadRequest, "error.tfa_already_enabled")
 		return
 	}
 	if user.OidcSub != nil || user.OidcProvider != nil {
-		Error(w, http.StatusBadRequest, "MFA is managed by your OIDC provider")
+		ErrorKey(w, r, http.StatusBadRequest, "error.oidc_mfa_managed")
 		return
 	}
 
@@ -59,7 +59,7 @@ func (h *TfaHandler) Setup(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("tfa setup generate secret", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to setup two-factor authentication")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_setup_tfa")
 		return
 	}
 
@@ -67,7 +67,7 @@ func (h *TfaHandler) Setup(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("tfa setup save secret", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to setup two-factor authentication")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_setup_tfa")
 		return
 	}
 
@@ -76,7 +76,7 @@ func (h *TfaHandler) Setup(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("tfa setup qr encode", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to generate QR code")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_generate_qr_code")
 		return
 	}
 	qrDataURL := "data:image/png;base64," + base64.StdEncoding.EncodeToString(qrPNG)
@@ -97,30 +97,30 @@ type VerifySetupRequest struct {
 func (h *TfaHandler) VerifySetup(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 
 	var req VerifySetupRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	req.Token = strings.TrimSpace(req.Token)
 	if len(req.Token) != 6 || !util.TokenRegex.MatchString(strings.ToUpper(req.Token)) {
-		Error(w, http.StatusBadRequest, "Token must be exactly 6 digits")
+		ErrorKey(w, r, http.StatusBadRequest, "error.token_6_digits")
 		return
 	}
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil || user.TfaSecret == nil || user.TfaEnabled {
-		Error(w, http.StatusBadRequest, "No TFA secret found. Please start the setup process first.")
+		ErrorKey(w, r, http.StatusBadRequest, "error.no_tfa_secret")
 		return
 	}
 
 	secret := strings.TrimSpace(*user.TfaSecret)
 	if !util.VerifyTOTP(secret, req.Token, util.TOTPWindow) {
-		Error(w, http.StatusBadRequest, "Invalid verification code. Please try again.")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_verification_code_retry")
 		return
 	}
 
@@ -130,7 +130,7 @@ func (h *TfaHandler) VerifySetup(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("tfa verify-setup hash codes", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to enable two-factor authentication")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enable_tfa")
 		return
 	}
 	jsonStr := util.EncodeBackupCodesJSON(hashed)
@@ -138,7 +138,7 @@ func (h *TfaHandler) VerifySetup(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("tfa verify-setup enable", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to enable two-factor authentication")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_enable_tfa")
 		return
 	}
 
@@ -157,37 +157,37 @@ type DisableRequest struct {
 func (h *TfaHandler) Disable(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 
 	var req DisableRequest
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.Password == "" {
-		Error(w, http.StatusBadRequest, "Password is required to disable TFA")
+		ErrorKey(w, r, http.StatusBadRequest, "error.tfa_password_required")
 		return
 	}
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	if !user.TfaEnabled {
-		Error(w, http.StatusBadRequest, "Two-factor authentication is not enabled for this account")
+		ErrorKey(w, r, http.StatusBadRequest, "error.tfa_not_enabled")
 		return
 	}
 	if user.PasswordHash == nil {
-		Error(w, http.StatusBadRequest, "Cannot disable TFA for accounts without a password (e.g., OIDC-only accounts)")
+		ErrorKey(w, r, http.StatusBadRequest, "error.tfa_no_password_disable")
 		return
 	}
 
 	hash := strings.TrimSpace(*user.PasswordHash)
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(req.Password)); err != nil {
-		Error(w, http.StatusUnauthorized, "Invalid password")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_password")
 		return
 	}
 
@@ -195,7 +195,7 @@ func (h *TfaHandler) Disable(w http.ResponseWriter, r *http.Request) {
 		if h.log != nil {
 			h.log.Error("tfa disable", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to disable two-factor authentication")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_disable_tfa")
 		return
 	}
 	// All trusted-device records exist solely to skip MFA. With MFA disabled they
@@ -236,13 +236,13 @@ func (h *TfaHandler) Disable(w http.ResponseWriter, r *http.Request) {
 func (h *TfaHandler) Status(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 
@@ -257,17 +257,17 @@ func (h *TfaHandler) Status(w http.ResponseWriter, r *http.Request) {
 func (h *TfaHandler) RegenerateBackupCodes(w http.ResponseWriter, r *http.Request) {
 	userID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if userID == "" {
-		Error(w, http.StatusUnauthorized, "Unauthorized")
+		ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
 		return
 	}
 
 	user, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || user == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	if !user.TfaEnabled {
-		Error(w, http.StatusBadRequest, "Two-factor authentication is not enabled for this account")
+		ErrorKey(w, r, http.StatusBadRequest, "error.tfa_not_enabled")
 		return
 	}
 
@@ -277,7 +277,7 @@ func (h *TfaHandler) RegenerateBackupCodes(w http.ResponseWriter, r *http.Reques
 		if h.log != nil {
 			h.log.Error("tfa regenerate hash codes", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to regenerate backup codes")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_regenerate_backup_codes")
 		return
 	}
 	jsonStr := util.EncodeBackupCodesJSON(hashed)
@@ -285,7 +285,7 @@ func (h *TfaHandler) RegenerateBackupCodes(w http.ResponseWriter, r *http.Reques
 		if h.log != nil {
 			h.log.Error("tfa regenerate save", "error", err)
 		}
-		Error(w, http.StatusInternalServerError, "Failed to regenerate backup codes")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_regenerate_backup_codes")
 		return
 	}
 

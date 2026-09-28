@@ -117,7 +117,7 @@ func (h *UsersHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	users, err := h.users.List(r.Context(), pageSize, offset)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to list users")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_list_users")
 		return
 	}
 	total, _ := h.users.Count(r.Context())
@@ -150,7 +150,7 @@ func (h *UsersHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *UsersHandler) ListForAssignment(w http.ResponseWriter, r *http.Request) {
 	users, err := h.users.ListForAssignment(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch users")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_users")
 		return
 	}
 	data := make([]map[string]interface{}, len(users))
@@ -174,23 +174,23 @@ func (h *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Role      string  `json:"role"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if len(req.Username) < 3 {
-		Error(w, http.StatusBadRequest, "Username must be at least 3 characters")
+		ErrorKey(w, r, http.StatusBadRequest, "error.username_min_length")
 		return
 	}
 	if req.Email == "" {
-		Error(w, http.StatusBadRequest, "Valid email is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.email_required")
 		return
 	}
 	if req.Password == "" {
-		Error(w, http.StatusBadRequest, "Password is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.password_required")
 		return
 	}
 	if err := ValidatePasswordPolicy(h.resolvedFor(r.Context()), req.Password); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 
@@ -214,13 +214,13 @@ func (h *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Enforce role escalation protection.
 	callerRole, _ := r.Context().Value(middleware.UserRoleKey).(string)
 	if !h.canAssignRole(r, callerRole, role) {
-		Error(w, http.StatusForbidden, "You do not have permission to assign the role: "+role)
+		ErrorKey(w, r, http.StatusForbidden, "error.cannot_assign_role_prefix", "detail", role)
 		return
 	}
 
 	exists, err := h.users.ExistsByUsernameOrEmail(r.Context(), req.Username, req.Email, "")
 	if err != nil || exists {
-		Error(w, http.StatusConflict, "Username or email already exists")
+		ErrorKey(w, r, http.StatusConflict, "error.username_or_email_exists")
 		return
 	}
 
@@ -228,14 +228,14 @@ func (h *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if entry := hostctx.EntryFromContext(r.Context()); entry != nil && entry.MaxUsers != nil {
 		count, countErr := h.users.Count(r.Context())
 		if countErr == nil && count >= *entry.MaxUsers {
-			Error(w, http.StatusForbidden, "User limit reached for this host's package")
+			ErrorKey(w, r, http.StatusForbidden, "error.user_limit_reached")
 			return
 		}
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), 12)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to hash password")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.hash_password_failed")
 		return
 	}
 
@@ -250,7 +250,7 @@ func (h *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 		LastName:     req.LastName,
 	}
 	if err := h.users.Create(r.Context(), u); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to create user")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_create_user")
 		return
 	}
 	AutoSubscribeIfHosted(h.adminMode, h.users, h.log, u)
@@ -286,13 +286,13 @@ func (h *UsersHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userId")
 	if userID == "" {
-		Error(w, http.StatusBadRequest, "User ID required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.user_id_required")
 		return
 	}
 
 	existing, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || existing == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 
@@ -305,20 +305,20 @@ func (h *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 		IsActive  *bool   `json:"is_active"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 
 	// Prevent modifying users with a higher-privilege role than the caller.
 	callerRole, _ := r.Context().Value(middleware.UserRoleKey).(string)
 	if roleRank(existing.Role) > roleRank(callerRole) {
-		Error(w, http.StatusForbidden, "Cannot modify a user with a higher-privilege role")
+		ErrorKey(w, r, http.StatusForbidden, "error.cannot_modify_higher_privilege")
 		return
 	}
 	if existing.Role == "superadmin" && callerRole != "superadmin" {
 		perm, permErr := h.permissions.GetByRole(r.Context(), callerRole)
 		if permErr != nil || perm == nil || !perm.CanManageSuperusers {
-			Error(w, http.StatusForbidden, "You do not have permission to modify superadmin users")
+			ErrorKey(w, r, http.StatusForbidden, "error.cannot_modify_superadmin")
 			return
 		}
 	}
@@ -340,13 +340,13 @@ func (h *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Role != nil {
 		// Enforce role escalation protection.
 		if !h.canAssignRole(r, callerRole, *req.Role) {
-			Error(w, http.StatusForbidden, "You do not have permission to assign the role: "+*req.Role)
+			ErrorKey(w, r, http.StatusForbidden, "error.cannot_assign_role_prefix", "detail", *req.Role)
 			return
 		}
 		// Prevent demoting yourself.
 		currentUserID, _ := r.Context().Value(middleware.UserIDKey).(string)
 		if currentUserID != "" && userID == currentUserID && *req.Role != existing.Role {
-			Error(w, http.StatusBadRequest, "Cannot change your own role")
+			ErrorKey(w, r, http.StatusBadRequest, "error.cannot_change_own_role")
 			return
 		}
 		u.Role = *req.Role
@@ -366,12 +366,12 @@ func (h *UsersHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 	exists, _ := h.users.ExistsByUsernameOrEmail(r.Context(), username, email, userID)
 	if exists {
-		Error(w, http.StatusConflict, "Username or email already exists")
+		ErrorKey(w, r, http.StatusConflict, "error.username_or_email_exists")
 		return
 	}
 
 	if err := h.users.Update(r.Context(), &u); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to update user")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_update_user")
 		return
 	}
 
@@ -427,27 +427,27 @@ func (h *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	userID := chi.URLParam(r, "userId")
 	currentUserID, _ := r.Context().Value(middleware.UserIDKey).(string)
 	if currentUserID != "" && userID == currentUserID {
-		Error(w, http.StatusBadRequest, "Cannot delete your own account")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_delete_own_account")
 		return
 	}
 
 	existing, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || existing == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 
 	// Prevent deleting users with a higher-privilege role.
 	callerRole, _ := r.Context().Value(middleware.UserRoleKey).(string)
 	if roleRank(existing.Role) > roleRank(callerRole) {
-		Error(w, http.StatusForbidden, "Cannot delete a user with a higher-privilege role")
+		ErrorKey(w, r, http.StatusForbidden, "error.cannot_delete_higher_privilege")
 		return
 	}
 	// Deleting a superadmin requires being superadmin or having can_manage_superusers.
 	if existing.Role == "superadmin" && callerRole != "superadmin" {
 		perm, permErr := h.permissions.GetByRole(r.Context(), callerRole)
 		if permErr != nil || perm == nil || !perm.CanManageSuperusers {
-			Error(w, http.StatusForbidden, "You do not have permission to delete superadmin users")
+			ErrorKey(w, r, http.StatusForbidden, "error.cannot_delete_superadmin")
 			return
 		}
 	}
@@ -456,7 +456,7 @@ func (h *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	if existing.Role == "superadmin" {
 		superCount, _ = h.users.CountSuperadmins(r.Context())
 		if superCount <= 1 {
-			Error(w, http.StatusBadRequest, "Cannot delete the last superadmin user")
+			ErrorKey(w, r, http.StatusBadRequest, "error.cannot_delete_last_superadmin")
 			return
 		}
 	}
@@ -465,14 +465,14 @@ func (h *UsersHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		if superCount == 0 {
 			adminCount, _ = h.users.CountActiveAdmins(r.Context())
 			if adminCount <= 1 {
-				Error(w, http.StatusBadRequest, "Cannot delete the last admin user")
+				ErrorKey(w, r, http.StatusBadRequest, "error.cannot_delete_last_admin")
 				return
 			}
 		}
 	}
 
 	if err := h.users.Delete(r.Context(), userID); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete user")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_user")
 		return
 	}
 
@@ -486,51 +486,51 @@ func (h *UsersHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
 		NewPassword string `json:"newPassword"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
-		Error(w, http.StatusBadRequest, "Invalid request body")
+		ErrorKey(w, r, http.StatusBadRequest, "error.invalid_request_body")
 		return
 	}
 	if req.NewPassword == "" {
-		Error(w, http.StatusBadRequest, "New password is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.new_password_required")
 		return
 	}
 
 	existing, err := h.users.GetByID(r.Context(), userID)
 	if err != nil || existing == nil {
-		Error(w, http.StatusNotFound, "User not found")
+		ErrorKey(w, r, http.StatusNotFound, "error.user_not_found")
 		return
 	}
 	if !existing.IsActive {
-		Error(w, http.StatusBadRequest, "Cannot reset password for inactive user")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_reset_inactive_user")
 		return
 	}
 
 	// Prevent resetting the password of users with a higher-privilege role.
 	callerRole, _ := r.Context().Value(middleware.UserRoleKey).(string)
 	if roleRank(existing.Role) > roleRank(callerRole) {
-		Error(w, http.StatusForbidden, "Cannot reset password for a user with a higher-privilege role")
+		ErrorKey(w, r, http.StatusForbidden, "error.cannot_reset_higher_privilege")
 		return
 	}
 	if existing.Role == "superadmin" && callerRole != "superadmin" {
 		perm, permErr := h.permissions.GetByRole(r.Context(), callerRole)
 		if permErr != nil || perm == nil || !perm.CanManageSuperusers {
-			Error(w, http.StatusForbidden, "You do not have permission to reset superadmin passwords")
+			ErrorKey(w, r, http.StatusForbidden, "error.cannot_reset_superadmin")
 			return
 		}
 	}
 
 	if err := ValidatePasswordPolicy(h.resolvedFor(r.Context()), req.NewPassword); err != nil {
-		Error(w, http.StatusBadRequest, err.Error())
+		ErrorKey(w, r, http.StatusBadRequest, "error.request_failed_detail", "detail", err.Error())
 		return
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), 12)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to hash password")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.hash_password_failed")
 		return
 	}
 
 	if err := h.users.UpdatePassword(r.Context(), userID, string(hash)); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to reset password")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_reset_password")
 		return
 	}
 

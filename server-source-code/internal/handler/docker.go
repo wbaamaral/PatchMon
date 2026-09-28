@@ -24,7 +24,7 @@ func NewDockerHandler(docker *store.DockerStore) *DockerHandler {
 func (h *DockerHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	data, err := h.docker.GetDashboard(r.Context())
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch Docker dashboard")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_docker_dashboard")
 		return
 	}
 	JSON(w, http.StatusOK, data)
@@ -49,7 +49,7 @@ func (h *DockerHandler) ListContainers(w http.ResponseWriter, r *http.Request) {
 	}
 	containers, total, err := h.docker.ListContainers(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch containers")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_containers")
 		return
 	}
 	pages := (total + params.Limit - 1) / params.Limit
@@ -71,16 +71,16 @@ func (h *DockerHandler) ListContainers(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) GetContainer(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Container ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.container_id_required")
 		return
 	}
 	detail, err := h.docker.GetContainer(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			Error(w, http.StatusNotFound, "Container not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.container_not_found")
 			return
 		}
-		Error(w, http.StatusInternalServerError, "Failed to fetch container")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_container")
 		return
 	}
 	// Match Node response: container with host and docker_images embedded, similarContainers
@@ -131,11 +131,11 @@ func (h *DockerHandler) GetContainer(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) DeleteContainer(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Container ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.container_id_required")
 		return
 	}
 	if err := h.docker.DeleteContainer(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete container")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_container")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -161,7 +161,7 @@ func (h *DockerHandler) ListImages(w http.ResponseWriter, r *http.Request) {
 	}
 	images, total, err := h.docker.ListImages(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch images")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_images")
 		return
 	}
 	pages := (total + params.Limit - 1) / params.Limit
@@ -202,16 +202,16 @@ func (h *DockerHandler) ListImages(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) GetImage(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Image ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.image_id_required")
 		return
 	}
 	detail, err := h.docker.GetImage(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			Error(w, http.StatusNotFound, "Image not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.image_not_found")
 			return
 		}
-		Error(w, http.StatusInternalServerError, "Failed to fetch image")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_image")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -226,16 +226,16 @@ func (h *DockerHandler) GetImage(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Image ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.image_id_required")
 		return
 	}
 	inUse, err := h.docker.DeleteImage(r.Context(), id)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete image")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_image")
 		return
 	}
 	if inUse > 0 {
-		Error(w, http.StatusBadRequest, "Cannot delete image: "+strconv.Itoa(inUse)+" container(s) are using this image")
+		ErrorKey(w, r, http.StatusBadRequest, "error.cannot_delete_image_prefix", "detail", strconv.Itoa(inUse)+" container(s) are using this image")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -250,7 +250,7 @@ func (h *DockerHandler) ListHosts(w http.ResponseWriter, r *http.Request) {
 	limit := parseIntQuery(r, "limit", 50)
 	hosts, total, err := h.docker.ListHosts(r.Context(), page, limit)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch Docker hosts")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_docker_hosts")
 		return
 	}
 	pages := (total + limit - 1) / limit
@@ -272,16 +272,16 @@ func (h *DockerHandler) ListHosts(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) GetHostDockerDetail(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Host ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.host_id_required")
 		return
 	}
 	detail, err := h.docker.GetHostDockerDetail(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			Error(w, http.StatusNotFound, "Host not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.host_not_found")
 			return
 		}
-		Error(w, http.StatusInternalServerError, "Failed to fetch host Docker detail")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_host_docker_detail")
 		return
 	}
 	JSON(w, http.StatusOK, detail)
@@ -304,7 +304,7 @@ func (h *DockerHandler) ListVolumes(w http.ResponseWriter, r *http.Request) {
 	}
 	volumes, total, err := h.docker.ListVolumes(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch volumes")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_volumes")
 		return
 	}
 	pages := (total + params.Limit - 1) / params.Limit
@@ -326,16 +326,16 @@ func (h *DockerHandler) ListVolumes(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) GetVolume(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Volume ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.volume_id_required")
 		return
 	}
 	detail, err := h.docker.GetVolume(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			Error(w, http.StatusNotFound, "Volume not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.volume_not_found")
 			return
 		}
-		Error(w, http.StatusInternalServerError, "Failed to fetch volume")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_volume")
 		return
 	}
 	JSON(w, http.StatusOK, detail)
@@ -345,11 +345,11 @@ func (h *DockerHandler) GetVolume(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) DeleteVolume(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Volume ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.volume_id_required")
 		return
 	}
 	if err := h.docker.DeleteVolume(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete volume")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_volume")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{
@@ -375,7 +375,7 @@ func (h *DockerHandler) ListNetworks(w http.ResponseWriter, r *http.Request) {
 	}
 	networks, total, err := h.docker.ListNetworks(r.Context(), params)
 	if err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to fetch networks")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_networks")
 		return
 	}
 	pages := (total + params.Limit - 1) / params.Limit
@@ -397,16 +397,16 @@ func (h *DockerHandler) ListNetworks(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) GetNetwork(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Network ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.network_id_required")
 		return
 	}
 	detail, err := h.docker.GetNetwork(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			Error(w, http.StatusNotFound, "Network not found")
+			ErrorKey(w, r, http.StatusNotFound, "error.network_not_found")
 			return
 		}
-		Error(w, http.StatusInternalServerError, "Failed to fetch network")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_fetch_network")
 		return
 	}
 	JSON(w, http.StatusOK, detail)
@@ -416,11 +416,11 @@ func (h *DockerHandler) GetNetwork(w http.ResponseWriter, r *http.Request) {
 func (h *DockerHandler) DeleteNetwork(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	if id == "" {
-		Error(w, http.StatusBadRequest, "Network ID is required")
+		ErrorKey(w, r, http.StatusBadRequest, "error.network_id_required")
 		return
 	}
 	if err := h.docker.DeleteNetwork(r.Context(), id); err != nil {
-		Error(w, http.StatusInternalServerError, "Failed to delete network")
+		ErrorKey(w, r, http.StatusInternalServerError, "error.failed_to_delete_network")
 		return
 	}
 	JSON(w, http.StatusOK, map[string]interface{}{

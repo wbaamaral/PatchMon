@@ -1,4 +1,5 @@
 import axios from "axios";
+import i18n from "../i18n";
 import { requestTokenRefresh } from "./sessionRefresh";
 import { consumeInteraction } from "./userActivity";
 
@@ -43,6 +44,9 @@ api.interceptors.request.use(
 			localStorage.setItem("device_id", deviceId);
 		}
 		config.headers["X-Device-ID"] = deviceId;
+
+		// Send current UI locale so the server can localize error messages
+		config.headers["X-User-Locale"] = i18n.language || "en";
 
 		// Only requests that follow a real interaction slide the session
 		// inactivity window. Background polling deliberately goes unmarked.
@@ -535,19 +539,20 @@ export const getGlobalTimezone = () => _globalTimezone;
 export const formatDate = (date, timezone) => {
 	const d = new Date(date);
 	if (Number.isNaN(d.getTime())) return " -";
+	const loc = i18n.language || undefined;
 	const tz = timezone || _globalTimezone;
 	if (tz) {
 		try {
-			return new Intl.DateTimeFormat(undefined, {
+			return new Intl.DateTimeFormat(loc, {
 				timeZone: tz,
 				dateStyle: "short",
 				timeStyle: "medium",
 			}).format(d);
 		} catch {
-			return d.toLocaleString();
+			return d.toLocaleString(loc);
 		}
 	}
-	return d.toLocaleString();
+	return d.toLocaleString(loc);
 };
 
 /**
@@ -559,18 +564,19 @@ export const formatDate = (date, timezone) => {
 export const formatDateOnly = (date, timezone) => {
 	const d = new Date(date);
 	if (Number.isNaN(d.getTime())) return " -";
+	const loc = i18n.language || undefined;
 	const tz = timezone || _globalTimezone;
 	if (tz) {
 		try {
-			return new Intl.DateTimeFormat(undefined, {
+			return new Intl.DateTimeFormat(loc, {
 				timeZone: tz,
 				dateStyle: "short",
 			}).format(d);
 		} catch {
-			return d.toLocaleDateString();
+			return d.toLocaleDateString(loc);
 		}
 	}
-	return d.toLocaleDateString();
+	return d.toLocaleDateString(loc);
 };
 
 // Version API
@@ -639,22 +645,24 @@ export const trustedDevicesAPI = {
 export const formatRelativeTime = (date) => {
 	if (date == null) return " -";
 	const now = new Date();
-	const diff = now - new Date(date);
-	const abs = Math.abs(diff);
-	const future = diff < 0;
-	const seconds = Math.floor(abs / 1000);
+	const diffMs = now - new Date(date);
+	const absMs = Math.abs(diffMs);
+	const rtf = new Intl.RelativeTimeFormat(i18n.language || "en", {
+		numeric: "auto",
+	});
+
+	const seconds = Math.floor(absMs / 1000);
 	const minutes = Math.floor(seconds / 60);
 	const hours = Math.floor(minutes / 60);
 	const days = Math.floor(hours / 24);
 
-	const suffix = future ? "" : " ago";
-	const prefix = future ? "in " : "";
-	if (days > 0) return `${prefix}${days} day${days > 1 ? "s" : ""}${suffix}`;
-	if (hours > 0)
-		return `${prefix}${hours} hour${hours > 1 ? "s" : ""}${suffix}`;
-	if (minutes > 0) return `${prefix}${minutes} min${suffix}`;
-	if (future) return "in a few seconds";
-	return "just now";
+	const sign = diffMs < 0 ? 1 : -1; // future = positive
+
+	if (days > 0) return rtf.format(sign * days, "day");
+	if (hours > 0) return rtf.format(sign * hours, "hour");
+	if (minutes > 0) return rtf.format(sign * minutes, "minute");
+	if (diffMs < 0) return rtf.format(30, "second");
+	return rtf.format(0, "second");
 };
 
 /**
@@ -689,17 +697,22 @@ export const formatLiveUptime = (bootTimeIso, nowMs = Date.now()) => {
 	const hours = Math.floor((totalMinutes % 1440) / 60);
 	const minutes = totalMinutes % 60;
 
+	const t = i18n.t.bind(i18n);
+
 	if (days > 0) {
-		return `${days} day${days === 1 ? "" : "s"}, ${hours} hour${
-			hours === 1 ? "" : "s"
-		}, ${minutes} minute${minutes === 1 ? "" : "s"}`;
+		return [
+			t("time.uptime.days", { count: days }),
+			t("time.uptime.hours", { count: hours }),
+			t("time.uptime.minutes", { count: minutes }),
+		].join(", ");
 	}
 	if (hours > 0) {
-		return `${hours} hour${hours === 1 ? "" : "s"}, ${minutes} minute${
-			minutes === 1 ? "" : "s"
-		}`;
+		return [
+			t("time.uptime.hours", { count: hours }),
+			t("time.uptime.minutes", { count: minutes }),
+		].join(", ");
 	}
-	return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+	return t("time.uptime.minutes", { count: minutes });
 };
 
 // Search API

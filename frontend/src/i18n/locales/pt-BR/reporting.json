@@ -1,0 +1,184 @@
+{
+	"title": "Relatórios",
+	"subtitle": "Visualize e gerencie alertas e notificações do sistema",
+	"error": {
+		"load": "Erro ao carregar alertas",
+		"load_hint": "Falha ao carregar alertas",
+		"try_again": "Tentar novamente",
+		"delete_failed": "Falha ao excluir alertas",
+		"bulk_action_failed": "Falha ao executar a ação em massa"
+	},
+	"tabs": {
+		"overview": "Visão geral",
+		"alerts": "Alertas",
+		"alert_settings": "Ciclo de vida do alerta",
+		"destinations": "Destinos",
+		"rules": "Regras de evento",
+		"reports": "Relatórios agendados",
+		"log": "Log de entrega",
+		"aria_label": "Abas"
+	},
+	"stats": {
+		"informational": "Informativo",
+		"warning": "Aviso",
+		"error": "Erro",
+		"critical": "Crítico",
+		"total_active": "Total ativo"
+	},
+	"severity": {
+		"informational": "Informativo",
+		"warning": "Aviso",
+		"error": "Erro",
+		"critical": "Crítico",
+		"all": "Todas as severidades"
+	},
+	"status": {
+		"open": "Aberto",
+		"acknowledged": "Reconhecido",
+		"investigating": "Investigando",
+		"escalated": "Escalado",
+		"silenced": "Silenciado",
+		"done": "Concluído",
+		"resolved": "Resolvido",
+		"all": "Todos os status",
+		"acked": "Reconhecido"
+	},
+	"filters": {
+		"search_placeholder": "Buscar alertas...",
+		"all_types": "Todos os tipos",
+		"all_assignments": "Todas as atribuições",
+		"assigned_to_me": "Atribuídos a mim",
+		"assigned": "Atribuído",
+		"unassigned": "Não atribuído",
+		"assigned_to_responder": "Atribuído ao responsável",
+		"unknown_user": "Usuário desconhecido",
+		"loading_users": "Carregando usuários"
+	},
+	"bulk": {
+		"selected_one": "{{count}} alerta selecionado",
+		"selected_other": "{{count}} alertas selecionados",
+		"selected_legacy": "{{count}} alerta(s) selecionado(s)",
+		"updated": "{{count}} alerta(s) atualizado(s): {{action}}",
+		"deleted_one": "{{count}} alerta excluído",
+		"deleted_other": "{{count}} alertas excluídos",
+		"delete": "Excluir",
+		"delete_confirm_title": "Excluir alertas",
+		"delete_confirm_message_one": "Tem certeza de que deseja excluir {{count}} alerta?",
+		"delete_confirm_message_other": "Tem certeza de que deseja excluir {{count}} alertas?",
+		"delete_confirm_label_one": "Excluir {{count}} alerta",
+		"delete_confirm_label_other": "Excluir {{count}} alertas"
+	},
+	"empty": {
+		"no_alerts": "Nenhum alerta encontrado",
+		"try_filters": "Tente ajustar seus filtros de busca",
+		"no_active": "Nenhum alerta ativo"
+	},
+	"loading_alerts": "Carregando alertas...",
+	"table": {
+		"severity": "Severidade",
+		"type": "Tipo",
+		"title": "Título",
+		"message": "Mensagem",
+		"assigned_to": "Atribuído a",
+		"status": "Status",
+		"created": "Criado",
+		"actions": "Ações"
+	},
+	"pagination": {
+		"rows_per_page": "Linhas por página:",
+		"range": "{{start}}-{{end}} de {{total}}",
+		"page_of": "Página {{page}} de {{pages}}",
+		"previous": "Página anterior",
+		"next": "Próxima página"
+	},
+	"actions_menu": {
+		"workflow": "Fluxo de trabalho",
+		"resolve": "Resolver"
+	},
+	"modal": {
+		"title": "Detalhes do alerta",
+		"severity": "Severidade",
+		"type": "Tipo",
+		"status": "Status",
+		"created": "Criado",
+		"assigned_to": "Atribuído a",
+		"unassigned": "Não atribuído",
+		"alert_title": "Título",
+		"message": "Mensagem",
+		"metadata": "Metadados",
+		"actions": "Ações",
+		"history": "Histórico",
+		"history_by": "por {{user}}",
+		"history_system": "Sistema",
+		"no_history": "Nenhum histórico disponível",
+		"close": "Fechar",
+		"close_modal": "Fechar modal"
+	},
+	"toasts": {
+		"refresh": "Atualizar alertas"
+	},
+	"widgets": {
+		"severity_doughnut": {
+			"title": "Alertas por severidade",
+			"empty": "Nenhum alerta ativo",
+			"view_all": "Visualizar todos os alertas",
+			"label_critical": "Críticos",
+			"label_error": "Erros",
+			"label_warning": "Avisos",
+			"label_informational": "Informativos",
+			"label_no_alerts": "Nenhum alerta"
+		},
+		"by_type": {
+			"title": "Alertas por tipo",
+			"empty": "Nenhum alerta ativo",
+			"view_all": "Visualizar todos os alertas",
+			"label_no_alerts": "Nenhum alerta"
+		},
+		"volume_trend": {
+			"title": "Tendência do volume de alertas",
+			"volume": "Volume",
+			"severity": "Severidade",
+			"new_alerts": "Novos alertas",
+			"resolved": "Resolvidos",
+			"empty": "Nenhum dado de alerta para este período",
+			"view_history": "Visualizar histórico de alertas"
+		},
+		"recent": {
+			"title": "Alertas recentes",
+			"empty": "Nenhum alerta recente",
+			"view_all": "Visualizar todos os alertas",
+			"severity": "Severidade",
+			"alert": "Alerta",
+			"time": "Hora",
+			"status": "Status"
+		},
+		"status_boxes": {
+			"title": "Resumo de alertas",
+			"active_alerts": "Alertas ativos",
+			"critical": "Críticos",
+			"warnings": "Avisos",
+			"resolved_today": "Resolvidos hoje"
+		},
+		"attention": {
+			"title": "Requerem atenção",
+			"unacknowledged": "Não reconhecidos",
+			"unassigned": "Não atribuídos",
+			"escalated": "Escalados",
+			"stale": "Parados (>24h sem atualização)",
+			"view_open": "Visualizar alertas abertos"
+		},
+		"responder_workload": {
+			"title": "Carga de trabalho do responsável",
+			"avg": "Média: {{value}}",
+			"empty": "Nenhuma atribuição ativa",
+			"active_unassigned": "Ativos não atribuídos",
+			"my_active": "Meus alertas ativos",
+			"view_all": "Visualizar todos os alertas"
+		},
+		"delivery": {
+			"title": "Entrega por destino",
+			"empty": "Nenhum dado de entrega para este período",
+			"view_log": "Visualizar log de entrega"
+		}
+	}
+}
