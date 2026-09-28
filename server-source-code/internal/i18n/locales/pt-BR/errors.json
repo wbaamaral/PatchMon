@@ -1,7 +1,7 @@
 {
 	"error.unauthorized": "Não autorizado",
 	"error.invalid_request_body": "Corpo da requisição inválido",
-	"error.internal_server_error": "Erro interno do servidor",
+	"error.internal_server_error": "Erro Interno do Servidor",
 	"error.not_found": "Não encontrado",
 	"error.forbidden": "Permissões insuficientes",
 	"error.invalid_token": "Token inválido",
@@ -417,5 +417,11 @@
 	"error.api_key_expired": "A chave de API expirou",
 	"error.request_failed_detail": "A requisição falhou: {{detail}}",
 	"error.internal_error_detail": "Erro interno: {{detail}}",
-	"error.operation_failed_detail": "A operação falhou: {{detail}}"
+	"error.operation_failed_detail": "A operação falhou: {{detail}}",
+	"error.origin_not_allowed": "Proibido: origem não permitida",
+	"error.streaming_not_available": "Streaming indisponível",
+	"error.invalid_run_id": "ID de execução inválido",
+	"error.patch_run_not_found": "Execução de patch não encontrada",
+	"error.missing_api_credentials": "Credenciais de API ausentes",
+	"error.invalid_api_credentials": "Credenciais de API inválidas"
 }

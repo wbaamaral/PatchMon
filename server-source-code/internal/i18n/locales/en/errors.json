@@ -1,7 +1,7 @@
 {
 	"error.unauthorized": "Unauthorized",
 	"error.invalid_request_body": "Invalid request body",
-	"error.internal_server_error": "Internal server error",
+	"error.internal_server_error": "Internal Server Error",
 	"error.not_found": "Not found",
 	"error.forbidden": "Insufficient permissions",
 	"error.invalid_token": "Invalid token",
@@ -417,5 +417,11 @@
 	"error.api_key_expired": "API key has expired",
 	"error.request_failed_detail": "Request failed: {{detail}}",
 	"error.internal_error_detail": "Internal error: {{detail}}",
-	"error.operation_failed_detail": "Operation failed: {{detail}}"
+	"error.operation_failed_detail": "Operation failed: {{detail}}",
+	"error.origin_not_allowed": "Forbidden: origin not allowed",
+	"error.streaming_not_available": "Streaming not available",
+	"error.invalid_run_id": "Invalid run ID",
+	"error.patch_run_not_found": "Patch run not found",
+	"error.missing_api_credentials": "Missing API credentials",
+	"error.invalid_api_credentials": "Invalid API credentials"
 }

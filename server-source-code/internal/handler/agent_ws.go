@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/PatchMon/PatchMon/server-source-code/internal/agentregistry"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	hostctx "github.com/PatchMon/PatchMon/server-source-code/internal/context"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/store"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/util"
@@ -94,13 +95,13 @@ func (h *AgentWSHandler) ServeWS(w http.ResponseWriter, r *http.Request) {
 	apiID := r.Header.Get("X-API-ID")
 	apiKey := r.Header.Get("X-API-KEY")
 	if apiID == "" || apiKey == "" {
-		http.Error(w, "Missing API credentials", http.StatusUnauthorized)
+		http.Error(w, i18n.T(r.Context(), "error.missing_api_credentials"), http.StatusUnauthorized)
 		return
 	}
 
 	host, err := h.hosts.GetByApiID(r.Context(), apiID)
 	if err != nil || host == nil {
-		http.Error(w, "Invalid API credentials", http.StatusUnauthorized)
+		http.Error(w, i18n.T(r.Context(), "error.invalid_api_credentials"), http.StatusUnauthorized)
 		return
 	}
 

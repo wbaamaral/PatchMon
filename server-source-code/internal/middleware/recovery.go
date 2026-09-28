@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
-)
+
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n")
 
 // Recovery returns a middleware that recovers from panics.
 // For /api routes, returns JSON so piped install scripts don't execute error text as shell commands.
@@ -25,7 +26,7 @@ func Recovery(log *slog.Logger) func(http.Handler) http.Handler {
 						w.WriteHeader(http.StatusInternalServerError)
 						_ = json.NewEncoder(w).Encode(map[string]string{"error": "Internal Server Error"})
 					} else {
-						http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+						http.Error(w, i18n.T(r.Context(), "error.internal_server_error"), http.StatusInternalServerError)
 					}
 				}
 			}()

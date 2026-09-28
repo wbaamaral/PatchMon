@@ -15,6 +15,7 @@ import (
 
 	"github.com/PatchMon/PatchMon/server-source-code/internal/agentregistry"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/config"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	hostctx "github.com/PatchMon/PatchMon/server-source-code/internal/context"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/models"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/store"
@@ -1252,7 +1253,7 @@ func (h *SettingsHandler) GetLogo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(data) == 0 {
-		http.Error(w, "Not Found", http.StatusNotFound)
+		http.Error(w, i18n.T(r.Context(), "error.not_found"), http.StatusNotFound)
 		return
 	}
 	if contentType == "" {
