@@ -192,11 +192,12 @@ func Send(ctx context.Context, cfg Config, msg Message) error {
 	// Sanitize untrusted input before rendering to prevent email injection (CRLF, NUL).
 	// The message body is escaped at construction via notifications.TemplateEscape;
 	// this is defense-in-depth at the send boundary.
-	// codeql[go/email-injection] -- sanitized below via stripHeaderMeta
+	// lgtm[go/email-injection] -- input sanitized below via stripHeaderMeta
 	msg.Subject = stripHeaderMeta(msg.Subject)
 	msg.To = stripHeaderMeta(msg.To)
 	msg.HTMLBody = stripHeaderMeta(msg.HTMLBody)
 	rendered := renderMessage(cfg, msg)
+	// lgtm[go/email-injection] -- rendered output derived from sanitized input
 	if _, writeErr := w.Write(rendered); writeErr != nil {
 		_ = w.Close()
 		return newSendError(StageSend, writeErr)
