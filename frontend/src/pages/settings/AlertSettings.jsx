@@ -244,7 +244,9 @@ const AlertSettings = () => {
 			toast.success(t("settings.toasts.settingsApplied"));
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("settings.toasts.applyFailed")),
+			toast.error(
+				err.response?.data?.error || t("settings.toasts.applyFailed"),
+			),
 	});
 
 	const isDirty =
@@ -407,7 +409,8 @@ const AlertSettings = () => {
 							onClick={() => refetch()}
 							className="btn-outline flex items-center gap-1 text-sm"
 						>
-							<RefreshCw className="h-3.5 w-3.5" /> {t("settings.tableSection.refresh")}
+							<RefreshCw className="h-3.5 w-3.5" />{" "}
+							{t("settings.tableSection.refresh")}
 						</button>
 					</div>
 
@@ -419,15 +422,27 @@ const AlertSettings = () => {
 										{t("settings.table.alertType")}
 									</th>
 									<th className={`${TH} w-16`}>{t("settings.table.active")}</th>
-									<th className={`${TH} w-28`}>{t("settings.table.severity")}</th>
-									<th className={`${TH} w-28`}>{t("settings.table.alertDelay")}</th>
-									<th className={`${TH} w-28`}>{t("settings.table.frequency")}</th>
-									<th className={`${TH} w-24`}>{t("settings.table.threshold")}</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.severity")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.alertDelay")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.frequency")}
+									</th>
+									<th className={`${TH} w-24`}>
+										{t("settings.table.threshold")}
+									</th>
 									<th className={`${TH} min-w-[180px]`}>
 										{t("settings.table.autoAssign")}
 									</th>
-									<th className={`${TH} w-28`}>{t("settings.table.retention")}</th>
-									<th className={`${TH} w-28`}>{t("settings.table.autoResolve")}</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.retention")}
+									</th>
+									<th className={`${TH} w-28`}>
+										{t("settings.table.autoResolve")}
+									</th>
 								</tr>
 							</thead>
 							<tbody className="bg-white dark:bg-secondary-800 divide-y divide-secondary-200 dark:divide-secondary-600">
@@ -891,7 +906,8 @@ const CleanupSection = () => {
 			</div>
 			{previewData && previewData.length === 0 && (
 				<p className="text-sm text-secondary-500 flex items-center gap-1">
-					<Check className="h-4 w-4 text-green-500" /> {t("settings.cleanup.none")}
+					<Check className="h-4 w-4 text-green-500" />{" "}
+					{t("settings.cleanup.none")}
 				</p>
 			)}
 			{previewData && previewData.length > 0 && (

@@ -279,7 +279,11 @@ const SettingsMetrics = () => {
 							type="button"
 							onClick={() => setShowFullId(!showFullId)}
 							className="p-2 text-secondary-600 dark:text-white hover:text-secondary-900 dark:hover:text-white"
-							title={showFullId ? t("metrics.anonymous_id.hide_id") : t("metrics.anonymous_id.show_id")}
+							title={
+								showFullId
+									? t("metrics.anonymous_id.hide_id")
+									: t("metrics.anonymous_id.show_id")
+							}
 						>
 							{showFullId ? (
 								<EyeOff className="h-5 w-5" />
@@ -357,7 +361,9 @@ const SettingsMetrics = () => {
 						<div className="flex">
 							<CheckCircle className="h-4 w-4 text-green-400 dark:text-green-300 mt-0.5" />
 							<div className="ml-2 text-sm text-green-700 dark:text-green-300">
-								<p className="font-medium">{t("metrics.messages.sent_success")}</p>
+								<p className="font-medium">
+									{t("metrics.messages.sent_success")}
+								</p>
 								{sendNowMutation.data?.data && (
 									<p className="mt-1">
 										{t("metrics.messages.sent_detail", {
@@ -376,7 +382,8 @@ const SettingsMetrics = () => {
 						<div className="flex">
 							<AlertCircle className="h-4 w-4 text-red-400 dark:text-red-300 mt-0.5" />
 							<div className="ml-2 text-sm text-red-700 dark:text-red-300">
-								{sendNowMutation.error?.message || t("metrics.errors.send_failed")}
+								{sendNowMutation.error?.message ||
+									t("metrics.errors.send_failed")}
 							</div>
 						</div>
 					</div>
@@ -388,7 +395,9 @@ const SettingsMetrics = () => {
 				<div className="flex">
 					<Info className="h-5 w-5 text-secondary-500 dark:text-white flex-shrink-0 mt-0.5" />
 					<div className="ml-3 text-sm text-secondary-700 dark:text-white">
-						<h4 className="font-medium mb-2">{t("metrics.how_it_works.title")}</h4>
+						<h4 className="font-medium mb-2">
+							{t("metrics.how_it_works.title")}
+						</h4>
 						<ul className="space-y-1 list-disc list-inside">
 							<li>{t("metrics.how_it_works.item1")}</li>
 							<li>{t("metrics.how_it_works.item2")}</li>

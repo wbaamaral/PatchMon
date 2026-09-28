@@ -908,7 +908,7 @@ export default function PatchWizard({
 	const targetsWithExtraDeps = useMemo(() => {
 		return targets.filter((t) => {
 			const v = validationByTarget[t.id];
-			if (!v || v.status !== "validated") return false;
+			if (v?.status !== "validated") return false;
 			return (
 				extraDependencies({
 					package_names: packagesForTarget(t),

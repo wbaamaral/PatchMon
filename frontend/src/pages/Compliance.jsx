@@ -23,8 +23,8 @@ import {
 	X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
 import { Doughnut } from "react-chartjs-2";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
 	Bar,
@@ -243,7 +243,7 @@ const Compliance = () => {
 		setPendingScans((prev) => prev.filter((p) => !activeHostIds.has(p.hostId)));
 
 		prevActiveScanIds.current = currentIds;
-	}, [activeScansData, queryClient, toast]);
+	}, [activeScansData, queryClient, toast, t]);
 
 	// Check if pending scans have completed (scan records appear in dashboard)
 	useEffect(() => {
@@ -271,12 +271,18 @@ const Compliance = () => {
 				const completed = pendingScans.find(
 					(p) => p.hostId === completedPending[0],
 				);
-				toast.success(t("toasts.scan_completed_for", { name: completed?.hostName || "host" }));
+				toast.success(
+					t("toasts.scan_completed_for", {
+						name: completed?.hostName || "host",
+					}),
+				);
 			} else {
-				toast.success(t("toasts.scans_completed", { count: completedPending.length }));
+				toast.success(
+					t("toasts.scans_completed", { count: completedPending.length }),
+				);
 			}
 		}
-	}, [dashboard?.recent_scans, pendingScans, toast]);
+	}, [dashboard?.recent_scans, pendingScans, toast, t]);
 
 	// Clear stale pending scans after 60 seconds
 	useEffect(() => {
@@ -358,7 +364,9 @@ const Compliance = () => {
 		},
 		onError: (error, { hostName }) => {
 			const errorMsg = error.response?.data?.error || error.message;
-			toast.error(t("toasts.scan_failed", { name: hostName || "host", error: errorMsg }));
+			toast.error(
+				t("toasts.scan_failed", { name: hostName || "host", error: errorMsg }),
+			);
 		},
 	});
 
@@ -1018,8 +1026,12 @@ const Compliance = () => {
 											className="w-full px-3 py-2 bg-secondary-700 border border-secondary-600 rounded-lg text-white text-sm"
 										>
 											<option value="all">{t("filters.all_profiles")}</option>
-											<option value="openscap">{t("filters.openscap_only")}</option>
-											<option value="docker-bench">{t("filters.docker_bench_only")}</option>
+											<option value="openscap">
+												{t("filters.openscap_only")}
+											</option>
+											<option value="docker-bench">
+												{t("filters.docker_bench_only")}
+											</option>
 										</select>
 									</div>
 									<div className="flex items-center gap-2">

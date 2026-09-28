@@ -339,7 +339,9 @@ const Integrations = () => {
 			load_tokens();
 		} catch (error) {
 			console.error("Failed to delete token:", error);
-			toast.error(error.response?.data?.error || t("integrations.toasts.delete_failed"));
+			toast.error(
+				error.response?.data?.error || t("integrations.toasts.delete_failed"),
+			);
 		}
 	};
 
@@ -351,7 +353,9 @@ const Integrations = () => {
 			load_tokens();
 		} catch (error) {
 			console.error("Failed to toggle token:", error);
-			toast.error(error.response?.data?.error || t("integrations.toasts.toggle_failed"));
+			toast.error(
+				error.response?.data?.error || t("integrations.toasts.toggle_failed"),
+			);
 		}
 	};
 
@@ -753,7 +757,10 @@ const Integrations = () => {
 															{token.metadata?.integration_type ===
 																"proxmox-lxc" && (
 																<p>
-																	{t("integrations.token.usage", { used: token.hosts_created_today, max: token.max_hosts_per_day })}
+																	{t("integrations.token.usage", {
+																		used: token.hosts_created_today,
+																		max: token.max_hosts_per_day,
+																	})}
 																</p>
 															)}
 															{token.metadata?.integration_type ===
@@ -790,15 +797,20 @@ const Integrations = () => {
 																	{token.allowed_ip_ranges.join(", ")}
 																</p>
 															)}
-															<p>{t("integrations.token.created")} {formatDate(token.created_at)}</p>
+															<p>
+																{t("integrations.token.created")}{" "}
+																{formatDate(token.created_at)}
+															</p>
 															{token.last_used_at && (
 																<p>
-																	{t("integrations.token.last_used")} {formatDate(token.last_used_at)}
+																	{t("integrations.token.last_used")}{" "}
+																	{formatDate(token.last_used_at)}
 																</p>
 															)}
 															{token.expires_at && (
 																<p>
-																	{t("integrations.token.expires")} {formatDate(token.expires_at)}
+																	{t("integrations.token.expires")}{" "}
+																	{formatDate(token.expires_at)}
 																	{new Date(token.expires_at) < new Date() && (
 																		<span className="ml-2 text-red-600 dark:text-red-400">
 																			{t("integrations.token.expired")}
@@ -827,7 +839,9 @@ const Integrations = () => {
 																	: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300"
 															}`}
 														>
-															{token.is_active ? t("integrations.token.disable") : t("integrations.token.enable")}
+															{token.is_active
+																? t("integrations.token.disable")
+																: t("integrations.token.enable")}
 														</button>
 														<button
 															type="button"
@@ -972,7 +986,10 @@ const Integrations = () => {
 															{token.metadata?.integration_type ===
 																"direct-host" && (
 																<p>
-																	{t("integrations.token.usage", { used: token.hosts_created_today, max: token.max_hosts_per_day })}
+																	{t("integrations.token.usage", {
+																		used: token.hosts_created_today,
+																		max: token.max_hosts_per_day,
+																	})}
 																</p>
 															)}
 															{token.metadata?.integration_type ===
@@ -997,15 +1014,20 @@ const Integrations = () => {
 																	{token.allowed_ip_ranges.join(", ")}
 																</p>
 															)}
-															<p>{t("integrations.token.created")} {formatDate(token.created_at)}</p>
+															<p>
+																{t("integrations.token.created")}{" "}
+																{formatDate(token.created_at)}
+															</p>
 															{token.last_used_at && (
 																<p>
-																	{t("integrations.token.last_used")} {formatDate(token.last_used_at)}
+																	{t("integrations.token.last_used")}{" "}
+																	{formatDate(token.last_used_at)}
 																</p>
 															)}
 															{token.expires_at && (
 																<p>
-																	{t("integrations.token.expires")} {formatDate(token.expires_at)}
+																	{t("integrations.token.expires")}{" "}
+																	{formatDate(token.expires_at)}
 																	{new Date(token.expires_at) < new Date() && (
 																		<span className="ml-2 text-red-600 dark:text-red-400">
 																			{t("integrations.token.expired")}
@@ -1034,7 +1056,9 @@ const Integrations = () => {
 																	: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300"
 															}`}
 														>
-															{token.is_active ? t("integrations.token.disable") : t("integrations.token.enable")}
+															{token.is_active
+																? t("integrations.token.disable")
+																: t("integrations.token.enable")}
 														</button>
 														<button
 															type="button"
@@ -1193,15 +1217,20 @@ const Integrations = () => {
 																	{token.allowed_ip_ranges.join(", ")}
 																</p>
 															)}
-															<p>{t("integrations.token.created")} {formatDate(token.created_at)}</p>
+															<p>
+																{t("integrations.token.created")}{" "}
+																{formatDate(token.created_at)}
+															</p>
 															{token.last_used_at && (
 																<p>
-																	{t("integrations.token.last_used")} {formatDate(token.last_used_at)}
+																	{t("integrations.token.last_used")}{" "}
+																	{formatDate(token.last_used_at)}
 																</p>
 															)}
 															{token.expires_at && (
 																<p>
-																	{t("integrations.token.expires")} {formatDate(token.expires_at)}
+																	{t("integrations.token.expires")}{" "}
+																	{formatDate(token.expires_at)}
 																	{new Date(token.expires_at) < new Date() && (
 																		<span className="ml-2 text-red-600 dark:text-red-400">
 																			{t("integrations.token.expired")}
@@ -1230,7 +1259,9 @@ const Integrations = () => {
 																	: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300"
 															}`}
 														>
-															{token.is_active ? t("integrations.token.disable") : t("integrations.token.enable")}
+															{token.is_active
+																? t("integrations.token.disable")
+																: t("integrations.token.enable")}
 														</button>
 														<button
 															type="button"
@@ -1383,15 +1414,20 @@ const Integrations = () => {
 																	)}
 																</button>
 															</div>
-															<p>{t("integrations.token.created")} {formatDate(token.created_at)}</p>
+															<p>
+																{t("integrations.token.created")}{" "}
+																{formatDate(token.created_at)}
+															</p>
 															{token.last_used_at && (
 																<p>
-																	{t("integrations.token.last_used")} {formatDate(token.last_used_at)}
+																	{t("integrations.token.last_used")}{" "}
+																	{formatDate(token.last_used_at)}
 																</p>
 															)}
 															{token.expires_at && (
 																<p>
-																	{t("integrations.token.expires")} {formatDate(token.expires_at)}
+																	{t("integrations.token.expires")}{" "}
+																	{formatDate(token.expires_at)}
 																	{new Date(token.expires_at) < new Date() && (
 																		<span className="ml-2 text-red-600 dark:text-red-400">
 																			{t("integrations.token.expired")}
@@ -1413,7 +1449,9 @@ const Integrations = () => {
 																	: "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900 dark:text-green-300"
 															}`}
 														>
-															{token.is_active ? t("integrations.token.disable") : t("integrations.token.enable")}
+															{token.is_active
+																? t("integrations.token.disable")
+																: t("integrations.token.enable")}
 														</button>
 														<button
 															type="button"
@@ -1482,7 +1520,9 @@ const Integrations = () => {
 
 								<div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded">
 									<p className="text-xs text-blue-800 dark:text-blue-300 mb-2">
-										<strong>{t("integrations.gethomepage.base64_title")}</strong>
+										<strong>
+											{t("integrations.gethomepage.base64_title")}
+										</strong>
 									</p>
 									<pre className="text-xs text-blue-800 dark:text-blue-300 font-mono bg-blue-100 dark:bg-blue-900/40 p-2 rounded overflow-x-auto">
 										{`echo -n "YOUR_API_KEY:YOUR_API_SECRET" | base64`}
@@ -1501,7 +1541,9 @@ const Integrations = () => {
 									</p>
 									<div className="space-y-2 text-xs text-blue-800 dark:text-blue-300 font-mono">
 										<div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded">
-											<strong>{t("integrations.gethomepage.security_widget")}</strong>
+											<strong>
+												{t("integrations.gethomepage.security_widget")}
+											</strong>
 											<br />
 											type: customapi
 											<br />
@@ -1512,7 +1554,9 @@ const Integrations = () => {
 											label: Security Updates
 										</div>
 										<div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded">
-											<strong>{t("integrations.gethomepage.uptodate_widget")}</strong>
+											<strong>
+												{t("integrations.gethomepage.uptodate_widget")}
+											</strong>
 											<br />
 											type: customapi
 											<br />
@@ -1523,7 +1567,9 @@ const Integrations = () => {
 											label: Up-to-Date Hosts
 										</div>
 										<div className="bg-blue-100 dark:bg-blue-900/40 p-2 rounded">
-											<strong>{t("integrations.gethomepage.recent_widget")}</strong>
+											<strong>
+												{t("integrations.gethomepage.recent_widget")}
+											</strong>
 											<br />
 											type: customapi
 											<br />
@@ -1570,19 +1616,34 @@ const Integrations = () => {
 										</p>
 										<ul className="list-disc list-inside space-y-2 text-xs md:text-sm text-primary-800 dark:text-primary-300 ml-2">
 											<li>
-												<strong>{t("integrations.docker.feature_containers")}</strong> - {t("integrations.docker.feature_containers_desc")}
+												<strong>
+													{t("integrations.docker.feature_containers")}
+												</strong>{" "}
+												- {t("integrations.docker.feature_containers_desc")}
 											</li>
 											<li>
-												<strong>{t("integrations.docker.feature_images")}</strong> - {t("integrations.docker.feature_images_desc")}
+												<strong>
+													{t("integrations.docker.feature_images")}
+												</strong>{" "}
+												- {t("integrations.docker.feature_images_desc")}
 											</li>
 											<li>
-												<strong>{t("integrations.docker.feature_volumes")}</strong> - {t("integrations.docker.feature_volumes_desc")}
+												<strong>
+													{t("integrations.docker.feature_volumes")}
+												</strong>{" "}
+												- {t("integrations.docker.feature_volumes_desc")}
 											</li>
 											<li>
-												<strong>{t("integrations.docker.feature_networks")}</strong> - {t("integrations.docker.feature_networks_desc")}
+												<strong>
+													{t("integrations.docker.feature_networks")}
+												</strong>{" "}
+												- {t("integrations.docker.feature_networks_desc")}
 											</li>
 											<li>
-												<strong>{t("integrations.docker.feature_realtime")}</strong> - {t("integrations.docker.feature_realtime_desc")}
+												<strong>
+													{t("integrations.docker.feature_realtime")}
+												</strong>{" "}
+												- {t("integrations.docker.feature_realtime_desc")}
 											</li>
 										</ul>
 									</div>
@@ -1595,15 +1656,9 @@ const Integrations = () => {
 									{t("integrations.docker.how_it_works")}
 								</h4>
 								<ol className="list-decimal list-inside space-y-3 text-xs md:text-sm text-secondary-700 dark:text-white">
-									<li>
-										{t("integrations.docker.step1")}
-									</li>
-									<li>
-										{t("integrations.docker.step2")}
-									</li>
-									<li>
-										{t("integrations.docker.step3")}
-									</li>
+									<li>{t("integrations.docker.step1")}</li>
+									<li>{t("integrations.docker.step2")}</li>
+									<li>{t("integrations.docker.step3")}</li>
 									<li>
 										{t("integrations.docker.step4_prefix")}{" "}
 										<Link
@@ -1613,9 +1668,7 @@ const Integrations = () => {
 											{t("integrations.docker.step4_link")}
 										</Link>
 									</li>
-									<li>
-										{t("integrations.docker.step5")}
-									</li>
+									<li>{t("integrations.docker.step5")}</li>
 								</ol>
 							</div>
 
@@ -1627,9 +1680,7 @@ const Integrations = () => {
 										<p className="font-semibold mb-1">
 											{t("integrations.docker.no_config_title")}
 										</p>
-										<p>
-											{t("integrations.docker.no_config_desc")}
-										</p>
+										<p>{t("integrations.docker.no_config_desc")}</p>
 									</div>
 								</div>
 							</div>
@@ -1639,7 +1690,9 @@ const Integrations = () => {
 								<div className="flex items-start gap-2">
 									<AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
 									<div className="text-xs md:text-sm text-blue-800 dark:text-blue-200">
-										<p className="font-semibold mb-2">{t("integrations.docker.requirements")}</p>
+										<p className="font-semibold mb-2">
+											{t("integrations.docker.requirements")}
+										</p>
 										<ul className="list-disc list-inside space-y-1 ml-2">
 											<li>{t("integrations.docker.req_agent")}</li>
 											<li>{t("integrations.docker.req_docker")}</li>
@@ -1650,9 +1703,7 @@ const Integrations = () => {
 												</code>
 												{t("integrations.docker.req_socket_suffix")}
 											</li>
-											<li>
-												{t("integrations.docker.req_root")}
-											</li>
+											<li>{t("integrations.docker.req_root")}</li>
 										</ul>
 									</div>
 								</div>

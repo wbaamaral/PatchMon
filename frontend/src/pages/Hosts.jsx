@@ -1430,8 +1430,7 @@ const Hosts = () => {
 						linkTo={`/hosts/${host.id}`}
 						validate={(value) => {
 							if (!value.trim()) return t("table.friendly_name_required");
-							if (value.trim().length < 1)
-								return t("table.friendly_name_min");
+							if (value.trim().length < 1) return t("table.friendly_name_min");
 							if (value.trim().length > 100)
 								return t("table.friendly_name_max");
 							return null;
@@ -2094,7 +2093,9 @@ const Hosts = () => {
 									className={`btn-outline flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm ${showFilters ? "bg-primary-50 border-primary-300" : ""}`}
 								>
 									<Filter className="h-4 w-4 flex-shrink-0" />
-									<span className="hidden sm:inline">{t("filters.filters")}</span>
+									<span className="hidden sm:inline">
+										{t("filters.filters")}
+									</span>
 								</button>
 								<button
 									type="button"
@@ -2102,7 +2103,9 @@ const Hosts = () => {
 									className="btn-outline flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm"
 								>
 									<Columns className="h-4 w-4 flex-shrink-0" />
-									<span className="hidden sm:inline">{t("filters.columns")}</span>
+									<span className="hidden sm:inline">
+										{t("filters.columns")}
+									</span>
 								</button>
 								<div className="relative">
 									<select
@@ -2112,7 +2115,9 @@ const Hosts = () => {
 									>
 										<option value="none">{t("filters.group_by_none")}</option>
 										<option value="group">{t("filters.group_by_group")}</option>
-										<option value="status">{t("filters.group_by_status")}</option>
+										<option value="status">
+											{t("filters.group_by_status")}
+										</option>
 										<option value="os">{t("filters.group_by_os")}</option>
 									</select>
 									<ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400 dark:text-white pointer-events-none" />
@@ -2148,7 +2153,9 @@ const Hosts = () => {
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
 											<option value="all">{t("filters.all_groups")}</option>
-											<option value="ungrouped">{t("filters.ungrouped")}</option>
+											<option value="ungrouped">
+												{t("filters.ungrouped")}
+											</option>
 											{hostGroups?.map((group) => (
 												<option key={group.id} value={group.id}>
 													{group.name}
@@ -2170,7 +2177,9 @@ const Hosts = () => {
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
 											<option value="all">{t("filters.all")}</option>
-											<option value="reporting">{t("filters.reporting")}</option>
+											<option value="reporting">
+												{t("filters.reporting")}
+											</option>
 											<option value="overdue">{t("filters.overdue")}</option>
 											<option value="stale">{t("filters.stale")}</option>
 											<option value="awaiting">
@@ -2192,7 +2201,9 @@ const Hosts = () => {
 											className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 										>
 											<option value="all">{t("filters.all")}</option>
-											<option value="connected">{t("filters.connected")}</option>
+											<option value="connected">
+												{t("filters.connected")}
+											</option>
 											<option value="offline">{t("filters.offline")}</option>
 										</select>
 									</div>
@@ -2237,7 +2248,9 @@ const Hosts = () => {
 													onChange={(e) => setOsVersionFilter(e.target.value)}
 													className="w-full border border-secondary-300 dark:border-secondary-600 rounded-lg px-3 py-2.5 sm:py-2 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-800 text-secondary-900 dark:text-white min-h-[44px]"
 												>
-													<option value="all">{t("filters.all_versions")}</option>
+													<option value="all">
+														{t("filters.all_versions")}
+													</option>
 													{(osVersionFilter &&
 													osVersionFilter !== "all" &&
 													!uniqueOsVersionsForFilter.includes(osVersionFilter)
@@ -2842,7 +2855,9 @@ const Hosts = () => {
 									</h3>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">
 										{t("auto_update.dialog.body_disabled_prefix")}{" "}
-										<strong>{t("auto_update.dialog.body_disabled_word")}</strong>{" "}
+										<strong>
+											{t("auto_update.dialog.body_disabled_word")}
+										</strong>{" "}
 										{t("auto_update.dialog.body_disabled_suffix")}
 									</p>
 									<p className="mt-2 text-sm text-secondary-600 dark:text-white">

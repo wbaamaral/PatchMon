@@ -359,9 +359,7 @@ const DiscordSettings = () => {
 								>
 									2
 								</span>
-								<span>
-									{t("discord.setup.step2")}
-								</span>
+								<span>{t("discord.setup.step2")}</span>
 							</li>
 							<li className="flex gap-3">
 								<span
@@ -370,9 +368,7 @@ const DiscordSettings = () => {
 								>
 									3
 								</span>
-								<span>
-									{t("discord.setup.step3")}
-								</span>
+								<span>{t("discord.setup.step3")}</span>
 							</li>
 							<li className="flex gap-3">
 								<span
@@ -397,9 +393,7 @@ const DiscordSettings = () => {
 								>
 									5
 								</span>
-								<span>
-									{t("discord.setup.step5")}
-								</span>
+								<span>{t("discord.setup.step5")}</span>
 							</li>
 							<li className="flex gap-3">
 								<span

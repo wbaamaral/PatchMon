@@ -58,7 +58,10 @@ const EVENT_TYPES = [
 		value: "patch_run_completed",
 		labelKey: "channels.eventTypes.patch_run_completed",
 	},
-	{ value: "patch_run_failed", labelKey: "channels.eventTypes.patch_run_failed" },
+	{
+		value: "patch_run_failed",
+		labelKey: "channels.eventTypes.patch_run_failed",
+	},
 	{
 		value: "patch_run_approved",
 		labelKey: "channels.eventTypes.patch_run_approved",
@@ -132,12 +135,24 @@ const SEVERITIES = [
 ];
 
 const REPORT_SECTIONS = [
-	{ id: "executive_summary", labelKey: "channels.reportSections.executive_summary" },
-	{ id: "compliance_summary", labelKey: "channels.reportSections.compliance_summary" },
-	{ id: "recent_patch_runs", labelKey: "channels.reportSections.recent_patch_runs" },
+	{
+		id: "executive_summary",
+		labelKey: "channels.reportSections.executive_summary",
+	},
+	{
+		id: "compliance_summary",
+		labelKey: "channels.reportSections.compliance_summary",
+	},
+	{
+		id: "recent_patch_runs",
+		labelKey: "channels.reportSections.recent_patch_runs",
+	},
 	{ id: "hosts_offline", labelKey: "channels.reportSections.hosts_offline" },
 	{ id: "open_alerts", labelKey: "channels.reportSections.open_alerts" },
-	{ id: "hosts_by_updates", labelKey: "channels.reportSections.hosts_by_updates" },
+	{
+		id: "hosts_by_updates",
+		labelKey: "channels.reportSections.hosts_by_updates",
+	},
 	{
 		id: "top_security_packages",
 		labelKey: "channels.reportSections.top_security_packages",
@@ -255,13 +270,11 @@ const describeSchedule = (expr, t) => {
 			? `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`
 			: null;
 	if (!time) return expr;
-	if (dom === "*" && dow === "*")
-		return t("channels.schedule.daily", { time });
+	if (dom === "*" && dow === "*") return t("channels.schedule.daily", { time });
 	if (dom === "*" && dow === "1-5")
 		return t("channels.schedule.weekdays", { time });
 	if (dom !== "*" && dow === "*") {
-		if (dom === "L")
-			return t("channels.schedule.lastDayOfMonth", { time });
+		if (dom === "L") return t("channels.schedule.lastDayOfMonth", { time });
 		const ordinal =
 			dom === "1" || dom === "21" || dom === "31"
 				? t("channels.schedule.ordinals.st")
@@ -337,8 +350,7 @@ const WebhookFormatHint = ({ url }) => {
 			)}
 			<span>
 				{t("channels.webhookHint.detectedPrefix")}{" "}
-				<span className="font-medium">{meta.label}</span>.{" "}
-				{meta.detail}.
+				<span className="font-medium">{meta.label}</span>. {meta.detail}.
 			</span>
 		</p>
 	);
@@ -399,9 +411,7 @@ const DestinationModal = ({
 			return;
 		}
 		if (channelType === "email" && insecureAuthBlocked) {
-			toast.warning(
-				t("channels.destination.validation.insecureAuthBlocked"),
-			);
+			toast.warning(t("channels.destination.validation.insecureAuthBlocked"));
 			return;
 		}
 		if (channelType === "ntfy" && !config.topic) {
@@ -583,9 +593,7 @@ const DestinationModal = ({
 								</label>
 								<input
 									className={INPUT}
-									placeholder={t(
-										"channels.destination.fields.fromPlaceholder",
-									)}
+									placeholder={t("channels.destination.fields.fromPlaceholder")}
 									value={config.from || ""}
 									onChange={(e) => updateConfig("from", e.target.value)}
 								/>
@@ -676,7 +684,9 @@ const DestinationModal = ({
 								</label>
 								<input
 									className={INPUT}
-									placeholder={t("channels.destination.fields.topicPlaceholder")}
+									placeholder={t(
+										"channels.destination.fields.topicPlaceholder",
+									)}
 									value={config.topic || ""}
 									onChange={(e) => updateConfig("topic", e.target.value)}
 								/>
@@ -1615,7 +1625,9 @@ export const NotificationPanel = ({ panel }) => {
 			setDestModal({ open: false, editing: null });
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.createFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.createFailed"),
+			),
 	});
 	const updateDest = useMutation({
 		mutationFn: ({ id, body }) => notificationsAPI.updateDestination(id, body),
@@ -1625,7 +1637,9 @@ export const NotificationPanel = ({ panel }) => {
 			setDestModal({ open: false, editing: null });
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.updateFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.updateFailed"),
+			),
 	});
 	const deleteDest = useMutation({
 		mutationFn: (id) => notificationsAPI.deleteDestination(id),
@@ -1634,7 +1648,9 @@ export const NotificationPanel = ({ panel }) => {
 			toast.success(t("channels.destinations.toasts.deleted"));
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.deleteFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.deleteFailed"),
+			),
 	});
 	const testNotify = useMutation({
 		mutationFn: (destination_id) => notificationsAPI.test({ destination_id }),
@@ -1648,7 +1664,9 @@ export const NotificationPanel = ({ panel }) => {
 			setRouteModal({ open: false, editing: null });
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.createFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.createFailed"),
+			),
 	});
 	const updateRoute = useMutation({
 		mutationFn: ({ id, body }) => notificationsAPI.updateRoute(id, body),
@@ -1658,7 +1676,9 @@ export const NotificationPanel = ({ panel }) => {
 			setRouteModal({ open: false, editing: null });
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.updateFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.updateFailed"),
+			),
 	});
 	const deleteRoute = useMutation({
 		mutationFn: (id) => notificationsAPI.deleteRoute(id),
@@ -1667,7 +1687,9 @@ export const NotificationPanel = ({ panel }) => {
 			toast.success(t("channels.routes.toasts.deleted"));
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.deleteFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.deleteFailed"),
+			),
 	});
 
 	const createReport = useMutation({
@@ -1678,7 +1700,9 @@ export const NotificationPanel = ({ panel }) => {
 			setReportModal({ open: false, editing: null });
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.createFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.createFailed"),
+			),
 	});
 	const updateReport = useMutation({
 		mutationFn: ({ id, body }) =>
@@ -1689,7 +1713,9 @@ export const NotificationPanel = ({ panel }) => {
 			setReportModal({ open: false, editing: null });
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.updateFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.updateFailed"),
+			),
 	});
 	const deleteReport = useMutation({
 		mutationFn: (id) => notificationsAPI.deleteScheduledReport(id),
@@ -1698,7 +1724,9 @@ export const NotificationPanel = ({ panel }) => {
 			toast.success(t("channels.reports.toasts.deleted"));
 		},
 		onError: (err) =>
-			toast.error(err.response?.data?.error || t("channels.actions.deleteFailed")),
+			toast.error(
+				err.response?.data?.error || t("channels.actions.deleteFailed"),
+			),
 	});
 	const runReportNow = useMutation({
 		mutationFn: (id) => notificationsAPI.runScheduledReportNow(id),
@@ -1724,7 +1752,9 @@ export const NotificationPanel = ({ panel }) => {
 			},
 			onError: (err) =>
 				toast.error(
-					err.response?.data?.error || err.message || t("channels.toasts.testFailed"),
+					err.response?.data?.error ||
+						err.message ||
+						t("channels.toasts.testFailed"),
 				),
 		});
 	};
@@ -1807,7 +1837,8 @@ export const NotificationPanel = ({ panel }) => {
 							}
 							className="btn-outline flex items-center gap-2"
 						>
-							<RefreshCw className="h-4 w-4" /> {t("channels.actions.refreshLog")}
+							<RefreshCw className="h-4 w-4" />{" "}
+							{t("channels.actions.refreshLog")}
 						</button>
 					)}
 				</div>
@@ -1825,7 +1856,8 @@ export const NotificationPanel = ({ panel }) => {
 							className="btn-primary flex items-center gap-2"
 							onClick={() => setDestModal({ open: true, editing: null })}
 						>
-							<Plus className="h-4 w-4" /> {t("channels.actions.addDestination")}
+							<Plus className="h-4 w-4" />{" "}
+							{t("channels.actions.addDestination")}
 						</button>
 					</div>
 
@@ -1847,7 +1879,9 @@ export const NotificationPanel = ({ panel }) => {
 										<th className={`${TH} w-28`}>
 											{t("channels.destinations.table.channel")}
 										</th>
-										<th className={TH}>{t("channels.destinations.table.name")}</th>
+										<th className={TH}>
+											{t("channels.destinations.table.name")}
+										</th>
 										<th className={`${TH} w-20`}>
 											{t("channels.destinations.table.enabled")}
 										</th>
@@ -1925,7 +1959,9 @@ export const NotificationPanel = ({ panel }) => {
 															onClick={async () => {
 																if (
 																	await confirm({
-																		title: t("channels.destinations.confirm.deleteTitle"),
+																		title: t(
+																			"channels.destinations.confirm.deleteTitle",
+																		),
 																		message: t(
 																			"channels.destinations.confirm.deleteMessage",
 																			{ name: d.display_name },
@@ -1986,7 +2022,9 @@ export const NotificationPanel = ({ panel }) => {
 							<table className="min-w-full table-fixed divide-y divide-secondary-200 dark:divide-secondary-600">
 								<thead className="bg-secondary-50 dark:bg-secondary-700">
 									<tr>
-										<th className={TH}>{t("channels.routes.table.destination")}</th>
+										<th className={TH}>
+											{t("channels.routes.table.destination")}
+										</th>
 										<th className={TH}>{t("channels.routes.table.events")}</th>
 										<th className={`${TH} w-32`}>
 											{t("channels.routes.table.minSeverity")}
@@ -2059,7 +2097,8 @@ export const NotificationPanel = ({ panel }) => {
 														setRouteModal({ open: true, editing: row })
 													}
 												>
-													<Edit2 className="h-3.5 w-3.5" /> {t("channels.actions.edit")}
+													<Edit2 className="h-3.5 w-3.5" />{" "}
+													{t("channels.actions.edit")}
 												</button>
 												<button
 													type="button"
@@ -2068,7 +2107,9 @@ export const NotificationPanel = ({ panel }) => {
 														if (
 															await confirm({
 																title: t("channels.routes.confirm.deleteTitle"),
-																message: t("channels.routes.confirm.deleteMessage"),
+																message: t(
+																	"channels.routes.confirm.deleteMessage",
+																),
 																confirmLabel: t(
 																	"channels.routes.confirm.deleteConfirm",
 																),
@@ -2125,8 +2166,12 @@ export const NotificationPanel = ({ panel }) => {
 									<tr>
 										<th className={`${TH} w-10`} />
 										<th className={TH}>{t("channels.reports.table.name")}</th>
-										<th className={TH}>{t("channels.reports.table.schedule")}</th>
-										<th className={TH}>{t("channels.reports.table.nextRun")}</th>
+										<th className={TH}>
+											{t("channels.reports.table.schedule")}
+										</th>
+										<th className={TH}>
+											{t("channels.reports.table.nextRun")}
+										</th>
 										<th className={`${TH} ${W_STATUS}`}>
 											{t("channels.reports.table.status")}
 										</th>
@@ -2185,7 +2230,8 @@ export const NotificationPanel = ({ panel }) => {
 														setReportModal({ open: true, editing: r })
 													}
 												>
-													<Edit2 className="h-3.5 w-3.5" /> {t("channels.actions.edit")}
+													<Edit2 className="h-3.5 w-3.5" />{" "}
+													{t("channels.actions.edit")}
 												</button>
 												<button
 													type="button"
@@ -2193,10 +2239,15 @@ export const NotificationPanel = ({ panel }) => {
 													onClick={async () => {
 														if (
 															await confirm({
-																title: t("channels.reports.confirm.deleteTitle"),
-																message: t("channels.reports.confirm.deleteMessage", {
-																	name: r.name,
-																}),
+																title: t(
+																	"channels.reports.confirm.deleteTitle",
+																),
+																message: t(
+																	"channels.reports.confirm.deleteMessage",
+																	{
+																		name: r.name,
+																	},
+																),
 																confirmLabel: t(
 																	"channels.reports.confirm.deleteConfirm",
 																),
@@ -2237,13 +2288,19 @@ export const NotificationPanel = ({ panel }) => {
 								<table className="min-w-full table-fixed divide-y divide-secondary-200 dark:divide-secondary-600">
 									<thead className="bg-secondary-50 dark:bg-secondary-700">
 										<tr>
-											<th className={`${TH} w-28`}>{t("channels.log.table.time")}</th>
+											<th className={`${TH} w-28`}>
+												{t("channels.log.table.time")}
+											</th>
 											<th className={`${TH} ${W_STATUS}`}>
 												{t("channels.log.table.status")}
 											</th>
 											<th className={TH}>{t("channels.log.table.event")}</th>
-											<th className={TH}>{t("channels.log.table.destination")}</th>
-											<th className={TH}>{t("channels.log.table.reference")}</th>
+											<th className={TH}>
+												{t("channels.log.table.destination")}
+											</th>
+											<th className={TH}>
+												{t("channels.log.table.reference")}
+											</th>
 											<th className={TH}>{t("channels.log.table.error")}</th>
 										</tr>
 									</thead>

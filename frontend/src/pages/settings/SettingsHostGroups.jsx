@@ -166,10 +166,14 @@ const SettingsHostGroups = () => {
 											type="button"
 											onClick={() => handleHostsClick(group.id)}
 											className="flex items-center text-sm text-secondary-500 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-											title={t("host_groups.actions.view_hosts_in", { name: group.name })}
+											title={t("host_groups.actions.view_hosts_in", {
+												name: group.name,
+											})}
 										>
 											<Server className="h-4 w-4 mr-1" />
-											{t("host_groups.hosts_count", { count: group._count?.hosts || 0 })}
+											{t("host_groups.hosts_count", {
+												count: group._count?.hosts || 0,
+											})}
 										</button>
 									</div>
 								</div>
@@ -240,10 +244,14 @@ const SettingsHostGroups = () => {
 													type="button"
 													onClick={() => handleHostsClick(group.id)}
 													className="flex items-center text-sm text-secondary-500 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
-													title={t("host_groups.actions.view_hosts_in", { name: group.name })}
+													title={t("host_groups.actions.view_hosts_in", {
+														name: group.name,
+													})}
 												>
 													<Server className="h-4 w-4 mr-2" />
-													{t("host_groups.hosts_count", { count: group._count?.hosts || 0 })}
+													{t("host_groups.hosts_count", {
+														count: group._count?.hosts || 0,
+													})}
 												</button>
 											</td>
 											<td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -441,7 +449,9 @@ const CreateHostGroupModal = ({ onClose, onSubmit, isLoading }) => {
 							{t("common.cancel")}
 						</button>
 						<button type="submit" className="btn-primary" disabled={isLoading}>
-							{isLoading ? t("host_groups.actions.creating") : t("host_groups.actions.create_group")}
+							{isLoading
+								? t("host_groups.actions.creating")
+								: t("host_groups.actions.create_group")}
 						</button>
 					</div>
 				</form>
@@ -578,7 +588,9 @@ const EditHostGroupModal = ({ group, onClose, onSubmit, isLoading }) => {
 								className="btn-primary"
 								disabled={isLoading}
 							>
-								{isLoading ? t("host_groups.actions.updating") : t("host_groups.actions.update_group")}
+								{isLoading
+									? t("host_groups.actions.updating")
+									: t("host_groups.actions.update_group")}
 							</button>
 						</div>
 					</div>
@@ -625,7 +637,9 @@ const DeleteHostGroupModal = ({ group, onClose, onConfirm, isLoading }) => {
 						<div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
 							<p className="text-sm text-blue-800 mb-2">
 								<strong>{t("host_groups.delete_modal.note_label")}</strong>{" "}
-								{t("host_groups.delete_modal.note_body", { count: group._count?.hosts || 0 })}
+								{t("host_groups.delete_modal.note_body", {
+									count: group._count?.hosts || 0,
+								})}
 							</p>
 							{hosts.length > 0 && (
 								<div className="mt-2">
@@ -664,7 +678,9 @@ const DeleteHostGroupModal = ({ group, onClose, onConfirm, isLoading }) => {
 						className="btn-danger"
 						disabled={isLoading}
 					>
-						{isLoading ? t("host_groups.actions.deleting") : t("host_groups.actions.delete_group")}
+						{isLoading
+							? t("host_groups.actions.deleting")
+							: t("host_groups.actions.delete_group")}
 					</button>
 				</div>
 			</div>

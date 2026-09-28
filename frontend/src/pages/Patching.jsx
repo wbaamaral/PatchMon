@@ -24,8 +24,8 @@ import {
 	X,
 	XCircle,
 } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Link,
 	useLocation,
@@ -570,7 +570,7 @@ const Patching = () => {
 
 /* ───────────────────── Runs & History Tab ───────────────────── */
 
-const useStatusOptions = () => {
+const _useStatusOptions = () => {
 	const { t } = useTranslation("patching");
 	return [
 		{ value: "", label: t("status.all") },
@@ -590,7 +590,7 @@ const useStatusOptions = () => {
 	];
 };
 
-const useTypeOptions = () => {
+const _useTypeOptions = () => {
 	const { t } = useTranslation("patching");
 	return [
 		{ value: "", label: t("type.all") },
@@ -748,7 +748,9 @@ function RunsTab({
 						{selectedRunIds.size > 0 && (
 							<>
 								<span className="text-sm text-secondary-600 dark:text-white/80 flex-shrink-0">
-									{t("bulk.selected_for_delete", { count: selectedRunIds.size })}
+									{t("bulk.selected_for_delete", {
+										count: selectedRunIds.size,
+									})}
 								</span>
 								<button
 									type="button"
@@ -767,7 +769,9 @@ function RunsTab({
 									onClick={() => setSelectedRunIds(new Set())}
 									className="text-xs sm:text-sm text-secondary-500 hover:text-secondary-700 dark:text-white/70 dark:hover:text-white min-h-[44px] px-2"
 								>
-									<span className="hidden sm:inline">{t("bulk.clear_delete")}</span>
+									<span className="hidden sm:inline">
+										{t("bulk.clear_delete")}
+									</span>
 									<span className="sm:hidden">{t("bulk.clear")}</span>
 								</button>
 							</>
@@ -781,7 +785,9 @@ function RunsTab({
 						{selectedApproveIds.size > 0 && (
 							<>
 								<span className="text-sm text-secondary-600 dark:text-white/80 flex-shrink-0">
-									{t("bulk.selected_for_approve", { count: selectedApproveIds.size })}
+									{t("bulk.selected_for_approve", {
+										count: selectedApproveIds.size,
+									})}
 								</span>
 								<button
 									type="button"
@@ -796,8 +802,12 @@ function RunsTab({
 									)}
 									<span className="hidden sm:inline">
 										{bulkApproving
-											? t("bulk.approving_selected", { count: selectedApproveIds.size })
-											: t("bulk.approve_selected", { count: selectedApproveIds.size })}
+											? t("bulk.approving_selected", {
+													count: selectedApproveIds.size,
+												})
+											: t("bulk.approve_selected", {
+													count: selectedApproveIds.size,
+												})}
 									</span>
 									<span className="sm:hidden">
 										{bulkApproving ? "…" : t("bulk.approve_short")}
@@ -809,7 +819,9 @@ function RunsTab({
 									disabled={bulkApproving}
 									className="text-xs sm:text-sm text-secondary-500 hover:text-secondary-700 dark:text-white/70 dark:hover:text-white min-h-[44px] px-2"
 								>
-									<span className="hidden sm:inline">{t("bulk.clear_approve")}</span>
+									<span className="hidden sm:inline">
+										{t("bulk.clear_approve")}
+									</span>
 									<span className="sm:hidden">{t("bulk.clear")}</span>
 								</button>
 							</>
@@ -1303,7 +1315,11 @@ function RunsTab({
 								</select>
 							</div>
 							<span className="text-sm text-secondary-700 dark:text-white">
-								{t("pagination.range", { start: rangeStart, end: rangeEnd, total: totalRuns })}
+								{t("pagination.range", {
+									start: rangeStart,
+									end: rangeEnd,
+									total: totalRuns,
+								})}
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
@@ -1625,7 +1641,9 @@ function PoliciesTab() {
 					<div className="bg-white dark:bg-secondary-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
 						<div className="flex items-center justify-between p-4 border-b border-secondary-200 dark:border-secondary-600">
 							<h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
-								{editingPolicy ? t("policies.edit_title") : t("policies.create_title")}
+								{editingPolicy
+									? t("policies.edit_title")
+									: t("policies.create_title")}
 							</h3>
 							<button
 								type="button"
@@ -1743,7 +1761,9 @@ function PoliciesTab() {
 										createMutation.isPending || updateMutation.isPending
 									}
 								>
-									{editingPolicy ? t("policies.update") : t("common:buttons.create", { defaultValue: "Create" })}
+									{editingPolicy
+										? t("policies.update")
+										: t("common:buttons.create", { defaultValue: "Create" })}
 								</button>
 							</div>
 						</form>
@@ -1874,9 +1894,7 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 					{t("assignments.applied_to")}
 				</div>
 				{assignments.length === 0 ? (
-					<p className="text-sm text-secondary-500">
-						{t("assignments.empty")}
-					</p>
+					<p className="text-sm text-secondary-500">{t("assignments.empty")}</p>
 				) : (
 					<ul className="flex flex-wrap gap-2">
 						{assignments.map((a) => (
@@ -1950,7 +1968,9 @@ function PolicyAssignments({ policy, hosts, hostGroups, onUpdate }) {
 					{t("assignments.exclusions_title")}
 				</div>
 				{exclusions.length === 0 ? (
-					<p className="text-sm text-secondary-500">{t("assignments.no_exclusions")}</p>
+					<p className="text-sm text-secondary-500">
+						{t("assignments.no_exclusions")}
+					</p>
 				) : (
 					<ul className="flex flex-wrap gap-2">
 						{exclusions.map((exc) => (

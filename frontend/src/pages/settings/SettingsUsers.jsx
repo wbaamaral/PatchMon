@@ -36,8 +36,18 @@ const SettingsUsers = () => {
 	const isOIDCSyncRoles = isOIDCEnabled && (oidcConfig?.syncRoles || false);
 
 	const tabs = [
-		{ id: "users", name: t("users.tabs.users"), icon: Users, href: "/settings/users" },
-		{ id: "roles", name: t("users.tabs.roles"), icon: Shield, href: "/settings/roles" },
+		{
+			id: "users",
+			name: t("users.tabs.users"),
+			icon: Users,
+			href: "/settings/users",
+		},
+		{
+			id: "roles",
+			name: t("users.tabs.roles"),
+			icon: Shield,
+			href: "/settings/roles",
+		},
 	];
 
 	// Update active tab when route changes

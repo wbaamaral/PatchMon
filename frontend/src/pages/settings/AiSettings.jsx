@@ -380,25 +380,29 @@ const AiSettings = () => {
 							<li className="flex items-center gap-2">
 								<Check className="h-4 w-4 text-green-500" />
 								<span>
-									<strong>{t("ai.features.assistant")}</strong> - {t("ai.features.assistant_desc")}
+									<strong>{t("ai.features.assistant")}</strong> -{" "}
+									{t("ai.features.assistant_desc")}
 								</span>
 							</li>
 							<li className="flex items-center gap-2">
 								<Check className="h-4 w-4 text-green-500" />
 								<span>
-									<strong>{t("ai.features.completion")}</strong> - {t("ai.features.completion_desc")}
+									<strong>{t("ai.features.completion")}</strong> -{" "}
+									{t("ai.features.completion_desc")}
 								</span>
 							</li>
 							<li className="flex items-center gap-2">
 								<Check className="h-4 w-4 text-green-500" />
 								<span>
-									<strong>{t("ai.features.diagnosis")}</strong> - {t("ai.features.diagnosis_desc")}
+									<strong>{t("ai.features.diagnosis")}</strong> -{" "}
+									{t("ai.features.diagnosis_desc")}
 								</span>
 							</li>
 							<li className="flex items-center gap-2">
 								<Check className="h-4 w-4 text-green-500" />
 								<span>
-									<strong>{t("ai.features.context")}</strong> - {t("ai.features.context_desc")}
+									<strong>{t("ai.features.context")}</strong> -{" "}
+									{t("ai.features.context_desc")}
 								</span>
 							</li>
 						</ul>

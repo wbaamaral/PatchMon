@@ -122,12 +122,12 @@ const EnvironmentSettings = () => {
 			await queryClient.invalidateQueries({ queryKey: ["environment-config"] });
 			setEditingKey(null);
 			setEditValue("");
-			toast.success(
-				t("environment.toasts.saved"),
-			);
+			toast.success(t("environment.toasts.saved"));
 		},
 		onError: (err) => {
-			toast.error(err.response?.data?.error || t("environment.toasts.update_failed"));
+			toast.error(
+				err.response?.data?.error || t("environment.toasts.update_failed"),
+			);
 		},
 	});
 
@@ -208,9 +208,12 @@ const EnvironmentSettings = () => {
 						{t("environment.title")}
 					</h2>
 					<p className="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
-						<strong>{t("environment.priority_1")}</strong> - {t("environment.priority_1_desc")} •{" "}
-						<strong>{t("environment.priority_2")}</strong> - {t("environment.priority_2_desc")}{" "}
-						• <strong>{t("environment.priority_3")}</strong> - {t("environment.priority_3_desc")}
+						<strong>{t("environment.priority_1")}</strong> -{" "}
+						{t("environment.priority_1_desc")} •{" "}
+						<strong>{t("environment.priority_2")}</strong> -{" "}
+						{t("environment.priority_2_desc")} •{" "}
+						<strong>{t("environment.priority_3")}</strong> -{" "}
+						{t("environment.priority_3_desc")}
 					</p>
 					<p className="text-sm text-secondary-500 dark:text-secondary-400 mt-1">
 						{t("environment.env_only_note")}
@@ -430,7 +433,9 @@ const EnvironmentSettings = () => {
 														{v.conflict && (
 															<span
 																className="text-xs text-amber-600 dark:text-amber-400"
-																title={t("environment.tooltips.remove_from_env")}
+																title={t(
+																	"environment.tooltips.remove_from_env",
+																)}
 															>
 																{t("environment.actions.remove_from_env")}
 															</span>
