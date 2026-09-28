@@ -84,6 +84,13 @@ func Normalize(raw string) string {
 	if raw == "" {
 		return defaultLg
 	}
+	if matcher == nil {
+		// Init() not called yet — fall back to simple matching
+		if len(raw) >= 2 && (raw[:2] == "pt" || raw[:2] == "PT") {
+			return "pt-BR"
+		}
+		return defaultLg
+	}
 	tag := language.Make(raw)
 	best, _, _ := matcher.Match(tag)
 	for _, l := range locales {
