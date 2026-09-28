@@ -65,7 +65,6 @@ func apiErrorWithMessage(w http.ResponseWriter, message string) {
 	})
 }
 
-
 func sliceContains(s []string, x string) bool {
 	for _, v := range s {
 		if strings.TrimSpace(v) == x {
