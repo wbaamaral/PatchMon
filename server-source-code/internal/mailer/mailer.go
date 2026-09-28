@@ -6,6 +6,7 @@
 package mailer
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -193,9 +194,9 @@ func Send(ctx context.Context, cfg Config, msg Message) error {
 	// Sanitize header-relevant characters to prevent email injection (CRLF, NUL).
 	// The message body is already escaped at construction via notifications.TemplateEscape;
 	// this is defense-in-depth for the raw write boundary.
-	sanitized := strings.ReplaceAll(rendered, "\r\n", "\n")
-	sanitized = strings.ReplaceAll(sanitized, "\x00", "")
-	if _, writeErr := w.Write([]byte(sanitized)); writeErr != nil {
+	sanitized := bytes.ReplaceAll(rendered, []byte("\r\n"), []byte("\n"))
+	sanitized = bytes.ReplaceAll(sanitized, []byte{0}, nil)
+	if _, writeErr := w.Write(sanitized); writeErr != nil {
 		_ = w.Close()
 		return newSendError(StageSend, writeErr)
 	}
