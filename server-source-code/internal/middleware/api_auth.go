@@ -29,6 +29,14 @@ func apiError(w http.ResponseWriter, r *http.Request, status int, key string) {
 	})
 }
 
+// maskKey returns a redacted form of a credential safe for logging.
+func maskKey(key string) string {
+	if len(key) <= 4 {
+		return "****"
+	}
+	return key[:4] + "****"
+}
+
 // ApiAuth returns a middleware that validates Basic Auth with an API scoped credential
 // (auto_enrollment_tokens where metadata.integration_type == "api"), updates last_used_at,
 // and attaches the token to the request context.
@@ -72,14 +80,14 @@ func ApiAuthForIntegration(tokens *store.AutoEnrollmentStore, integrationType st
 			apiKey, apiSecret := parts[0], parts[1]
 
 			if log != nil {
-				log.Debug("api_auth validating", "path", r.URL.Path, "api_key", apiKey)
+				log.Debug("api_auth validating", "path", r.URL.Path, "api_key", maskKey(apiKey))
 			}
 
 			ctx := r.Context()
 			token, err := tokens.GetByKey(ctx, apiKey)
 			if err != nil {
 				if log != nil {
-					log.Debug("api_auth failed: token not found", "path", r.URL.Path, "api_key", apiKey, "error", err)
+					log.Debug("api_auth failed: token not found", "path", r.URL.Path, "api_key", maskKey(apiKey), "error", err)
 				}
 				apiError(w, r, http.StatusUnauthorized, "error.invalid_api_key")
 				return
