@@ -53,7 +53,7 @@ func AuthWithSessionCheck(cfg *config.Config, sessionsStore *store.SessionsStore
 				if log != nil {
 					log.Debug("auth failed: no token", "path", r.URL.Path, "method", r.Method)
 				}
-				ErrorKey(w, r, http.StatusUnauthorized, "error.unauthorized")
+				writeJSONError(w, r, http.StatusUnauthorized, "error.unauthorized")
 				return
 			}
 
@@ -69,7 +69,7 @@ func AuthWithSessionCheck(cfg *config.Config, sessionsStore *store.SessionsStore
 				if log != nil {
 					log.Debug("auth token invalid", "path", r.URL.Path, "error", err, "valid", t != nil && t.Valid)
 				}
-				ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_token_msg")
+				writeJSONError(w, r, http.StatusUnauthorized, "error.invalid_token_msg")
 				return
 			}
 
@@ -79,7 +79,7 @@ func AuthWithSessionCheck(cfg *config.Config, sessionsStore *store.SessionsStore
 				if log != nil {
 					log.Debug("auth rejected non-access token", "path", r.URL.Path, "typ", typ)
 				}
-				ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_token_msg")
+				writeJSONError(w, r, http.StatusUnauthorized, "error.invalid_token_msg")
 				return
 			}
 
@@ -90,7 +90,7 @@ func AuthWithSessionCheck(cfg *config.Config, sessionsStore *store.SessionsStore
 				if log != nil {
 					log.Debug("auth token missing sub claim", "path", r.URL.Path)
 				}
-				ErrorKey(w, r, http.StatusUnauthorized, "error.invalid_token_msg")
+				writeJSONError(w, r, http.StatusUnauthorized, "error.invalid_token_msg")
 				return
 			}
 
@@ -100,7 +100,7 @@ func AuthWithSessionCheck(cfg *config.Config, sessionsStore *store.SessionsStore
 			if sessionID != "" && sessionsStore != nil {
 				sess, err := sessionsStore.GetByID(r.Context(), sessionID, userID)
 				if err != nil || sess == nil {
-					ErrorKey(w, r, http.StatusUnauthorized, "error.request_failed_detail", "detail", "Session expired")
+					writeJSONError(w, r, http.StatusUnauthorized, "error.session_expired")
 					return
 				}
 
@@ -112,7 +112,7 @@ func AuthWithSessionCheck(cfg *config.Config, sessionsStore *store.SessionsStore
 						if err := sessionsStore.RevokeByID(r.Context(), sessionID, userID); err != nil {
 							slog.Error("auth: failed to revoke inactive session", "session_id", sessionID, "error", err)
 						}
-						ErrorKey(w, r, http.StatusUnauthorized, "error.request_failed_detail", "detail", "Session expired due to inactivity")
+						writeJSONError(w, r, http.StatusUnauthorized, "error.session_expired_login")
 						return
 					}
 				}
