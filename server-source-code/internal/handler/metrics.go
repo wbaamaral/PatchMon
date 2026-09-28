@@ -27,7 +27,7 @@ func NewMetricsHandler(settings *store.SettingsStore, hosts *store.HostsStore, c
 }
 
 // adminModeGuard returns true (and writes a 403) when AdminMode is active.
-func (h *MetricsHandler) adminModeGuard(w http.ResponseWriter) bool {
+func (h *MetricsHandler) adminModeGuard(w http.ResponseWriter, r *http.Request) bool {
 	if h.cfg != nil && h.cfg.AdminMode {
 		ErrorKey(w, r, http.StatusForbidden, "error.metrics_not_available")
 		return true
@@ -37,7 +37,7 @@ func (h *MetricsHandler) adminModeGuard(w http.ResponseWriter) bool {
 
 // Get handles GET /api/v1/metrics - returns metrics settings.
 func (h *MetricsHandler) Get(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
@@ -70,7 +70,7 @@ func (h *MetricsHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 // Update handles PUT /api/v1/metrics - updates metrics_enabled.
 func (h *MetricsHandler) Update(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	var req struct {
@@ -105,7 +105,7 @@ func (h *MetricsHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 // RegenerateID handles POST /api/v1/metrics/regenerate-id.
 func (h *MetricsHandler) RegenerateID(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())
@@ -129,7 +129,7 @@ func (h *MetricsHandler) RegenerateID(w http.ResponseWriter, r *http.Request) {
 
 // SendNow handles POST /api/v1/metrics/send-now - sends metrics to patchmon.cloud.
 func (h *MetricsHandler) SendNow(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	s, err := h.settings.GetFirst(r.Context())

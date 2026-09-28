@@ -34,7 +34,7 @@ func (h *AutomationHandler) WithConfig(cfg *config.Config) *AutomationHandler {
 
 // adminModeGuard returns true (and writes a 403) when AdminMode is active.
 // Queue totals are process-wide, so they are not shown per context.
-func (h *AutomationHandler) adminModeGuard(w http.ResponseWriter) bool {
+func (h *AutomationHandler) adminModeGuard(w http.ResponseWriter, r *http.Request) bool {
 	if h.cfg != nil && h.cfg.AdminMode {
 		ErrorKey(w, r, http.StatusForbidden, "error.automation_not_available")
 		return true
@@ -207,7 +207,7 @@ func (h *AutomationHandler) getQueueLastRunInfo(queueName string) (lastRun strin
 
 // Overview handles GET /automation/overview.
 func (h *AutomationHandler) Overview(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r, r) {
 		return
 	}
 	queues := []string{
@@ -300,7 +300,7 @@ func (h *AutomationHandler) Overview(w http.ResponseWriter, r *http.Request) {
 
 // Stats handles GET /automation/stats.
 func (h *AutomationHandler) Stats(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r, r) {
 		return
 	}
 	queues := []string{
@@ -332,7 +332,7 @@ func (h *AutomationHandler) Stats(w http.ResponseWriter, r *http.Request) {
 
 // Jobs handles GET /automation/jobs/:queueName.
 func (h *AutomationHandler) Jobs(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w) {
+	if h.adminModeGuard(w, r, r) {
 		return
 	}
 	queueName := chi.URLParam(r, "queueName")
