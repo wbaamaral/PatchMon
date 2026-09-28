@@ -467,13 +467,13 @@ func getServerVersionInfo() (*ServerVersionInfo, error) {
 	}
 
 	// Operator-gated insecure TLS for lab/air-gapped deployments.
-	// #nosec G402 -- intentional, gated behind cfg.SkipSSLVerify / env var, documented operator opt-in.
+	// codeql[go/disabled-certificate-check] -- intentional, gated behind cfg.SkipSSLVerify / env var, documented operator opt-in.
 	if cfg.SkipSSLVerify || client.IsSkipSSLVerifyEnvSet() {
 		logger.Warn("TLS verification disabled for version check")
 		httpClient.Transport = &http.Transport{
 			ResponseHeaderTimeout: 5 * time.Second,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true, // #nosec G402 -- operator-gated, see comment above
+				InsecureSkipVerify: true, // codeql[go/disabled-certificate-check] -- operator-gated, see comment above
 			},
 		}
 	}
@@ -560,11 +560,11 @@ func getLatestBinaryFromServer() (*ServerVersionResponse, error) {
 
 	// Operator-gated insecure TLS for lab/air-gapped deployments.
 	// WARNING: This is dangerous for binary downloads even with hash verification!
-	// #nosec G402 -- intentional, gated behind cfg.SkipSSLVerify / env var, documented operator opt-in.
+	// codeql[go/disabled-certificate-check] -- intentional, gated behind cfg.SkipSSLVerify / env var, documented operator opt-in.
 	if cfg.SkipSSLVerify || client.IsSkipSSLVerifyEnvSet() {
 		logger.Warn("TLS verification disabled for binary download")
 		transport.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true, // #nosec G402 -- operator-gated, see comment above
+			InsecureSkipVerify: true, // codeql[go/disabled-certificate-check] -- operator-gated, see comment above
 		}
 	}
 	defer transport.CloseIdleConnections()

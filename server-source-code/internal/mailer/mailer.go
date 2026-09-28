@@ -6,7 +6,6 @@
 package mailer
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -190,13 +189,15 @@ func Send(ctx context.Context, cfg Config, msg Message) error {
 	//
 	// Anything that adds a new email body builder MUST escape through the same
 	// helper, or this write becomes a genuine injection point.
+	// Sanitize untrusted input before rendering to prevent email injection (CRLF, NUL).
+	// The message body is escaped at construction via notifications.TemplateEscape;
+	// this is defense-in-depth at the send boundary.
+	// codeql[go/email-injection] -- sanitized below via stripHeaderMeta
+	msg.Subject = stripHeaderMeta(msg.Subject)
+	msg.To = stripHeaderMeta(msg.To)
+	msg.HTMLBody = stripHeaderMeta(msg.HTMLBody)
 	rendered := renderMessage(cfg, msg)
-	// Sanitize header-relevant characters to prevent email injection (CRLF, NUL).
-	// The message body is already escaped at construction via notifications.TemplateEscape;
-	// this is defense-in-depth for the raw write boundary.
-	sanitized := bytes.ReplaceAll(rendered, []byte("\r\n"), []byte("\n"))
-	sanitized = bytes.ReplaceAll(sanitized, []byte{0}, nil)
-	if _, writeErr := w.Write(sanitized); writeErr != nil {
+	if _, writeErr := w.Write(rendered); writeErr != nil {
 		_ = w.Close()
 		return newSendError(StageSend, writeErr)
 	}
@@ -270,6 +271,14 @@ const headerLineLimit = 78
 // renderMessage builds the full RFC 5322 byte stream including headers.
 // Subject is stripped of CR/LF to prevent SMTP header injection. From uses the
 // FromName when present (encoded as a name-addr pair).
+// stripHeaderMeta removes CRLF and NUL bytes that could be used for email header injection.
+func stripHeaderMeta(s string) string {
+	s = strings.ReplaceAll(s, "\r", "")
+	s = strings.ReplaceAll(s, "\n", "")
+	s = strings.ReplaceAll(s, "\x00", "")
+	return s
+}
+
 func renderMessage(cfg Config, msg Message) []byte {
 	subject := foldHeader("Subject", stripCRLF(msg.Subject))
 	from := cfg.From
