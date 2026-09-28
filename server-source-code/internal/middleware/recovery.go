@@ -7,7 +7,8 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n")
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
+)
 
 // Recovery returns a middleware that recovers from panics.
 // For /api routes, returns JSON so piped install scripts don't execute error text as shell commands.

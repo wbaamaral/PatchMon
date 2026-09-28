@@ -1,19 +1,18 @@
 package middleware
 
 import (
-	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	"log/slog"
-
 	"github.com/PatchMon/PatchMon/server-source-code/internal/clientip"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/db"
+	"github.com/PatchMon/PatchMon/server-source-code/internal/i18n"
 	"github.com/PatchMon/PatchMon/server-source-code/internal/store"
 	"golang.org/x/crypto/bcrypt"
 )

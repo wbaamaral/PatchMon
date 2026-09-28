@@ -185,7 +185,7 @@ func (l *Localizer) T(key string, args ...any) string {
 		kv[k] = val
 		if k == "count" {
 			var n int
-			fmt.Sscanf(val, "%d", &n)
+			_, _ = fmt.Sscanf(val, "%d", &n)
 			count = &n
 		}
 	}
