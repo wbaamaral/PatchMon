@@ -207,7 +207,7 @@ func (h *AutomationHandler) getQueueLastRunInfo(queueName string) (lastRun strin
 
 // Overview handles GET /automation/overview.
 func (h *AutomationHandler) Overview(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w, r, r) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	queues := []string{
@@ -300,7 +300,7 @@ func (h *AutomationHandler) Overview(w http.ResponseWriter, r *http.Request) {
 
 // Stats handles GET /automation/stats.
 func (h *AutomationHandler) Stats(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w, r, r) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	queues := []string{
@@ -332,7 +332,7 @@ func (h *AutomationHandler) Stats(w http.ResponseWriter, r *http.Request) {
 
 // Jobs handles GET /automation/jobs/:queueName.
 func (h *AutomationHandler) Jobs(w http.ResponseWriter, r *http.Request) {
-	if h.adminModeGuard(w, r, r) {
+	if h.adminModeGuard(w, r) {
 		return
 	}
 	queueName := chi.URLParam(r, "queueName")
