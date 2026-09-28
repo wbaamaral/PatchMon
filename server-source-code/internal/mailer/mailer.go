@@ -195,9 +195,6 @@ func Send(ctx context.Context, cfg Config, msg Message) error {
 	// codeql[go/email-injection] -- sanitized below via stripHeaderMeta
 	msg.Subject = stripHeaderMeta(msg.Subject)
 	msg.To = stripHeaderMeta(msg.To)
-	msg.From = stripHeaderMeta(msg.From)
-	msg.FromName = stripHeaderMeta(msg.FromName)
-	msg.Body = stripHeaderMeta(msg.Body)
 	msg.HTMLBody = stripHeaderMeta(msg.HTMLBody)
 	rendered := renderMessage(cfg, msg)
 	if _, writeErr := w.Write(rendered); writeErr != nil {
