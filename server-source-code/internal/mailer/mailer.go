@@ -6,6 +6,7 @@
 package mailer
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -190,7 +191,12 @@ func Send(ctx context.Context, cfg Config, msg Message) error {
 	// Anything that adds a new email body builder MUST escape through the same
 	// helper, or this write becomes a genuine injection point.
 	rendered := renderMessage(cfg, msg)
-	if _, writeErr := w.Write(rendered); writeErr != nil {
+	// Sanitize header-relevant characters to prevent email injection (CRLF, NUL).
+	// The message body is already escaped at construction via notifications.TemplateEscape;
+	// this is defense-in-depth for the raw write boundary.
+	sanitized := bytes.ReplaceAll(rendered, []byte("\r\n"), []byte("\n"))
+	sanitized = bytes.ReplaceAll(sanitized, []byte{0}, nil)
+	if _, writeErr := w.Write(sanitized); writeErr != nil {
 		_ = w.Close()
 		return newSendError(StageSend, writeErr)
 	}

@@ -54,6 +54,14 @@ type RDPHandler struct {
 }
 
 // NewRDPHandler creates a new RDP handler.
+// redactParam returns a redacted form of a config parameter safe for logging.
+func redactParam(val string) string {
+	if val == "" {
+		return "(empty)"
+	}
+	return "(set)"
+}
+
 func NewRDPHandler(
 	rdpTicketStore *store.RDPTicketStore,
 	rdpSessions *rdpproxy.Sessions,
@@ -526,8 +534,8 @@ func (h *RDPHandler) doGuacConnect(r *http.Request) (guac.Tunnel, error) {
 			"session_id", data.SessionID,
 			"user_id", data.UserID,
 			"host_id", data.HostID,
-			"requested_security_mode", config.Parameters["security"],
-			"requested_ignore_cert", config.Parameters["ignore-cert"],
+			"requested_security_mode", redactParam(config.Parameters["security"]),
+			"requested_ignore_cert", redactParam(config.Parameters["ignore-cert"]),
 			"missing_username_or_password", data.Username == "" || data.Password == "",
 			"error", err,
 		)
@@ -542,8 +550,8 @@ func (h *RDPHandler) doGuacConnect(r *http.Request) (guac.Tunnel, error) {
 		"session_id", data.SessionID,
 		"user_id", data.UserID,
 		"host_id", data.HostID,
-		"requested_security_mode", config.Parameters["security"],
-		"requested_ignore_cert", config.Parameters["ignore-cert"],
+		"requested_security_mode", redactParam(config.Parameters["security"]),
+		"requested_ignore_cert", redactParam(config.Parameters["ignore-cert"]),
 		"missing_username_or_password", data.Username == "" || data.Password == "",
 	)
 
