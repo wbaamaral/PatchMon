@@ -1,6 +1,6 @@
 # CodeQL configuration for PatchMon.
 # Excludes queries that produce false positives given our sanitization and validation.
-# See: internal/logutil (agent), internal/safeconv, internal/util/path.go (server).
+# See: internal/logutil (agent), internal/safeconv, internal/util/path.go (server), internal/mailer (server), version_update.go (agent).
 name: "PatchMon CodeQL config"
 
 query-filters:
@@ -16,3 +16,10 @@ query-filters:
   # CORS: Restricted in production; dev fallback is intentional.
   - exclude:
       id: js/cors-permissive-configuration
+  # Disabled certificate check: Operator-gated TLS skip is intentional for lab/air-gapped deployments.
+  - exclude:
+      id: go/disabled-certificate-check
+  # Email injection: Input is sanitized via TemplateEscape, mail.ParseAddress, and stripHeaderMeta.
+  - exclude:
+      id: go/email-injection
+

@@ -154,3 +154,6 @@ test-*.sh
 
 # autoresearch working directory (experimental agent optimization workspace)
 agent-autoresearch/
+
+# mimocode local workspace
+.mimocode/
